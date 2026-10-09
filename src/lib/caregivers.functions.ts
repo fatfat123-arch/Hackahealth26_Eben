@@ -22,6 +22,7 @@ export const createCaregiver = createServerFn({ method: "POST" })
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email, password: data.password, email_confirm: true, user_metadata: { full_name: data.name },
     });
+    if (error) console.error("createCaregiver", error.message, error.status);
     if (error || !created.user) throw new Error(error?.message?.includes("already") ? "Cette adresse e-mail est déjà utilisée." : "Impossible de créer le compte.");
     await supabaseAdmin.from("profiles").upsert({ id: created.user.id, full_name: data.name, email: data.email });
     const { error: roleErr } = await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "caregiver" });
