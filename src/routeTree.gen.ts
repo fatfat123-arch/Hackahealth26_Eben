@@ -10,11 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as PasseportIdRouteImport } from './routes/passeport.$id'
+import { Route as AuthenticatedEspaceIndexRouteImport } from './routes/_authenticated/espace/index'
+import { Route as AuthenticatedEspacePatientsIndexRouteImport } from './routes/_authenticated/espace/patients/index'
+import { Route as AuthenticatedEspacePatientsListeRouteImport } from './routes/_authenticated/espace/patients/liste'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnexionRoute = ConnexionRouteImport.update({
+  id: '/connexion',
+  path: '/connexion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PasseportIdRoute = PasseportIdRouteImport.update({
@@ -22,30 +36,83 @@ const PasseportIdRoute = PasseportIdRouteImport.update({
   path: '/passeport/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedEspaceIndexRoute =
+  AuthenticatedEspaceIndexRouteImport.update({
+    id: '/espace/',
+    path: '/espace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspacePatientsIndexRoute =
+  AuthenticatedEspacePatientsIndexRouteImport.update({
+    id: '/espace/patients/',
+    path: '/espace/patients/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspacePatientsListeRoute =
+  AuthenticatedEspacePatientsListeRouteImport.update({
+    id: '/espace/patients/liste',
+    path: '/espace/patients/liste',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
+  '/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
+  '/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
+  '/espace': typeof AuthenticatedEspaceIndexRoute
+  '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
+  '/espace/patients': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
+  '/_authenticated/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/_authenticated/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
+  '/_authenticated/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/passeport/$id'
+  fullPaths:
+    | '/'
+    | '/connexion'
+    | '/passeport/$id'
+    | '/espace/'
+    | '/espace/patients/liste'
+    | '/espace/patients/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/passeport/$id'
-  id: '__root__' | '/' | '/passeport/$id'
+  to:
+    | '/'
+    | '/connexion'
+    | '/passeport/$id'
+    | '/espace'
+    | '/espace/patients/liste'
+    | '/espace/patients'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/connexion'
+    | '/passeport/$id'
+    | '/_authenticated/espace/'
+    | '/_authenticated/espace/patients/liste'
+    | '/_authenticated/espace/patients/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ConnexionRoute: typeof ConnexionRoute
   PasseportIdRoute: typeof PasseportIdRoute
 }
 
@@ -58,6 +125,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connexion': {
+      id: '/connexion'
+      path: '/connexion'
+      fullPath: '/connexion'
+      preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/passeport/$id': {
       id: '/passeport/$id'
       path: '/passeport/$id'
@@ -65,11 +146,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PasseportIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/espace/': {
+      id: '/_authenticated/espace/'
+      path: '/espace'
+      fullPath: '/espace/'
+      preLoaderRoute: typeof AuthenticatedEspaceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/patients/': {
+      id: '/_authenticated/espace/patients/'
+      path: '/espace/patients'
+      fullPath: '/espace/patients/'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/patients/liste': {
+      id: '/_authenticated/espace/patients/liste'
+      path: '/espace/patients/liste'
+      fullPath: '/espace/patients/liste'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsListeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedEspaceIndexRoute: typeof AuthenticatedEspaceIndexRoute
+  AuthenticatedEspacePatientsListeRoute: typeof AuthenticatedEspacePatientsListeRoute
+  AuthenticatedEspacePatientsIndexRoute: typeof AuthenticatedEspacePatientsIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedEspaceIndexRoute: AuthenticatedEspaceIndexRoute,
+  AuthenticatedEspacePatientsListeRoute: AuthenticatedEspacePatientsListeRoute,
+  AuthenticatedEspacePatientsIndexRoute: AuthenticatedEspacePatientsIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ConnexionRoute: ConnexionRoute,
   PasseportIdRoute: PasseportIdRoute,
 }
 export const routeTree = rootRouteImport
