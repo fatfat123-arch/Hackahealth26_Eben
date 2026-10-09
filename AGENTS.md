@@ -18,3 +18,4 @@
 - Media sit in the private `passport-media` bucket and are stored as paths; URLs are signed at read time (staff via RLS, public page via a server function scoped to one patient id). Why: public buckets are blocked in this workspace and patients must not be listable.
 - Roles (`admin`, `caregiver`) live in `user_roles` and are checked with `has_role`/`is_staff` in RLS; creating/editing caregiver accounts goes through admin-checked server functions. Why: permissions enforced server-side, never by hidden buttons.
 - Back-office pages live under `src/routes/_authenticated/espace/`; public sign-ups are disabled so only admins create accounts.
+- Enrich the public passport view object with contact display fields at the patient-to-view boundary without changing patient persistence or forms; keep unknown real contact identities unnamed to avoid misrepresenting who answers the stored number.
