@@ -62,15 +62,15 @@ function PatientPage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  const [from, setFrom] = useState<"view" | "edit">("view");
 
-  useEffect(() => { if (data && mode === "view") { setDraft(data.draft); setUrls(data.urls); } }, [data, mode]);
+  useEffect(() => { if (data && mode === "view" && from !== "edit") { setDraft(data.draft); setUrls(data.urls); } }, [data, mode]);
 
   if (isLoading || (data && !draft)) return <p>Chargement…</p>;
   if (error) return <p className="bo-error" role="alert">Le profil n’a pas pu être chargé.</p>;
   if (!data || !draft) return <><BackLink to="/espace/patients/liste">Retour à la liste</BackLink><h1 className="bo-title">Profil introuvable</h1></>;
 
   const editing = mode === "edit";
-  const [prevMode, setPrevMode] = [mode, setMode];
 
   async function save() {
     if (!draft) return;
@@ -84,7 +84,7 @@ function PatientPage() {
     setMode("view"); setMsg("Modifications enregistrées.");
   }
 
-  if (mode === "preview") return <PreviewPanel draft={draft} urls={urls} updatedAt={data.row.updated_at} onClose={() => setMode(editing ? "edit" : (sessionStorage.getItem("pv-from") as "edit" | "view") || "view")} />;
+  if (mode === "preview") return <PreviewPanel draft={draft} urls={urls} updatedAt={data.row.updated_at} onClose={() => setMode(from)} />;
 
   return <>
     <BackLink to="/espace/patients/liste">Retour à la liste</BackLink>
@@ -95,7 +95,7 @@ function PatientPage() {
         <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> {busy ? "Enregistrement…" : "Enregistrer"}</button>
         <button type="button" className="bo-btn bo-btn-outline" onClick={() => { setErr(""); setMode("view"); setDraft(data.draft); setUrls(data.urls); }}><X aria-hidden="true" /> Annuler</button>
       </> : <button type="button" className="bo-btn bo-btn-primary" onClick={() => { setMsg(""); setMode("edit"); }}><Pencil aria-hidden="true" /> Modifier</button>}
-      <button type="button" className="bo-btn bo-btn-outline" onClick={() => { sessionStorage.setItem("pv-from", prevMode); setPrevMode("preview"); }}><Eye aria-hidden="true" /> Aperçu</button>
+      <button type="button" className="bo-btn bo-btn-outline" onClick={() => { setFrom(editing ? "edit" : "view"); setMode("preview"); }}><Eye aria-hidden="true" /> Aperçu</button>
       <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
     </div>
     {msg && <p className="bo-success" role="status">{msg}</p>}

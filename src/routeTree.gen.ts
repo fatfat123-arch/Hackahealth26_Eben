@@ -15,6 +15,7 @@ import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as PasseportIdRouteImport } from './routes/passeport.$id'
 import { Route as AuthenticatedEspaceIndexRouteImport } from './routes/_authenticated/espace/index'
 import { Route as AuthenticatedEspacePatientsIndexRouteImport } from './routes/_authenticated/espace/patients/index'
+import { Route as AuthenticatedEspacePatientsIdRouteImport } from './routes/_authenticated/espace/patients/$id'
 import { Route as AuthenticatedEspacePatientsListeRouteImport } from './routes/_authenticated/espace/patients/liste'
 import { Route as AuthenticatedEspacePatientsNouveauRouteImport } from './routes/_authenticated/espace/patients/nouveau'
 
@@ -49,6 +50,12 @@ const AuthenticatedEspacePatientsIndexRoute =
     path: '/espace/patients/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEspacePatientsIdRoute =
+  AuthenticatedEspacePatientsIdRouteImport.update({
+    id: '/espace/patients/$id',
+    path: '/espace/patients/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEspacePatientsListeRoute =
   AuthenticatedEspacePatientsListeRouteImport.update({
     id: '/espace/patients/liste',
@@ -67,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
   '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
   '/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
   '/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
   '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/espace': typeof AuthenticatedEspaceIndexRoute
+  '/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
   '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
   '/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
   '/espace/patients': typeof AuthenticatedEspacePatientsIndexRoute
@@ -87,6 +96,7 @@ export interface FileRoutesById {
   '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/_authenticated/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/_authenticated/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
   '/_authenticated/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
   '/_authenticated/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
   '/_authenticated/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/passeport/$id'
     | '/espace/'
+    | '/espace/patients/$id'
     | '/espace/patients/liste'
     | '/espace/patients/nouveau'
     | '/espace/patients/'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/passeport/$id'
     | '/espace'
+    | '/espace/patients/$id'
     | '/espace/patients/liste'
     | '/espace/patients/nouveau'
     | '/espace/patients'
@@ -117,6 +129,7 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/passeport/$id'
     | '/_authenticated/espace/'
+    | '/_authenticated/espace/patients/$id'
     | '/_authenticated/espace/patients/liste'
     | '/_authenticated/espace/patients/nouveau'
     | '/_authenticated/espace/patients/'
@@ -173,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEspacePatientsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/espace/patients/$id': {
+      id: '/_authenticated/espace/patients/$id'
+      path: '/espace/patients/$id'
+      fullPath: '/espace/patients/$id'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/espace/patients/liste': {
       id: '/_authenticated/espace/patients/liste'
       path: '/espace/patients/liste'
@@ -192,6 +212,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEspaceIndexRoute: typeof AuthenticatedEspaceIndexRoute
+  AuthenticatedEspacePatientsIdRoute: typeof AuthenticatedEspacePatientsIdRoute
   AuthenticatedEspacePatientsListeRoute: typeof AuthenticatedEspacePatientsListeRoute
   AuthenticatedEspacePatientsNouveauRoute: typeof AuthenticatedEspacePatientsNouveauRoute
   AuthenticatedEspacePatientsIndexRoute: typeof AuthenticatedEspacePatientsIndexRoute
@@ -199,6 +220,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEspaceIndexRoute: AuthenticatedEspaceIndexRoute,
+  AuthenticatedEspacePatientsIdRoute: AuthenticatedEspacePatientsIdRoute,
   AuthenticatedEspacePatientsListeRoute: AuthenticatedEspacePatientsListeRoute,
   AuthenticatedEspacePatientsNouveauRoute:
     AuthenticatedEspacePatientsNouveauRoute,
