@@ -1,19 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PassportView } from "@/components/passport/passport-view";
-import { passport } from "@/data/passport";
+import { LoginForm } from "@/components/backoffice/login-form";
 
 export const Route = createFileRoute("/")({
-  component: Index,
   head: () => ({ meta: [
-    { title: "Passeport de communication — Julien Morel" },
-    { name: "description", content: "Découvrez comment communiquer avec Julien : ses gestes, ses centres d’intérêt et ce qui est important pour lui." },
-    { property: "og:title", content: "Passeport de communication — Julien Morel" },
-    { property: "og:description", content: "Prendre le temps de comprendre Julien, ses gestes et ses besoins." },
+    { title: "Connexion — Passeport de communication" },
+    { name: "description", content: "Espace réservé aux administrateurs et aux accompagnants." },
+    { property: "og:title", content: "Connexion — Passeport de communication" },
+    { property: "og:description", content: "Espace réservé aux administrateurs et aux accompagnants." },
     { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
   ] }),
+  component: LoginForm,
 });
-
-function Index() {
-  return <PassportView data={passport} demo />;
-}
