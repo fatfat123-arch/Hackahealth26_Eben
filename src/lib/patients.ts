@@ -1,4 +1,4 @@
-import type { DictionaryEntry } from "@/data/passport";
+import { passport, type DictionaryEntry } from "@/data/passport";
 import type { PassportViewData } from "@/components/passport/passport-view";
 
 export const MEDIA_BUCKET = "passport-media";
@@ -89,23 +89,27 @@ export function formatDateFr(iso: string | null | undefined): string {
 }
 
 export function toViewData(d: PatientDraft, urls: Record<string, string>, updatedAt: string | null): PassportViewData {
+  const isFictionalProfile = d.name === passport.name && d.phone === passport.phone;
   return {
     name: d.name || "Nom à compléter",
     birthDate: formatDateFr(d.birthDate || null),
     phone: d.phone,
     phoneHref: `tel:${d.phone.replace(/[^+\d]/g, "")}`,
     phoneNote: d.phoneNote,
+    contactName: isFictionalProfile ? passport.contactName : "",
+    contactRelationship: isFictionalProfile ? passport.contactRelationship : "",
+    contactPhone: d.phone,
     address: d.address || "—",
     updatedAt: updatedAt ? formatDateFr(updatedAt) : "Pas encore enregistré",
     updatedAtISO: updatedAt ?? "",
     portrait: d.photoPath ? urls[d.photoPath] : null,
     portraitAlt: d.photoAlt,
-    about: d.about, howTo: d.howTo, reminder: d.reminder,
+    about: d.about, howTo: d.howTo, reminder: d.reminder.replace("Parlez-moi comme à un adulte.", "Parlez-moi normalement."),
     dictionary: d.dictionary.filter(e => e.path).map(e => ({
       id: e.id, type: e.type, title: e.title, description: e.description, alt: e.alt || e.title,
       source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined, transcript: e.transcript,
     })),
-    interests: d.interests.filter(Boolean), dislikes: d.dislikes.filter(Boolean), additional: d.additional.filter(Boolean),
+    interests: d.interests.filter(Boolean), dislikes: d.dislikes.filter(Boolean), additional: d.additional.filter(Boolean).map(item => item.replace("Ma personne de confiance", "Ma personne de contact")),
   };
 }
 

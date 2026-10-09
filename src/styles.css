@@ -33,6 +33,7 @@
   --foreground: #2b3a4a;
   --tint-blue: #f3f7fb;
   --tint-yellow: #fdf6e3;
+  --contact-border: #f3dfa9;
   --line: #d5e0ec;
   --primary: oklch(0.423637652 0.135026710 254.037930386);
   --accent: oklch(0.785620288 0.163470349 78.518687939);
@@ -69,6 +70,12 @@
 .passport-section { border: 0; }
 .passport-trigger { width: 100%; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 26px; background: var(--primary); color: var(--background); border-radius: 3px; font-size: 21px; line-height: 1.4; font-weight: 600; text-align: left; cursor: pointer; }
 .section-title { display: flex; align-items: center; gap: 18px; }
+.section-icon { width: 48px; height: 48px; flex-shrink: 0; object-fit: contain; }
+.passport-contact { margin-top: 28px; padding: 26px; background: var(--tint-yellow); border: 1px solid var(--contact-border); border-radius: 12px; }
+.profile-copy .passport-contact-name { margin-top: 8px; font-weight: 500; }
+.passport-contact-call { min-height: 56px; height: auto; max-width: 100%; margin-top: 18px; padding: 12px 24px; border-radius: 12px; background: var(--primary); color: var(--background); font-size: 17px; line-height: 1.5; display: inline-flex; flex-wrap: wrap; column-gap: 18px; row-gap: 4px; white-space: normal; text-align: center; text-decoration: none; box-shadow: none; transition: none; }
+.passport-contact-call:hover { background: var(--primary); }
+.passport-contact-call:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; box-shadow: none; }
 .section-title > svg { width: 26px; height: 26px; flex-shrink: 0; stroke-width: 1.6; color: var(--accent); }
 .section-toggle { color: var(--accent); flex-shrink: 0; }
 .section-toggle svg { width: 26px; height: 26px; }
@@ -124,6 +131,9 @@
   .communication-note p { font-size: 16px; }
   .passport-trigger { padding: 18px 16px; min-height: 76px; font-size: 18px; gap: 12px; }
   .section-title { gap: 12px; }
+  .section-icon { width: 40px; height: 40px; }
+  .passport-contact { padding: 22px 18px; }
+  .passport-contact-call { width: 100%; padding: 12px 16px; }
   .section-title > svg { width: 22px; height: 22px; }
   .section-toggle svg { width: 22px; height: 22px; }
   .dictionary-grid { gap: 12px; }
