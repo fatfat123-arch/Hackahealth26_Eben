@@ -46,13 +46,13 @@ function Index() {
           <figcaption><span>{passport.name}</span><span>Heureux de vous rencontrer.</span></figcaption>
         </figure>
         <div className="profile-copy">
-          <section aria-labelledby="about-title">
-            <h2 id="about-title">À propos de moi</h2>
-            <p>{passport.about}</p>
-          </section>
-          <section className="how-to" aria-labelledby="how-title">
+          <section aria-labelledby="how-title">
             <h2 id="how-title">Comment utiliser cette page</h2>
             <p>{passport.howTo}</p>
+          </section>
+          <section className="how-to" aria-labelledby="about-title">
+            <h2 id="about-title">À propos de moi</h2>
+            <p>{passport.about}</p>
           </section>
           <dl className="profile-details">
             <div><dt>Nom</dt><dd>{passport.name}</dd></div>
