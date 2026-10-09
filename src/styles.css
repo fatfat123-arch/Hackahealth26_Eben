@@ -30,13 +30,16 @@
 }
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.29 0 0);
+  --foreground: #2b3a4a;
+  --tint-blue: #f3f7fb;
+  --tint-yellow: #fdf6e3;
+  --line: #d5e0ec;
   --primary: oklch(0.423637652 0.135026710 254.037930386);
   --accent: oklch(0.785620288 0.163470349 78.518687939);
   --muted-foreground: oklch(0.43 0 0);
 }
 @layer base {
-  * { border-color: var(--primary); }
+  * { border-color: var(--line); }
   body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 18px; line-height: 1.65; letter-spacing: 0; }
 }
 .passport-page { max-width: 1100px; margin: 0 auto; padding: 51px 0 30px; }
@@ -133,6 +136,42 @@
   .passport-footer { margin-top: 30px; }
 }
 @media (max-width: 359px) { .profile-details > div { grid-template-columns: 1fr; gap: 0; } }
+/* Softer style */
+.passport-heading h1 { font-weight: 600; font-size: 36px; }
+.title-underline { height: 3px; }
+.profile-section { grid-template-columns: 220px minmax(0, 1fr); gap: 48px; }
+.profile-photo img { width: 220px; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+.profile-photo figcaption span:first-child { font-weight: 600; font-size: 21px; }
+.profile-copy h2 { font-weight: 600; font-size: 21px; margin-bottom: 14px; }
+.how-to { margin-top: 36px; }
+.profile-details { border-top: 1px solid var(--line); margin-top: 36px; padding-top: 26px; }
+.profile-details dt { font-weight: 600; }
+.communication-note { background: var(--tint-yellow); border-left-width: 3px; border-radius: 0 8px 8px 0; margin: 48px 0 36px; padding: 20px 24px; }
+.passport-sections { gap: 16px; }
+.passport-trigger { background: var(--tint-blue); color: var(--primary); border: 1px solid var(--line); border-radius: 8px; font-weight: 500; font-size: 20px; padding: 20px 28px; }
+.passport-trigger[data-state=open] { border-color: var(--primary); }
+.passport-trigger:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.section-content { padding: 32px 4px 28px; }
+.dictionary-grid { gap: 24px; }
+.dictionary-card { background: var(--background); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.dictionary-media { border-radius: 6px; overflow: hidden; background: var(--tint-blue); }
+.dictionary-copy { padding: 18px 6px 6px; }
+.dictionary-copy h3 { font-weight: 600; font-size: 18px; }
+.gif-control, .audio-control { border-radius: 8px; }
+.audio-media { border-bottom: 0; }
+.passport-footer { border-top: 1px solid var(--line); margin-top: 56px; }
+@media (max-width: 900px) { .profile-section { grid-template-columns: 220px minmax(0, 1fr); gap: 32px; } .profile-photo img { height: auto; } }
+@media (max-width: 640px) {
+  .passport-heading h1 { font-size: 28px; }
+  .profile-section { grid-template-columns: 1fr; gap: 32px; }
+  .profile-photo { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .profile-photo img { width: 160px; aspect-ratio: 1; }
+  .profile-photo figcaption { border-left: 0; padding-left: 0; border-top: 3px solid var(--accent); padding-top: 10px; }
+  .profile-copy h2 { font-size: 20px; }
+  .passport-trigger { padding: 18px 18px; font-size: 18px; }
+  .dictionary-card { padding: 10px; }
+  .dictionary-copy { padding: 14px 4px 4px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
