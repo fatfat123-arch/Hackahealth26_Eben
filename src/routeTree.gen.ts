@@ -14,6 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as PasseportIdRouteImport } from './routes/passeport.$id'
 import { Route as AuthenticatedEspaceIndexRouteImport } from './routes/_authenticated/espace/index'
+import { Route as AuthenticatedEspaceTutorielRouteImport } from './routes/_authenticated/espace/tutoriel'
+import { Route as AuthenticatedEspaceAccompagnantsIndexRouteImport } from './routes/_authenticated/espace/accompagnants/index'
+import { Route as AuthenticatedEspaceAccompagnantsIdRouteImport } from './routes/_authenticated/espace/accompagnants/$id'
 import { Route as AuthenticatedEspacePatientsIndexRouteImport } from './routes/_authenticated/espace/patients/index'
 import { Route as AuthenticatedEspacePatientsIdRouteImport } from './routes/_authenticated/espace/patients/$id'
 import { Route as AuthenticatedEspacePatientsListeRouteImport } from './routes/_authenticated/espace/patients/liste'
@@ -42,6 +45,24 @@ const AuthenticatedEspaceIndexRoute =
   AuthenticatedEspaceIndexRouteImport.update({
     id: '/espace/',
     path: '/espace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspaceTutorielRoute =
+  AuthenticatedEspaceTutorielRouteImport.update({
+    id: '/espace/tutoriel',
+    path: '/espace/tutoriel',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspaceAccompagnantsIndexRoute =
+  AuthenticatedEspaceAccompagnantsIndexRouteImport.update({
+    id: '/espace/accompagnants/',
+    path: '/espace/accompagnants/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspaceAccompagnantsIdRoute =
+  AuthenticatedEspaceAccompagnantsIdRouteImport.update({
+    id: '/espace/accompagnants/$id',
+    path: '/espace/accompagnants/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedEspacePatientsIndexRoute =
@@ -73,20 +94,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
+  '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/espace/accompagnants/$id': typeof AuthenticatedEspaceAccompagnantsIdRoute
   '/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
   '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
   '/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
+  '/espace/accompagnants/': typeof AuthenticatedEspaceAccompagnantsIndexRoute
   '/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
+  '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/espace': typeof AuthenticatedEspaceIndexRoute
+  '/espace/accompagnants/$id': typeof AuthenticatedEspaceAccompagnantsIdRoute
   '/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
   '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
   '/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
+  '/espace/accompagnants': typeof AuthenticatedEspaceAccompagnantsIndexRoute
   '/espace/patients': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRoutesById {
@@ -95,10 +122,13 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/passeport/$id': typeof PasseportIdRoute
+  '/_authenticated/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/_authenticated/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/_authenticated/espace/accompagnants/$id': typeof AuthenticatedEspaceAccompagnantsIdRoute
   '/_authenticated/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
   '/_authenticated/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
   '/_authenticated/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
+  '/_authenticated/espace/accompagnants/': typeof AuthenticatedEspaceAccompagnantsIndexRoute
   '/_authenticated/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRouteTypes {
@@ -107,20 +137,26 @@ export interface FileRouteTypes {
     | '/'
     | '/connexion'
     | '/passeport/$id'
+    | '/espace/tutoriel'
     | '/espace/'
+    | '/espace/accompagnants/$id'
     | '/espace/patients/$id'
     | '/espace/patients/liste'
     | '/espace/patients/nouveau'
+    | '/espace/accompagnants/'
     | '/espace/patients/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/connexion'
     | '/passeport/$id'
+    | '/espace/tutoriel'
     | '/espace'
+    | '/espace/accompagnants/$id'
     | '/espace/patients/$id'
     | '/espace/patients/liste'
     | '/espace/patients/nouveau'
+    | '/espace/accompagnants'
     | '/espace/patients'
   id:
     | '__root__'
@@ -128,10 +164,13 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/connexion'
     | '/passeport/$id'
+    | '/_authenticated/espace/tutoriel'
     | '/_authenticated/espace/'
+    | '/_authenticated/espace/accompagnants/$id'
     | '/_authenticated/espace/patients/$id'
     | '/_authenticated/espace/patients/liste'
     | '/_authenticated/espace/patients/nouveau'
+    | '/_authenticated/espace/accompagnants/'
     | '/_authenticated/espace/patients/'
   fileRoutesById: FileRoutesById
 }
@@ -179,6 +218,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEspaceIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/espace/tutoriel': {
+      id: '/_authenticated/espace/tutoriel'
+      path: '/espace/tutoriel'
+      fullPath: '/espace/tutoriel'
+      preLoaderRoute: typeof AuthenticatedEspaceTutorielRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/accompagnants/': {
+      id: '/_authenticated/espace/accompagnants/'
+      path: '/espace/accompagnants'
+      fullPath: '/espace/accompagnants/'
+      preLoaderRoute: typeof AuthenticatedEspaceAccompagnantsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/accompagnants/$id': {
+      id: '/_authenticated/espace/accompagnants/$id'
+      path: '/espace/accompagnants/$id'
+      fullPath: '/espace/accompagnants/$id'
+      preLoaderRoute: typeof AuthenticatedEspaceAccompagnantsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/espace/patients/': {
       id: '/_authenticated/espace/patients/'
       path: '/espace/patients'
@@ -211,19 +271,27 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedEspaceTutorielRoute: typeof AuthenticatedEspaceTutorielRoute
   AuthenticatedEspaceIndexRoute: typeof AuthenticatedEspaceIndexRoute
+  AuthenticatedEspaceAccompagnantsIdRoute: typeof AuthenticatedEspaceAccompagnantsIdRoute
   AuthenticatedEspacePatientsIdRoute: typeof AuthenticatedEspacePatientsIdRoute
   AuthenticatedEspacePatientsListeRoute: typeof AuthenticatedEspacePatientsListeRoute
   AuthenticatedEspacePatientsNouveauRoute: typeof AuthenticatedEspacePatientsNouveauRoute
+  AuthenticatedEspaceAccompagnantsIndexRoute: typeof AuthenticatedEspaceAccompagnantsIndexRoute
   AuthenticatedEspacePatientsIndexRoute: typeof AuthenticatedEspacePatientsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedEspaceTutorielRoute: AuthenticatedEspaceTutorielRoute,
   AuthenticatedEspaceIndexRoute: AuthenticatedEspaceIndexRoute,
+  AuthenticatedEspaceAccompagnantsIdRoute:
+    AuthenticatedEspaceAccompagnantsIdRoute,
   AuthenticatedEspacePatientsIdRoute: AuthenticatedEspacePatientsIdRoute,
   AuthenticatedEspacePatientsListeRoute: AuthenticatedEspacePatientsListeRoute,
   AuthenticatedEspacePatientsNouveauRoute:
     AuthenticatedEspacePatientsNouveauRoute,
+  AuthenticatedEspaceAccompagnantsIndexRoute:
+    AuthenticatedEspaceAccompagnantsIndexRoute,
   AuthenticatedEspacePatientsIndexRoute: AuthenticatedEspacePatientsIndexRoute,
 }
 
