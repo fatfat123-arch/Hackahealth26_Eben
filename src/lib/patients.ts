@@ -9,9 +9,9 @@ export type DictItem = {
   title: string;
   description: string;
   path: string;
-  posterPath?: string;
+  posterPath?: string | undefined;
   alt: string;
-  transcript?: string;
+  transcript?: string | undefined;
 };
 
 export type PatientDraft = {

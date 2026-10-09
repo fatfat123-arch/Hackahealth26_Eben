@@ -13,7 +13,7 @@ export type PassportViewData = {
   address: string;
   updatedAt: string;
   updatedAtISO: string;
-  portrait?: string | null;
+  portrait?: string | null | undefined;
   portraitAlt: string;
   about: string;
   howTo: string;

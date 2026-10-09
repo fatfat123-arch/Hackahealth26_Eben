@@ -125,7 +125,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       <div className="bo-dict-edit">
         {draft.dictionary.map((e, i) => <fieldset key={e.id} className="bo-fieldset bo-dict-item">
           <legend>Entrée {i + 1}{e.path ? ` · ${kindLabel[e.type]}` : ""}</legend>
-          {e.path && urls[e.path] && <div className="bo-dict-preview"><DictionaryCard entry={{ ...e, alt: e.alt || e.title, source: urls[e.path], poster: e.posterPath ? urls[e.posterPath] : undefined }} /></div>}
+          {e.path && urls[e.path] && <div className="bo-dict-preview"><DictionaryCard entry={{ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }} /></div>}
           <label className="bo-btn bo-btn-outline bo-file"><Upload aria-hidden="true" /> {uploading === e.id ? "Envoi en cours…" : e.path ? "Remplacer le fichier" : "Choisir un fichier (image, GIF, vidéo ou son)"}
             <input type="file" accept="image/*,video/*,audio/*" className="sr-only" onChange={ev => {
               const f = ev.target.files?.[0];
