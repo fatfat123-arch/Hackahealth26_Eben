@@ -33,7 +33,7 @@ export function DictionaryCard({ entry }: { entry: DictionaryEntry }) {
           </Button>
         </>}
         {entry.type === "video" && <video controls playsInline preload="none" poster={entry.poster} aria-label={entry.alt}>
-          <source src={entry.source} type="video/mp4" />
+          <source src={entry.source} type="video/webm" />
           Votre navigateur ne permet pas de lire cette vidéo.
         </video>}
         {entry.type === "audio" && <div className="audio-media">

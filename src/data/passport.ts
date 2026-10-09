@@ -3,7 +3,7 @@ import thirst from "@/assets/soif.jpg";
 import yesAnimation from "@/assets/oui.gif";
 import yesStill from "@/assets/oui.jpg";
 import tiredStill from "@/assets/fatigue.jpg";
-import tiredVideo from "@/assets/fatigue.mp4";
+import tiredVideo from "@/assets/fatigue.webm";
 import attentionSound from "@/assets/attention.mp3";
 
 export type DictionaryEntry = {
