@@ -8,3 +8,9 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Application architecture
+- Keep the public passport’s replaceable fictional profile and media references in `src/data/passport.ts`; the page must consume this single source rather than embed person-specific content throughout the UI.
+- Use Radix multiple accordions for the public sections, with no default open values, to retain keyboard accessibility and independent expansion.
+- Keep dictionary playback in a dedicated browser-safe component with user-controlled audio/video and a pause control for GIFs, so media remains accessible without introducing server dependencies.
+- Render the primary main landmark in the root layout and define page-specific metadata on every content route to preserve accessible structure and sharing information.
