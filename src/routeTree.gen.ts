@@ -10,33 +10,175 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as PasseportIdRouteImport } from './routes/passeport.$id'
+import { Route as AuthenticatedEspaceIndexRouteImport } from './routes/_authenticated/espace/index'
+import { Route as AuthenticatedEspaceTutorielRouteImport } from './routes/_authenticated/espace/tutoriel'
+import { Route as AuthenticatedEspaceAccompagnantsIndexRouteImport } from './routes/_authenticated/espace/accompagnants/index'
+import { Route as AuthenticatedEspaceAccompagnantsIdRouteImport } from './routes/_authenticated/espace/accompagnants/$id'
+import { Route as AuthenticatedEspacePatientsIndexRouteImport } from './routes/_authenticated/espace/patients/index'
+import { Route as AuthenticatedEspacePatientsIdRouteImport } from './routes/_authenticated/espace/patients/$id'
+import { Route as AuthenticatedEspacePatientsListeRouteImport } from './routes/_authenticated/espace/patients/liste'
+import { Route as AuthenticatedEspacePatientsNouveauRouteImport } from './routes/_authenticated/espace/patients/nouveau'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnexionRoute = ConnexionRouteImport.update({
+  id: '/connexion',
+  path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PasseportIdRoute = PasseportIdRouteImport.update({
+  id: '/passeport/$id',
+  path: '/passeport/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedEspaceIndexRoute =
+  AuthenticatedEspaceIndexRouteImport.update({
+    id: '/espace/',
+    path: '/espace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspaceTutorielRoute =
+  AuthenticatedEspaceTutorielRouteImport.update({
+    id: '/espace/tutoriel',
+    path: '/espace/tutoriel',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspaceAccompagnantsIndexRoute =
+  AuthenticatedEspaceAccompagnantsIndexRouteImport.update({
+    id: '/espace/accompagnants/',
+    path: '/espace/accompagnants/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspaceAccompagnantsIdRoute =
+  AuthenticatedEspaceAccompagnantsIdRouteImport.update({
+    id: '/espace/accompagnants/$id',
+    path: '/espace/accompagnants/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspacePatientsIndexRoute =
+  AuthenticatedEspacePatientsIndexRouteImport.update({
+    id: '/espace/patients/',
+    path: '/espace/patients/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspacePatientsIdRoute =
+  AuthenticatedEspacePatientsIdRouteImport.update({
+    id: '/espace/patients/$id',
+    path: '/espace/patients/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspacePatientsListeRoute =
+  AuthenticatedEspacePatientsListeRouteImport.update({
+    id: '/espace/patients/liste',
+    path: '/espace/patients/liste',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEspacePatientsNouveauRoute =
+  AuthenticatedEspacePatientsNouveauRouteImport.update({
+    id: '/espace/patients/nouveau',
+    path: '/espace/patients/nouveau',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connexion': typeof ConnexionRoute
+  '/passeport/$id': typeof PasseportIdRoute
+  '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
+  '/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/espace/accompagnants/$id': typeof AuthenticatedEspaceAccompagnantsIdRoute
+  '/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
+  '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
+  '/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
+  '/espace/accompagnants/': typeof AuthenticatedEspaceAccompagnantsIndexRoute
+  '/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connexion': typeof ConnexionRoute
+  '/passeport/$id': typeof PasseportIdRoute
+  '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
+  '/espace': typeof AuthenticatedEspaceIndexRoute
+  '/espace/accompagnants/$id': typeof AuthenticatedEspaceAccompagnantsIdRoute
+  '/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
+  '/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
+  '/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
+  '/espace/accompagnants': typeof AuthenticatedEspaceAccompagnantsIndexRoute
+  '/espace/patients': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/connexion': typeof ConnexionRoute
+  '/passeport/$id': typeof PasseportIdRoute
+  '/_authenticated/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
+  '/_authenticated/espace/': typeof AuthenticatedEspaceIndexRoute
+  '/_authenticated/espace/accompagnants/$id': typeof AuthenticatedEspaceAccompagnantsIdRoute
+  '/_authenticated/espace/patients/$id': typeof AuthenticatedEspacePatientsIdRoute
+  '/_authenticated/espace/patients/liste': typeof AuthenticatedEspacePatientsListeRoute
+  '/_authenticated/espace/patients/nouveau': typeof AuthenticatedEspacePatientsNouveauRoute
+  '/_authenticated/espace/accompagnants/': typeof AuthenticatedEspaceAccompagnantsIndexRoute
+  '/_authenticated/espace/patients/': typeof AuthenticatedEspacePatientsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/connexion'
+    | '/passeport/$id'
+    | '/espace/tutoriel'
+    | '/espace/'
+    | '/espace/accompagnants/$id'
+    | '/espace/patients/$id'
+    | '/espace/patients/liste'
+    | '/espace/patients/nouveau'
+    | '/espace/accompagnants/'
+    | '/espace/patients/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/connexion'
+    | '/passeport/$id'
+    | '/espace/tutoriel'
+    | '/espace'
+    | '/espace/accompagnants/$id'
+    | '/espace/patients/$id'
+    | '/espace/patients/liste'
+    | '/espace/patients/nouveau'
+    | '/espace/accompagnants'
+    | '/espace/patients'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/connexion'
+    | '/passeport/$id'
+    | '/_authenticated/espace/tutoriel'
+    | '/_authenticated/espace/'
+    | '/_authenticated/espace/accompagnants/$id'
+    | '/_authenticated/espace/patients/$id'
+    | '/_authenticated/espace/patients/liste'
+    | '/_authenticated/espace/patients/nouveau'
+    | '/_authenticated/espace/accompagnants/'
+    | '/_authenticated/espace/patients/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ConnexionRoute: typeof ConnexionRoute
+  PasseportIdRoute: typeof PasseportIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +190,119 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connexion': {
+      id: '/connexion'
+      path: '/connexion'
+      fullPath: '/connexion'
+      preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passeport/$id': {
+      id: '/passeport/$id'
+      path: '/passeport/$id'
+      fullPath: '/passeport/$id'
+      preLoaderRoute: typeof PasseportIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/espace/': {
+      id: '/_authenticated/espace/'
+      path: '/espace'
+      fullPath: '/espace/'
+      preLoaderRoute: typeof AuthenticatedEspaceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/tutoriel': {
+      id: '/_authenticated/espace/tutoriel'
+      path: '/espace/tutoriel'
+      fullPath: '/espace/tutoriel'
+      preLoaderRoute: typeof AuthenticatedEspaceTutorielRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/accompagnants/': {
+      id: '/_authenticated/espace/accompagnants/'
+      path: '/espace/accompagnants'
+      fullPath: '/espace/accompagnants/'
+      preLoaderRoute: typeof AuthenticatedEspaceAccompagnantsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/accompagnants/$id': {
+      id: '/_authenticated/espace/accompagnants/$id'
+      path: '/espace/accompagnants/$id'
+      fullPath: '/espace/accompagnants/$id'
+      preLoaderRoute: typeof AuthenticatedEspaceAccompagnantsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/patients/': {
+      id: '/_authenticated/espace/patients/'
+      path: '/espace/patients'
+      fullPath: '/espace/patients/'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/patients/$id': {
+      id: '/_authenticated/espace/patients/$id'
+      path: '/espace/patients/$id'
+      fullPath: '/espace/patients/$id'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/patients/liste': {
+      id: '/_authenticated/espace/patients/liste'
+      path: '/espace/patients/liste'
+      fullPath: '/espace/patients/liste'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsListeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/espace/patients/nouveau': {
+      id: '/_authenticated/espace/patients/nouveau'
+      path: '/espace/patients/nouveau'
+      fullPath: '/espace/patients/nouveau'
+      preLoaderRoute: typeof AuthenticatedEspacePatientsNouveauRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedEspaceTutorielRoute: typeof AuthenticatedEspaceTutorielRoute
+  AuthenticatedEspaceIndexRoute: typeof AuthenticatedEspaceIndexRoute
+  AuthenticatedEspaceAccompagnantsIdRoute: typeof AuthenticatedEspaceAccompagnantsIdRoute
+  AuthenticatedEspacePatientsIdRoute: typeof AuthenticatedEspacePatientsIdRoute
+  AuthenticatedEspacePatientsListeRoute: typeof AuthenticatedEspacePatientsListeRoute
+  AuthenticatedEspacePatientsNouveauRoute: typeof AuthenticatedEspacePatientsNouveauRoute
+  AuthenticatedEspaceAccompagnantsIndexRoute: typeof AuthenticatedEspaceAccompagnantsIndexRoute
+  AuthenticatedEspacePatientsIndexRoute: typeof AuthenticatedEspacePatientsIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedEspaceTutorielRoute: AuthenticatedEspaceTutorielRoute,
+  AuthenticatedEspaceIndexRoute: AuthenticatedEspaceIndexRoute,
+  AuthenticatedEspaceAccompagnantsIdRoute:
+    AuthenticatedEspaceAccompagnantsIdRoute,
+  AuthenticatedEspacePatientsIdRoute: AuthenticatedEspacePatientsIdRoute,
+  AuthenticatedEspacePatientsListeRoute: AuthenticatedEspacePatientsListeRoute,
+  AuthenticatedEspacePatientsNouveauRoute:
+    AuthenticatedEspacePatientsNouveauRoute,
+  AuthenticatedEspaceAccompagnantsIndexRoute:
+    AuthenticatedEspaceAccompagnantsIndexRoute,
+  AuthenticatedEspacePatientsIndexRoute: AuthenticatedEspacePatientsIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ConnexionRoute: ConnexionRoute,
+  PasseportIdRoute: PasseportIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

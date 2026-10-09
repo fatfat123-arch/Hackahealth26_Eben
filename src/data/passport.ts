@@ -13,8 +13,8 @@ export type DictionaryEntry = {
   type: "image" | "gif" | "video" | "audio";
   source: string;
   alt: string;
-  poster?: string;
-  transcript?: string;
+  poster?: string | undefined;
+  transcript?: string | undefined;
 };
 
 export const passport = {
