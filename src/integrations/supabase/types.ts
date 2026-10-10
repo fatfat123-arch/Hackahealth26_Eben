@@ -19,6 +19,7 @@ export type Database = {
           about: string
           additional: string[]
           address: string
+          archived_at: string | null
           birth_date: string | null
           created_at: string
           created_by: string | null
@@ -39,6 +40,7 @@ export type Database = {
           about?: string
           additional?: string[]
           address?: string
+          archived_at?: string | null
           birth_date?: string | null
           created_at?: string
           created_by?: string | null
@@ -59,6 +61,7 @@ export type Database = {
           about?: string
           additional?: string[]
           address?: string
+          archived_at?: string | null
           birth_date?: string | null
           created_at?: string
           created_by?: string | null
@@ -79,18 +82,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          archived_at: string | null
           created_at: string
           email: string
           full_name: string
           id: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           email?: string
           full_name?: string
