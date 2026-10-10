@@ -24,56 +24,52 @@ function Tutorial() {
   const { id } = Route.useSearch();
   const [url, setUrl] = useState("");
   useEffect(() => { setUrl(id ? publicPassportUrl(id) : ""); }, [id]);
-  const link = url || "l’adresse de la page publique du patient";
+  const link = url || "le lien public copié depuis le profil du résident";
 
   return <article className="bo-tutorial">
-    {id ? <BackLink to="/espace/patients/$id" params={{ id }}>Retour au profil</BackLink> : <BackLink to="/espace/patients">Retour aux profils des patients</BackLink>}
-    <h1 className="bo-title">Tutoriel : relier le passeport à un code QR ou une puce NFC</h1>
+    {id ? <BackLink to="/espace/patients/$id" params={{ id }}>Retour au profil</BackLink> : <BackLink to="/espace/patients">Retour aux profils des résidents</BackLink>}
+    <h1 className="bo-title">Tutoriel : utiliser un code QR et un badge NFC</h1>
     <div className="title-underline" />
-    <div className="bo-intro"><Mascot pose="qr" size={120} /><p>Suivez ces quatre étapes simples. Vous n’avez besoin que d’un téléphone et de quelques minutes.</p></div>
+    <div className="bo-intro"><Mascot pose="qr" size={120} /><p>Le code QR et le badge NFC ouvrent exactement le même passeport. Suivez les étapes dans l’ordre et testez toujours le support avant de le remettre au résident.</p></div>
     <section className="bo-card">
-      <h2>1. Trouver le lien du passeport</h2>
-      <p>Chaque patient a sa propre page publique. C’est elle qui s’affiche lorsque quelqu’un scanne le code.</p>
-      {url ? <p className="bo-url">Lien de ce patient : <strong>{url}</strong></p> : <p>Le lien est affiché sur la page du profil, dans l’encadré « Lien vers la page publique ».</p>}
-      <p>Le profil doit être <strong>enregistré</strong> pour que la page publique fonctionne.</p>
+      <h2>1. Récupérer le lien du passeport</h2>
+      <ol className="bo-steps"><li>Ouvrez le profil du résident.</li><li>Enregistrez le profil pour créer sa page publique.</li><li>Dans « Lien vers la page publique », touchez <strong>Copier le lien</strong>.</li><li>Vérifiez que le nom correspond au bon résident.</li></ol>
+      {url ? <p className="bo-url">Lien à utiliser pour ce résident : <strong>{url}</strong></p> : <p>Ouvrez d’abord un profil pour afficher ici son lien exact.</p>}
     </section>
     <section className="bo-card">
-      <h2>2. Créer un code QR</h2>
+      <h2>2. Préparer et tester le code QR</h2>
       <ol className="bo-steps">
-        <li>Ouvrez le profil du patient dans cet espace.</li>
-        <li>Dans l’encadré « Lien vers la page publique », cliquez sur <strong>Télécharger le code QR</strong>. Une image est enregistrée sur votre appareil.</li>
-        <li>Imprimez l’image en taille suffisante : au moins 3 cm de côté.</li>
-        <li>Collez-la sur un support que la personne garde avec elle : carte plastifiée, porte-clés, bracelet, étiquette de sac.</li>
-        <li>Testez le code : ouvrez l’appareil photo d’un téléphone, visez le code et vérifiez que le passeport s’affiche.</li>
+        <li>Sur le profil, touchez <strong>Télécharger le code QR</strong>.</li><li>Imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.</li><li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li><li>Visez-le avec l’appareil photo d’un autre téléphone.</li><li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
       </ol>
     </section>
     <section className="bo-card">
-      <h2>3. Programmer une puce NFC</h2>
-      <p>Une puce NFC permet d’ouvrir le passeport en approchant simplement un téléphone, sans scanner.</p>
+      <h2>3. Programmer le badge NFC</h2>
+      <p>Le badge NFC contient uniquement le lien du passeport. En approchant un téléphone compatible, une notification permet d’ouvrir la page du résident.</p>
+      <h3>Avant de commencer</h3>
+      <ul className="bo-steps"><li>Préparez un badge NFC vierge <strong>NTAG213 ou NTAG215</strong>.</li><li>Installez l’application gratuite <strong>NFC Tools</strong>.</li><li>Sur Android, activez le NFC dans les réglages. Sur les iPhone récents, la lecture est disponible automatiquement.</li><li>Copiez le lien du bon résident depuis son profil.</li></ul>
+      <h3>Écrire le lien sur le badge</h3>
       <ol className="bo-steps">
-        <li>Procurez-vous une puce NFC vierge (autocollant, carte ou porte-clés, modèle NTAG213 ou NTAG215).</li>
-        <li>Installez sur votre téléphone une application gratuite d’écriture NFC, par exemple « NFC Tools ».</li>
-        <li>Activez le NFC dans les réglages du téléphone (sur iPhone, il est toujours actif).</li>
-        <li>Dans l’application, choisissez <strong>Écrire</strong>, puis <strong>Ajouter un enregistrement</strong>, puis <strong>URL / Lien</strong>.</li>
-        <li>Collez le lien : <strong>{link}</strong>. Utilisez le bouton « Copier le lien » du profil pour éviter les erreurs.</li>
-        <li>Lancez l’écriture et approchez la puce du dos du téléphone jusqu’à la confirmation.</li>
-        <li>Testez : approchez un autre téléphone de la puce et vérifiez que le passeport s’ouvre.</li>
+        <li>Ouvrez <strong>NFC Tools</strong>, puis touchez <strong>Écrire</strong>.</li><li>Touchez <strong>Ajouter un enregistrement</strong>.</li><li>Choisissez <strong>URL / URI</strong>.</li><li>Collez le lien : <strong>{link}</strong>.</li><li>Vérifiez le lien, puis touchez <strong>Valider</strong>.</li><li>Touchez <strong>Écrire</strong>.</li><li>Maintenez le badge sans bouger contre le haut d’un iPhone ou le centre du dos d’un Android.</li><li>Attendez le message <strong>Écriture terminée</strong>.</li>
       </ol>
-      <p>Conseil : vous pouvez verrouiller la puce dans l’application pour éviter qu’elle soit modifiée par erreur. Ce verrouillage est définitif.</p>
+      <p><strong>Important :</strong> ne verrouillez pas encore le badge. Testez-le d’abord : le verrouillage est définitif.</p>
       <TutorialPhotos photos={[
-        { src: nfc01, alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré", highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 } },
-        { src: nfc02, alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
-        { src: nfc03, alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
-        { src: nfc04, alt: "Champ URL de NFC Tools, mention Renseignez votre URL entourée ; l’option URL / URI n’apparaît pas sur cet écran", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
-        { src: nfc05, alt: "Champ URL rempli avec le lien du passeport dans NFC Tools, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
-        { src: nfc06, alt: "Enregistrement URL ajouté dans NFC Tools, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
-        { src: nfc07, alt: "Boîte de dialogue demandant d’approcher un tag NFC pour l’écriture" },
-        { src: nfc08, alt: "Confirmation « Écriture terminée » dans NFC Tools" },
+        { src: nfc01, title: "Étape 1 — Ouvrir « Écrire »", explanation: "Sélectionnez l’onglet Écrire en haut de l’écran.", alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré", highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 } },
+        { src: nfc02, title: "Étape 2 — Ajouter un enregistrement", explanation: "Choisissez le contenu à placer dans le badge.", alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
+        { src: nfc03, title: "Étape 3 — Choisir URL / URI", explanation: "Cette option permet d’ouvrir directement le passeport.", alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
+        { src: nfc04, title: "Étape 4 — Coller le lien", explanation: "Collez le lien public copié depuis le profil du résident.", alt: "Champ URL vide de NFC Tools", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
+        { src: nfc05, title: "Étape 5 — Valider le lien", explanation: "Vérifiez qu’il commence par https://eh-passport.ch/passeport/, puis validez.", alt: "Champ URL rempli avec le lien du passeport, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
+        { src: nfc06, title: "Étape 6 — Lancer l’écriture", explanation: "Lorsque l’URL apparaît dans la liste, touchez Écrire.", alt: "Enregistrement URL ajouté, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
+        { src: nfc07, title: "Étape 7 — Approcher le badge", explanation: "Gardez le badge immobile contre le téléphone.", alt: "Demande d’approcher un badge NFC" },
+        { src: nfc08, title: "Étape 8 — Vérifier la confirmation", explanation: "Écriture terminée confirme que le lien est enregistré.", alt: "Confirmation « Écriture terminée »" },
       ]} />
+      <h3>Tester le badge avant de le distribuer</h3>
+      <ol className="bo-steps"><li>Fermez NFC Tools ou prenez un deuxième téléphone.</li><li>Déverrouillez le téléphone et approchez-le du badge.</li><li>Touchez la notification.</li><li>Vérifiez le nom du résident et la lecture des vidéos.</li><li>Inscrivez le nom du résident sur le badge ou son emballage.</li></ol>
+      <h3>Si le badge ne réagit pas</h3>
+      <ul className="bo-steps"><li>Retirez une coque épaisse ou métallique.</li><li>Déplacez lentement le badge sur le dos du téléphone.</li><li>Sur Android, vérifiez que le NFC est activé.</li><li>Relisez le badge dans NFC Tools pour vérifier l’URL.</li></ul>
     </section>
     <section className="bo-card">
       <h2>4. Mettre à jour le passeport</h2>
-      <p>Il n’est pas nécessaire de refaire le code QR ou la puce après une modification : le lien reste le même et la page affiche toujours les informations les plus récentes.</p>
+      <p>Après une modification, il n’est pas nécessaire de réimprimer le code QR ni de reprogrammer le badge NFC : le lien reste identique et affiche automatiquement les informations les plus récentes.</p>
     </section>
   </article>;
 }

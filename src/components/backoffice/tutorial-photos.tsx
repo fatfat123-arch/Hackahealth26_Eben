@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 type TutorialPhoto = {
   src: string;
   alt: string;
+  title?: string;
+  explanation?: string;
   highlight?: { cx: number; cy: number; rx: number; ry: number };
 };
 
@@ -24,10 +26,16 @@ export function TutorialPhotos({ photos }: { photos: TutorialPhoto[] }) {
   const photo = selected === null ? undefined : photos[selected];
   return <Dialog.Root open={photo !== undefined} onOpenChange={open => { if (!open) setSelected(null); }}>
     <div className="bo-tutorial-photos">
-      {photos.map((item, index) => <Button key={item.src} type="button" variant="ghost" className="bo-tutorial-photo-button" aria-label={`Agrandir la photo ${index + 1} : ${item.alt}`} onClick={event => {
-        origin.current = event.currentTarget;
-        setSelected(index);
-      }}><Photo photo={item} /></Button>)}
+      {photos.map((item, index) => <figure className="bo-tutorial-photo-step" key={item.src}>
+        <Button type="button" variant="ghost" className="bo-tutorial-photo-button" aria-label={`Agrandir la photo ${index + 1} : ${item.alt}`} onClick={event => {
+          origin.current = event.currentTarget;
+          setSelected(index);
+        }}><Photo photo={item} /></Button>
+        {(item.title || item.explanation) && <figcaption>
+          {item.title && <strong>{item.title}</strong>}
+          {item.explanation && <span>{item.explanation}</span>}
+        </figcaption>}
+      </figure>)}
     </div>
     <Dialog.Portal>
       <Dialog.Overlay className="bo-tutorial-photo-overlay" />
