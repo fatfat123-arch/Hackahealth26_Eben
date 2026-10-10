@@ -1,5 +1,5 @@
 // Address of the published site. Set it once the app is published (e.g. "https://mon-site.lovable.app").
-export const PUBLISHED_ORIGIN = "";
+export const PUBLISHED_ORIGIN: string = "";
 
 export function isPreviewOrigin(origin: string) {
   return /id-preview--|lovableproject\.com|localhost|127\.0\.0\.1/.test(origin);
