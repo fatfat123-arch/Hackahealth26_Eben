@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
-import { MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMe } from "@/lib/session";
 
@@ -29,7 +28,6 @@ export function LoginForm() {
   return (
     <div className="login-scene">
     <div className="bo-login">
-      <div className="heading-symbol" aria-hidden="true"><MessageCircle size={32} strokeWidth={1.6} /></div>
       <h1 className="bo-title">Connexion</h1>
       <div className="title-underline" />
       <p className="bo-lead">Espace réservé aux administrateurs et aux accompagnants.</p>
