@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DictionaryGrid } from "@/components/passport/dictionary-grid";
 import { PatientForm } from "@/components/backoffice/patient-form";
-import { draftToRow, emptyDraft, rowToDraft, toViewData, type PatientRow } from "@/lib/patients";
+import { draftToRow, emptyDraft, rowToDraft, toViewData, type PatientRow, type PatientDraft } from "@/lib/patients";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import type { DictionaryEntry } from "@/data/passport";
 
-afterEach(cleanup);
+beforeEach(() => { vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {}); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 const entries: DictionaryEntry[] = [
   { id: "one", title: "J’ai soif", type: "image", source: "/photo.jpg", alt: "Un verre", description: "Boire" },
   { id: "two", title: "Je suis fatigué", type: "video", source: "/video.webm", alt: "Fatigue", description: "Une pause" },
@@ -50,7 +51,7 @@ describe("Dictionary order", () => {
 
   it("reorders with arrow buttons, numbers positions and appends new entries", () => {
     function Form() {
-      const [draft, setDraft] = useState({ ...emptyDraft(), dictionary: entries.map(e => ({ ...e, path: e.source })) });
+      const [draft, setDraft] = useState<PatientDraft>({ ...emptyDraft(), dictionary: entries.map(e => ({ ...e, path: e.source })) });
       return <PatientForm draft={draft} onChange={setDraft} urls={{}} onUrls={() => {}} readOnly={false} folder="test" updatedAt={null} />;
     }
     render(<Form />);
@@ -58,11 +59,15 @@ describe("Dictionary order", () => {
     expect(screen.getByRole("button", { name: "Monter l’entrée 1" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Monter l’entrée 2" }));
     let groups = screen.getAllByRole("group", { name: /Entrée/ });
-    expect(within(groups[0]).getByLabelText("Signification (titre)")).toHaveValue("Je suis fatigué");
+    const first = groups[0];
+    if (!first) throw new Error("Première entrée manquante");
+    expect(within(first).getByLabelText("Signification (titre)")).toHaveValue("Je suis fatigué");
     fireEvent.click(screen.getByRole("button", { name: "Ajouter une entrée" }));
     groups = screen.getAllByRole("group", { name: /Entrée/ });
     expect(groups).toHaveLength(4);
-    expect(within(groups[3]).getByLabelText("Signification (titre)")).toHaveValue("");
+    const last = groups[3];
+    if (!last) throw new Error("Nouvelle entrée manquante");
+    expect(within(last).getByLabelText("Signification (titre)")).toHaveValue("");
     expect(screen.getByRole("button", { name: "Descendre l’entrée 4" })).toBeDisabled();
   });
 });
