@@ -78,11 +78,11 @@ function Caregivers() {
     <h1 className="bo-title">Profils des accompagnants</h1>
     <div className="title-underline" />
     <div className="bo-actions">
-      <button type="button" className="bo-btn bo-btn-primary" onClick={() => { setOpen(!open); setMsg(""); }} aria-expanded={open}><UserPlus aria-hidden="true" /> Créer un accompagnant</button>
+      <button type="button" className="bo-btn bo-btn-primary" onClick={() => { setOpen(!open); setMsg(""); }} aria-expanded={open}><UserPlus aria-hidden="true" /> Créer un compte</button>
     </div>
     {msg && <p className="bo-success" role="status">{msg}</p>}
     {open && <form className="bo-card bo-form" onSubmit={submit} noValidate>
-      <h2>Nouvel accompagnant</h2>
+      <h2>Nouveau compte</h2>
       <label className="bo-field"><span>Nom</span><input className="bo-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} autoComplete="off" /></label>
       <label className="bo-field"><span>Adresse e-mail</span><input className="bo-input" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} autoComplete="off" /></label>
       <label className="bo-field"><span>Mot de passe temporaire</span><input className="bo-input" type="text" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} autoComplete="new-password" /><small className="bo-hint">Au moins 8 caractères.</small></label>
