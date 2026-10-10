@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { BookOpen, Eye, Save } from "lucide-react";
 import { createPatient } from "@/lib/patients.functions";
-import { draftToRow, emptyDraft } from "@/lib/patients";
+import { draftToRow, emptyDraft, patientValidationError } from "@/lib/patients";
 import { PatientForm } from "@/components/backoffice/patient-form";
 import { PreviewPanel } from "@/components/backoffice/preview-panel";
 import { BackLink } from "@/components/backoffice/back-link";
@@ -26,7 +26,8 @@ function NewPatient() {
   const [error, setError] = useState("");
 
   async function save() {
-    if (!draft.name.trim()) { setError("Le nom est obligatoire."); window.scrollTo(0, 0); return; }
+    const validationError = patientValidationError(draft);
+    if (validationError) { setError(validationError); window.scrollTo(0, 0); return; }
     setBusy(true); setError("");
     let failed = false;
     try { await createPatient({ data: { id, row: draftToRow(draft) } }); } catch { failed = true; }

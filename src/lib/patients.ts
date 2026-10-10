@@ -26,6 +26,7 @@ export type PatientDraft = {
   howTo: string;
   reminder: string;
   photoPath: string | null;
+  photoPositionY: number;
   dictionary: DictItem[];
   communicates: string[];
   understandingNeeds: string[];
@@ -49,6 +50,7 @@ export type PatientRow = {
   how_to: string;
   reminder: string;
   photo_path: string | null;
+  photo_position_y?: number | null;
   dictionary: unknown;
   communicates?: string[];
   understanding_needs?: string[];
@@ -66,13 +68,13 @@ export const DEFAULT_HOW_TO = "Cette page vous aide à comprendre ce que je souh
 
 export const emptyDraft = (): PatientDraft => ({
   name: "", birthDate: "", phone: "", phoneNote: "", address: "", about: "", howTo: DEFAULT_HOW_TO, reminder: "",
-  photoPath: null, dictionary: [], communicates: [], understandingNeeds: [], tools: [], facilitators: [], interests: [], dislikes: [], additional: [], sectionOrder: defaultSectionOrder(),
+  photoPath: null, photoPositionY: 50, dictionary: [], communicates: [], understandingNeeds: [], tools: [], facilitators: [], interests: [], dislikes: [], additional: [], sectionOrder: defaultSectionOrder(),
 });
 
 export function rowToDraft(r: PatientRow): PatientDraft {
   return {
     name: r.name, birthDate: r.birth_date ?? "", phone: r.phone, phoneNote: r.phone_note, address: r.address,
-    about: r.about, howTo: r.how_to, reminder: r.reminder, photoPath: r.photo_path,
+    about: r.about, howTo: r.how_to, reminder: r.reminder, photoPath: r.photo_path, photoPositionY: r.photo_position_y ?? 50,
     communicates: r.communicates ?? [], understandingNeeds: r.understanding_needs ?? [], tools: r.tools ?? [], facilitators: r.facilitators ?? [],
     dictionary: Array.isArray(r.dictionary) ? (r.dictionary as DictItem[]) : [],
     interests: r.interests ?? [], dislikes: r.dislikes ?? [], additional: r.additional ?? [],
@@ -85,7 +87,7 @@ export function draftToRow(d: PatientDraft) {
   return {
     name: d.name.trim(), birth_date: d.birthDate || null, phone: d.phone.trim(), phone_note: d.phoneNote.trim(),
     address: d.address.trim(), about: d.about.trim(), how_to: d.howTo.trim(), reminder: d.reminder.trim(),
-    photo_path: d.photoPath,
+    photo_path: d.photoPath, photo_position_y: Math.min(100, Math.max(0, Math.round(d.photoPositionY))),
     communicates: clean(d.communicates), understanding_needs: clean(d.understandingNeeds), tools: clean(d.tools), facilitators: clean(d.facilitators), dictionary: d.dictionary.filter(e => e.path),
     interests: clean(d.interests), dislikes: clean(d.dislikes), additional: clean(d.additional),
     section_order: normalizeSectionOrder(d.sectionOrder),
@@ -114,6 +116,19 @@ export function ageFromBirthDate(iso: string | null | undefined, now = new Date(
   return age >= 0 && age <= 130 ? `${age} ans` : "—";
 }
 
+export function patientValidationError(d: Pick<PatientDraft, "name" | "birthDate" | "phone">, today = new Date()): string | null {
+  if (!d.name.trim()) return "Le nom est obligatoire.";
+  if (d.birthDate) {
+    const selected = new Date(`${d.birthDate}T12:00:00`);
+    const limit = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    if (Number.isNaN(selected.getTime())) return "La date de naissance n’est pas valide.";
+    if (selected > limit) return "La date de naissance ne peut pas être dans le futur.";
+  }
+  if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(d.phone)) return "Le numéro de téléphone ne peut pas contenir de lettres.";
+  if (d.phone && !/^\+?[0-9 ()'./-]+$/.test(d.phone)) return "Le numéro de téléphone contient un caractère non autorisé.";
+  return null;
+}
+
 export function toViewData(d: PatientDraft, urls: Record<string, string>, updatedAt: string | null, publicAge?: string): PassportViewData {
   return {
     name: d.name || "Nom à compléter",
@@ -128,6 +143,7 @@ export function toViewData(d: PatientDraft, urls: Record<string, string>, update
     updatedAt: updatedAt ? formatDateFr(updatedAt) : "Pas encore enregistré",
     updatedAtISO: updatedAt ?? "",
     portrait: d.photoPath ? urls[d.photoPath] : null,
+    portraitPosition: `${d.photoPositionY}%`,
     portraitAlt: `Photo de ${(d.name.trim().split(/\s+/)[0]) || "la personne"}`,
     about: d.about, howTo: d.howTo, reminder: d.reminder,
     dictionary: d.dictionary.filter(e => e.path).map(e => ({

@@ -8,7 +8,7 @@ import { mediaFile, signedMediaUrl } from "@/server/media.server";
 
 type PatientRecord = RowDataPacket & {
   id: string; name: string; age: number | null; birth_date: string | Date | null; phone: string; phone_note: string; address: string;
-  about: string; how_to: string; reminder: string; photo_path: string | null; dictionary: unknown;
+  about: string; how_to: string; reminder: string; photo_path: string | null; photo_position_y: number; dictionary: unknown;
   communicates: unknown; understanding_needs: unknown; tools: unknown; facilitators: unknown; interests: unknown;
   dislikes: unknown; additional: unknown; section_order: unknown; created_by: string | null;
   created_at: string | Date; updated_at: string | Date; archived_at: string | Date | null;
@@ -16,7 +16,7 @@ type PatientRecord = RowDataPacket & {
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 export type PatientResult = {
   id: string; name: string; age: number | null; birth_date: string | null; phone: string; phone_note: string; address: string;
-  about: string; how_to: string; reminder: string; photo_path: string | null; created_by: string | null;
+  about: string; how_to: string; reminder: string; photo_path: string | null; photo_position_y: number; created_by: string | null;
   created_at: string | null; updated_at: string | null; archived_at: string | null;
   dictionary: JsonValue[]; communicates: string[]; understanding_needs: string[]; tools: string[]; facilitators: string[];
   interests: string[]; dislikes: string[]; additional: string[]; section_order: string[];
@@ -24,10 +24,13 @@ export type PatientResult = {
 
 const idSchema = z.string().uuid();
 const JSON_COLUMNS = new Set(["dictionary", "communicates", "understanding_needs", "tools", "facilitators", "interests", "dislikes", "additional", "section_order"]);
-const EDITABLE = new Set(["name", "birth_date", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", ...JSON_COLUMNS]);
+const EDITABLE = new Set(["name", "birth_date", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", "photo_position_y", ...JSON_COLUMNS]);
 
 function editableValues(values: Record<string, unknown>) {
   const clean = Object.fromEntries(Object.entries(values).filter(([key]) => EDITABLE.has(key)));
+  if (typeof clean["birth_date"] === "string" && clean["birth_date"] > new Date().toISOString().slice(0, 10)) throw new Error("La date de naissance ne peut pas être dans le futur.");
+  if (typeof clean["phone"] === "string" && (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(clean["phone"]) || (clean["phone"] && !/^\+?[0-9 ()'./-]+$/.test(clean["phone"])))) throw new Error("Le numéro de téléphone n’est pas valide.");
+  if ("photo_position_y" in clean) clean["photo_position_y"] = Math.min(100, Math.max(0, Math.round(Number(clean["photo_position_y"]) || 50)));
   return clean;
 }
 

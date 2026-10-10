@@ -35,6 +35,7 @@ async function serve(request: Request, head = false) {
     const headers = new Headers({
       "accept-ranges": "bytes",
       "cache-control": "private, max-age=3600",
+      "content-disposition": "inline",
       "content-type": TYPES[extname(path).toLowerCase()] || "application/octet-stream",
       "x-content-type-options": "nosniff",
     });

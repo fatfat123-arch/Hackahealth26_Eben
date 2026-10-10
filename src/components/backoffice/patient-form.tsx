@@ -20,7 +20,7 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
 };
 /** Draft keys saved together with each editable field. */
 export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
-  photo: ["photoPath"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
+  photo: ["photoPath", "photoPositionY"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
   about: ["about"], howTo: ["howTo"], dictionary: ["dictionary"], communicates: ["communicates"], understandingNeeds: ["understandingNeeds"],
   tools: ["tools"], facilitators: ["facilitators"], interests: ["interests"], dislikes: ["dislikes"], additional: ["additional"], sectionOrder: ["sectionOrder"],
 };
@@ -91,17 +91,17 @@ function ReadValue({ label, value }: { label: string; value: ReactNode }) {
   return <div className="bo-read"><dt>{label}</dt><dd>{value || "—"}</dd></div>;
 }
 
-function ListEditor({ title, items, onChange, readOnly, hideLegend }: { title: string; items: string[]; onChange: (l: string[]) => void; readOnly: boolean; hideLegend?: boolean }) {
+function ListEditor({ title, items, onChange, readOnly, hideLegend, keywords = false }: { title: string; items: string[]; onChange: (l: string[]) => void; readOnly: boolean; hideLegend?: boolean; keywords?: boolean }) {
   const id = useId();
   return <fieldset className="bo-fieldset">
     <legend className={hideLegend ? "sr-only" : undefined}>{title}</legend>
-    {readOnly ? (items.length ? <ul className="passport-list">{items.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p>Aucune information.</p>) : <>
+    {readOnly ? (items.length ? <ul className={keywords ? "passport-tags" : "passport-list"}>{items.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p>Aucune information.</p>) : <>
       {items.map((t, i) => <div key={i} className="bo-row">
-        <label className="sr-only" htmlFor={`${id}-${i}`}>{title}, point {i + 1}</label>
+        <label className="sr-only" htmlFor={`${id}-${i}`}>{title}, {keywords ? "mot-clé" : "point"} {i + 1}</label>
         <input id={`${id}-${i}`} className="bo-input" value={t} onChange={e => onChange(items.map((x, j) => j === i ? e.target.value : x))} />
         <button type="button" className="bo-btn bo-btn-outline bo-icon-btn" onClick={() => onChange(items.filter((_, j) => j !== i))} aria-label={`Supprimer le point ${i + 1}`}><Trash2 aria-hidden="true" /></button>
       </div>)}
-      <button type="button" className="bo-btn bo-btn-outline" onClick={() => onChange([...items, ""])}><Plus aria-hidden="true" /> Ajouter un point</button>
+      <button type="button" className="bo-btn bo-btn-outline" onClick={() => onChange([...items, ""])}><Plus aria-hidden="true" /> Ajouter {keywords ? "un mot-clé" : "un point"}</button>
     </>}
   </fieldset>;
 }
@@ -192,10 +192,10 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     </div>;
   }
   const list = (k: "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional") =>
-    Card(k, <ListEditor title={FIELD_LABELS[k]} items={draft[k]} onChange={() => {}} readOnly hideLegend />,
-      <ListEditor title={FIELD_LABELS[k]} items={draft[k]} onChange={l => set(k, l)} readOnly={false} hideLegend={!!inline} />, inline ? <h2>{FIELD_LABELS[k]}</h2> : null);
+    Card(k, <ListEditor title={FIELD_LABELS[k]} items={draft[k]} onChange={() => {}} readOnly hideLegend keywords={k === "interests" || k === "dislikes"} />,
+      <ListEditor title={FIELD_LABELS[k]} items={draft[k]} onChange={l => set(k, l)} readOnly={false} hideLegend={!!inline} keywords={k === "interests" || k === "dislikes"} />, inline ? <h2>{FIELD_LABELS[k]}</h2> : null);
 
-  const photoRead = draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={`Photo de ${firstName}`} /> : <p>Aucune photo.</p>;
+  const photoRead = draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={`Photo de ${firstName}`} style={{ objectPosition: `center ${draft.photoPositionY}%` }} /> : <p>Aucune photo.</p>;
   const dictRead = draft.dictionary.length === 0 ? <p>Aucune entrée.</p> : <DictionaryGrid entries={draft.dictionary.map(e => ({ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }))} />;
   const dictEdit = isEditing("dictionary") ? <>
       <p className="sr-only" role="status">{orderMessage}</p>
@@ -237,7 +237,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
   </> : null;
   const photoEdit = <>
       <div className="bo-photo-edit">
-        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt="Photo actuelle" /> : <div className="photo-placeholder">Pas de photo</div>}
+        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt="Photo actuelle" style={{ objectPosition: `center ${draft.photoPositionY}%` }} /> : <div className="photo-placeholder">Pas de photo</div>}
         <div className="bo-stack">
           <label className="bo-btn bo-btn-outline bo-file"><Upload aria-hidden="true" /> {uploading === "photo" ? "Envoi en cours…" : draft.photoPath ? "Remplacer la photo" : "Choisir une photo"}
             <input type="file" accept="image/*" className="sr-only" onChange={e => handleUpload(e.target.files?.[0], "photo", p => set("photoPath", p), f => f.type.startsWith("image/"))} />
@@ -245,11 +245,12 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
           {draft.photoPath && <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("photoPath", null)}>Retirer la photo</button>}
         </div>
       </div>
+      {draft.photoPath && <Field label="Cadrage vertical de la photo" hint="Déplacez le curseur pour choisir la partie visible du portrait."><input type="range" min="0" max="100" step="1" value={draft.photoPositionY} onChange={e => set("photoPositionY", Number(e.target.value))} aria-label="Position verticale de la photo" /></Field>}
   </>;
   const text = (k: "howTo" | "about") => <Field label="Texte"><textarea className="bo-input bo-textarea" value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
   const input = (k: "name" | "birthDate" | "address" | "reminder" | "phone", label: string, type = "text", hint?: string) =>
-    <Field label={label} hint={hint}><input className="bo-input" type={type} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
-  const phoneEdit = <>{input("phone", "Téléphone", "tel")}<Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field></>;
+    <Field label={label} hint={hint}><input className="bo-input" type={type} max={k === "birthDate" ? new Date().toISOString().slice(0, 10) : undefined} inputMode={k === "phone" ? "tel" : undefined} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
+  const phoneEdit = <>{input("phone", "Téléphone", "tel", "Chiffres uniquement, avec éventuellement +, espaces, parenthèses, points ou tirets.")}<Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field></>;
 
   const info = inline
     ? <section className="bo-card"><h2>Informations</h2><dl className="bo-read-list">

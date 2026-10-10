@@ -29,6 +29,7 @@ export type PassportViewData = {
   updatedAt: string;
   updatedAtISO: string;
   portrait?: string | null | undefined;
+  portraitPosition?: string | undefined;
   portraitAlt: string;
   about: string;
   howTo: string;
@@ -97,7 +98,7 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
       </header>
       <section className="profile-section" aria-label={`Profil de ${data.name}`}>
         <figure className="profile-photo">
-          {data.portrait ? <img src={data.portrait} alt={`Photo de ${firstName || data.name}`} width={1024} height={1024} fetchPriority="high" />
+          {data.portrait ? <img src={data.portrait} alt={`Photo de ${firstName || data.name}`} width={1024} height={1024} fetchPriority="high" style={{ objectPosition: `center ${data.portraitPosition ?? "50%"}` }} />
             : <div className="photo-placeholder" role="img" aria-label="Aucune photo">Pas de photo</div>}
         </figure>
         <div className="profile-copy">
@@ -116,14 +117,14 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
           </dl>
         </div>
       </section>
-      <section className="passport-contact" aria-labelledby="contact-title">
+      {(data.contactName || data.contactPhone) && <section className="passport-contact" aria-labelledby="contact-title">
         <h2 id="contact-title">Ma personne de contact</h2>
         <p>Pour m'aider, vous pouvez appeler :</p>
         {data.contactName && <p className="passport-contact-name">{data.contactName}{data.contactRelationship && `, ${data.contactRelationship}`}</p>}
         {data.contactPhone ? <Button asChild className="passport-contact-call">
           <a href={contactHref}><span>{contactFirstName ? `Appeler ${contactFirstName}` : "Appeler ma personne de contact"}</span><span>{data.contactPhone}</span></a>
         </Button> : <p>Aucun numéro renseigné.</p>}
-      </section>
+      </section>}
       {data.reminder && <aside className="communication-note"><Info aria-hidden="true" /><p>{data.reminder}</p></aside>}
       <Accordion type="multiple" className="passport-sections" aria-label="Les rubriques de mon passeport">
         {normalizeSectionOrder(data.sectionOrder).map(k => renderSection(k, data))}

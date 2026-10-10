@@ -18,5 +18,12 @@ if (ageColumns.length === 0) {
   await connection.query("ALTER TABLE patients ADD COLUMN age TINYINT UNSIGNED NULL AFTER name");
   await connection.query("UPDATE patients SET age=TIMESTAMPDIFF(YEAR,birth_date,CURDATE()) WHERE birth_date IS NOT NULL");
 }
+const [photoPositionColumns] = await connection.query(
+  "SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME='patients' AND COLUMN_NAME='photo_position_y' LIMIT 1",
+  [process.env.DB_NAME],
+);
+if (photoPositionColumns.length === 0) {
+  await connection.query("ALTER TABLE patients ADD COLUMN photo_position_y TINYINT UNSIGNED NOT NULL DEFAULT 50 AFTER photo_alt");
+}
 await connection.end();
 console.log("MariaDB schema ready.");

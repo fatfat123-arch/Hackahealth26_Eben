@@ -6,7 +6,7 @@ import QRCode from "qrcode";
 import { BookOpen, ListOrdered, Copy, Download, Eye } from "lucide-react";
 import { getPatient, updatePatient } from "@/lib/patients.functions";
 import { signPaths } from "@/lib/session";
-import { draftPaths, draftToRow, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
+import { draftPaths, draftToRow, patientValidationError, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
 import { PatientForm, FIELD_DRAFT_KEYS, FIELD_LABELS, type FieldKey } from "@/components/backoffice/patient-form";
 import { askConfirm } from "@/components/backoffice/confirm-dialog";
 import { PreviewPanel } from "@/components/backoffice/preview-panel";
@@ -81,7 +81,8 @@ function PatientPage() {
 
   async function saveField(k: FieldKey): Promise<boolean> {
     if (!draft) return false;
-    if (k === "name" && !draft.name.trim()) { setErr("Le nom est obligatoire."); return false; }
+    const validationError = patientValidationError(draft);
+    if (validationError) { setErr(validationError); return false; }
     const full = draftToRow(draft) as Record<string, unknown>;
     const cols = Object.fromEntries(FIELD_DRAFT_KEYS[k].map(key => { const c = COLUMN[key]; return [c, full[c]]; }));
     setBusy(true); setErr("");
@@ -134,6 +135,6 @@ function PatientPage() {
 
 const COLUMN: Record<keyof PatientDraft, string> = {
   name: "name", birthDate: "birth_date", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
-  photoPath: "photo_path", dictionary: "dictionary", communicates: "communicates", understandingNeeds: "understanding_needs", tools: "tools", facilitators: "facilitators",
+  photoPath: "photo_path", photoPositionY: "photo_position_y", dictionary: "dictionary", communicates: "communicates", understandingNeeds: "understanding_needs", tools: "tools", facilitators: "facilitators",
   interests: "interests", dislikes: "dislikes", additional: "additional", sectionOrder: "section_order",
 };

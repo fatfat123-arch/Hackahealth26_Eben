@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS patients (
   name VARCHAR(255) NOT NULL DEFAULT '', age TINYINT UNSIGNED NULL, birth_date DATE NULL,
   phone VARCHAR(80) NOT NULL DEFAULT '', phone_note VARCHAR(255) NOT NULL DEFAULT '', address TEXT NOT NULL,
   about TEXT NOT NULL, how_to TEXT NOT NULL, reminder TEXT NOT NULL,
-  photo_path VARCHAR(500) NULL, photo_alt VARCHAR(255) NOT NULL DEFAULT '',
+  photo_path VARCHAR(500) NULL, photo_alt VARCHAR(255) NOT NULL DEFAULT '', photo_position_y TINYINT UNSIGNED NOT NULL DEFAULT 50,
   dictionary JSON NOT NULL, communicates JSON NOT NULL, understanding_needs JSON NOT NULL,
   tools JSON NOT NULL, facilitators JSON NOT NULL, interests JSON NOT NULL, dislikes JSON NOT NULL,
   additional JSON NOT NULL, section_order JSON NOT NULL,
