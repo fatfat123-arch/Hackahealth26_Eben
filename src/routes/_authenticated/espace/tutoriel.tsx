@@ -65,7 +65,7 @@ function Tutorial() {
         { src: nfc02.url, alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
         { src: nfc03.url, alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
         { src: nfc04.url, alt: "Champ URL de NFC Tools, mention Renseignez votre URL entourée ; l’option URL / URI n’apparaît pas sur cet écran", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
-        { src: nfc05.url, alt: "Champ URL rempli avec le lien du passeport dans NFC Tools, bouton Valider entouré", highlight: { cx: 74, cy: 93.7, rx: 24, ry: 3.2 } },
+        { src: nfc05.url, alt: "Champ URL rempli avec le lien du passeport dans NFC Tools, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
         { src: nfc06.url, alt: "Enregistrement URL ajouté dans NFC Tools, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
         { src: nfc07.url, alt: "Boîte de dialogue demandant d’approcher un tag NFC pour l’écriture" },
         { src: nfc08.url, alt: "Confirmation « Écriture terminée » dans NFC Tools" },
