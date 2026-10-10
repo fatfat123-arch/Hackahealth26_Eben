@@ -1,4 +1,4 @@
-import { Info, Plus, Minus, Cake, MapPin, CalendarCheck, BookOpen, MessageCircle, Brain, Wrench, HandHeart, Sparkles, ShieldAlert, NotebookPen, type LucideIcon } from "lucide-react";
+import { Info, Plus, Minus, Cake, MapPin, CalendarCheck } from "lucide-react";
 import { Mascot } from "@/components/mascot";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
@@ -7,6 +7,14 @@ import { normalizeSectionOrder, SECTION_TITLES, type SectionKey } from "@/lib/se
 import type { ReactNode } from "react";
 import type { DictionaryEntry } from "@/data/passport";
 import { Button } from "@/components/ui/button";
+import dictionaryIcon from "@/assets/icone-dictionnaire.png";
+import communicatesIcon from "@/assets/icone-communique.png";
+import understandingIcon from "@/assets/icone-comprendre.png";
+import toolsIcon from "@/assets/icone-outils.png";
+import facilitatorsIcon from "@/assets/icone-faciliter.png";
+import notesIcon from "@/assets/icone-notes.png";
+import interestsIcon from "@/assets/passport-interets.png";
+import dislikesIcon from "@/assets/passport-peurs.png";
 
 export type PassportViewData = {
   name: string;
@@ -36,11 +44,11 @@ export type PassportViewData = {
   sectionOrder?: SectionKey[];
 };
 
-function SectionHeader({ title, icon: Icon }: { title: string; icon: LucideIcon }) {
+function SectionHeader({ title, icon }: { title: string; icon: string }) {
   return <AccordionPrimitive.Header asChild>
     <h2>
       <AccordionPrimitive.Trigger className="passport-trigger">
-        <span className="section-title"><Icon className="section-icon" aria-hidden="true" /><span>{title}</span></span>
+        <span className="section-title"><img className="section-icon" src={icon} alt="" aria-hidden="true" width={48} height={48} /><span>{title}</span></span>
         <span className="section-toggle" aria-hidden="true"><Plus className="closed-icon" /><Minus className="open-icon" /></span>
       </AccordionPrimitive.Trigger>
     </h2>
@@ -57,9 +65,9 @@ function BulletList({ items }: { items: string[] }) {
   return <ul className="passport-list">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>;
 }
 
-const ICONS: Record<SectionKey, LucideIcon> = {
-  dictionary: BookOpen, communicates: MessageCircle, understandingNeeds: Brain, tools: Wrench,
-  facilitators: HandHeart, interests: Sparkles, dislikes: ShieldAlert, additional: NotebookPen,
+const ICONS: Record<SectionKey, string> = {
+  dictionary: dictionaryIcon, communicates: communicatesIcon, understandingNeeds: understandingIcon, tools: toolsIcon,
+  facilitators: facilitatorsIcon, interests: interestsIcon, dislikes: dislikesIcon, additional: notesIcon,
 };
 
 function renderSection(k: SectionKey, data: PassportViewData) {
