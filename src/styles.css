@@ -403,7 +403,7 @@
   .dictionary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .bo-greeting, .bo-intro { flex-direction: column; text-align: center; padding: 20px; }
   .bo-greeting .title-underline { margin-left: auto; margin-right: auto; }
-  .bo-steptab { flex: 1 1 45%; font-size: 16px; }
+  .bo-steptab { flex: 1 1 100%; justify-content: flex-start; text-align: left; font-size: 16px; }
   .bo-saved { padding: 14px 16px; }
 }
 
@@ -480,3 +480,11 @@
 .bo-section-order-num { flex: none; min-width: 2ch; font-weight: 600; color: #004d95; }
 .bo-section-order-title { flex: 1; min-width: 0; }
 .bo-section-order-ctl { display: flex; gap: 6px; flex: none; }
+
+/* Consistency pass */
+.bo-step-num { flex: none; }
+.bo-actions + .bo-hint, .bo-hint + .bo-card, .bo-hint + section, .bo-success + section, .bo-error + section { margin-top: 16px; }
+.bo-card h2, .bo-edit-head h2 { overflow-wrap: anywhere; }
+.bo-url, .bo-url a { overflow-wrap: anywhere; }
+.bo-read-edit .bo-pencil { align-self: start; margin: -10px -8px 0 0; }
+.bo-edit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
