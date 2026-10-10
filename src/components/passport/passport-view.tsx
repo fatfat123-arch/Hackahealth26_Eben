@@ -1,4 +1,5 @@
-import { Info, MessageCircle, Plus, Minus } from "lucide-react";
+import { Info, Plus, Minus, Cake, MapPin, CalendarCheck } from "lucide-react";
+import { Mascot } from "@/components/mascot";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
@@ -43,19 +44,25 @@ function SectionHeader({ title, icon }: { title: string; icon: string }) {
   </AccordionPrimitive.Header>;
 }
 
+function TagList({ items }: { items: string[] }) {
+  if (items.length === 0) return <p>Aucune information pour le moment.</p>;
+  return <ul className="passport-tags">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>;
+}
+
 function BulletList({ items }: { items: string[] }) {
   if (items.length === 0) return <p>Aucune information pour le moment.</p>;
   return <ul className="passport-list">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>;
 }
 
 export function PassportView({ data, demo = false }: { data: PassportViewData; demo?: boolean }) {
+  const firstName = data.name.trim().split(/\s+/)[0];
   const contactFirstName = data.contactName.trim().split(/\s+/)[0];
   const contactHref = `tel:${data.contactPhone.replace(/[^+\d]/g, "")}`;
   return (
     <div className="passport-page">
       <header className="passport-heading">
-        <div className="heading-symbol" aria-hidden="true"><MessageCircle size={32} strokeWidth={1.6} /></div>
-        <h1>Passeport de communication</h1>
+        <p className="passport-kicker">Passeport de communication</p>
+        <h1>{firstName ? `Bonjour, je m’appelle ${firstName}` : "Bonjour"}</h1>
         <div className="title-underline" />
       </header>
       <section className="profile-section" aria-label={`Profil de ${data.name}`}>
@@ -65,7 +72,7 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
         </figure>
         <div className="profile-copy">
           <section aria-labelledby="how-title">
-            <h2 id="how-title">Comment utiliser cette page</h2>
+            <div className="how-heading"><h2 id="how-title">Comment utiliser cette page</h2><Mascot pose="salut" size={64} /></div>
             <p>{data.howTo}</p>
           </section>
           <section className="how-to" aria-labelledby="about-title">
@@ -73,10 +80,9 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
             <p>{data.about}</p>
           </section>
           <dl className="profile-details">
-            <div><dt>Nom</dt><dd>{data.name}</dd></div>
-            <div><dt>Date de naissance</dt><dd>{data.birthDate}</dd></div>
-            <div><dt>Adresse</dt><dd>{data.address}</dd></div>
-            <div className="last-updated"><dt>Dernière mise à jour</dt><dd><time dateTime={data.updatedAtISO}>{data.updatedAt}</time></dd></div>
+            <div><dt><Cake aria-hidden="true" />Date de naissance</dt><dd>{data.birthDate || "—"}</dd></div>
+            <div><dt><MapPin aria-hidden="true" />Adresse</dt><dd>{data.address || "—"}</dd></div>
+            <div className="last-updated"><dt><CalendarCheck aria-hidden="true" />Dernière mise à jour</dt><dd><time dateTime={data.updatedAtISO}>{data.updatedAt}</time></dd></div>
           </dl>
           <section className="passport-contact" aria-labelledby="contact-title">
             <h2 id="contact-title">Ma personne de contact</h2>
@@ -99,11 +105,11 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
         </AccordionItem>
         <AccordionItem value="interests" className="passport-section">
           <SectionHeader title="Mes centres d’intérêt" icon={interestsIcon.url} />
-          <AccordionContent className="section-content"><BulletList items={data.interests} /></AccordionContent>
+          <AccordionContent className="section-content"><TagList items={data.interests} /></AccordionContent>
         </AccordionItem>
         <AccordionItem value="dislikes" className="passport-section">
           <SectionHeader title="Mes peurs / Ce que je n’aime pas" icon={dislikesIcon.url} />
-          <AccordionContent className="section-content"><BulletList items={data.dislikes} /></AccordionContent>
+          <AccordionContent className="section-content"><TagList items={data.dislikes} /></AccordionContent>
         </AccordionItem>
         <AccordionItem value="other" className="passport-section">
           <SectionHeader title="Autres informations" icon={informationIcon.url} />
