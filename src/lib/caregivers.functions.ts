@@ -21,8 +21,10 @@ async function assertSafeTarget(context: Ctx, targetId: string, removesAdmin: bo
   if (!roles?.length) throw new Error("Compte introuvable.");
   const isAdmin = roles.some(r => r.role === "admin");
   if (removesAdmin && isAdmin) {
-    const { data: admins } = await sb.from("user_roles").select("user_id, profiles!inner(archived_at)").eq("role", "admin").is("profiles.archived_at", null).neq("user_id", targetId);
-    if (!admins?.length) throw new Error("Il doit toujours rester au moins un administrateur actif.");
+    const { data: admins } = await sb.from("user_roles").select("user_id").eq("role", "admin").neq("user_id", targetId);
+    const ids = (admins ?? []).map(a => a.user_id);
+    const { count } = ids.length ? await sb.from("profiles").select("id", { count: "exact", head: true }).in("id", ids).is("archived_at", null) : { count: 0 };
+    if (!count) throw new Error("Il doit toujours rester au moins un administrateur actif.");
   }
   return sb;
 }
