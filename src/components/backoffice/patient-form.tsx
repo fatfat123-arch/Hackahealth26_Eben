@@ -3,6 +3,11 @@ import { Plus, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import * as Tabs from "@radix-ui/react-tabs";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
+import { DictionaryGrid } from "@/components/passport/dictionary-grid";
+import { SortableDictionaryEntry } from "@/components/backoffice/sortable-dictionary-entry";
+import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
+import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { MEDIA_BUCKET, mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
 type Props = {
@@ -62,7 +67,15 @@ function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode, 
 export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt }: Props) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [orderMessage, setOrderMessage] = useState("");
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   const set = <K extends keyof PatientDraft>(k: K, v: PatientDraft[K]) => onChange({ ...draft, [k]: v });
+  function moveEntry(from: number, to: number) {
+    const next = moveDictionaryEntry(draft.dictionary, from, to);
+    if (next === draft.dictionary) return;
+    set("dictionary", next);
+    setOrderMessage(`Entrée déplacée à la position ${to + 1} sur ${next.length}.`);
+  }
 
   async function handleUpload(file: File | undefined, key: string, apply: (path: string) => void, accept?: (f: File) => boolean) {
     if (!file) return;
@@ -97,9 +110,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       </section>
 </>, <>
       <section className="bo-card"><h2>Mon dictionnaire</h2>
-        {draft.dictionary.length === 0 ? <p>Aucune entrée.</p> : <div className="dictionary-grid">
-          {draft.dictionary.map(e => <DictionaryCard key={e.id} entry={{ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }} />)}
-        </div>}
+        {draft.dictionary.length === 0 ? <p>Aucune entrée.</p> : <DictionaryGrid entries={draft.dictionary.map(e => ({ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }))} />}
       </section>
 </>, <>
       <section className="bo-card"><ListEditor title="Je communique" items={draft.communicates} onChange={() => {}} readOnly /></section>
@@ -143,9 +154,19 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     </section>
 </>, <>
     <section className="bo-card"><h2>Mon dictionnaire</h2>
+      <p className="sr-only" role="status">{orderMessage}</p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} accessibility={{ screenReaderInstructions: { draggable: "Pour déplacer une entrée, appuyez sur Espace, utilisez les flèches, puis appuyez sur Espace pour confirmer ou Échap pour annuler." }, announcements: {
+        onDragStart: () => "Déplacement de l’entrée commencé.",
+        onDragOver: ({ over }) => over ? `Position ${draft.dictionary.findIndex(e => e.id === over.id) + 1}.` : "Hors de la liste.",
+        onDragEnd: () => "Déplacement terminé.",
+        onDragCancel: () => "Déplacement annulé.",
+      } }} onDragEnd={({ active, over }) => {
+        if (!over) return;
+        moveEntry(draft.dictionary.findIndex(e => e.id === active.id), draft.dictionary.findIndex(e => e.id === over.id));
+      }}>
+      <SortableContext items={draft.dictionary.map(e => e.id)} strategy={rectSortingStrategy}>
       <div className="bo-dict-edit">
-        {draft.dictionary.map((e, i) => <fieldset key={e.id} className="bo-fieldset bo-dict-item">
-          <legend>Entrée {i + 1}{e.path ? ` · ${kindLabel[e.type]}` : ""}</legend>
+        {draft.dictionary.map((e, i) => <SortableDictionaryEntry key={e.id} id={e.id} index={i} count={draft.dictionary.length} title={`Entrée ${i + 1}${e.path ? ` · ${kindLabel[e.type]}` : ""}`} onMove={moveEntry}>
           {e.path && urls[e.path] && <div className="bo-dict-preview"><DictionaryCard entry={{ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }} /></div>}
           <label className="bo-btn bo-btn-outline bo-file"><Upload aria-hidden="true" /> {uploading === e.id ? "Envoi en cours…" : e.path ? "Remplacer le fichier" : "Choisir un fichier (image, GIF, vidéo ou son)"}
             <input type="file" accept="image/*,video/*,audio/*" className="sr-only" onChange={ev => {
@@ -159,8 +180,10 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
           <Field label="Description du média" hint="Pour les personnes qui ne voient pas ou n’entendent pas."><input className="bo-input" value={e.alt} onChange={ev => setEntry(i, { alt: ev.target.value })} /></Field>
           {e.type === "audio" && <Field label="Transcription du son"><input className="bo-input" value={e.transcript ?? ""} onChange={ev => setEntry(i, { transcript: ev.target.value })} /></Field>}
           <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("dictionary", draft.dictionary.filter((_, j) => j !== i))}><Trash2 aria-hidden="true" /> Supprimer cette entrée</button>
-        </fieldset>)}
+        </SortableDictionaryEntry>)}
       </div>
+      </SortableContext>
+      </DndContext>
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("dictionary", [...draft.dictionary, { id: crypto.randomUUID(), type: "image", title: "", description: "", path: "", alt: "" }])}><Plus aria-hidden="true" /> Ajouter une entrée</button>
     </section>
 </>, <>
