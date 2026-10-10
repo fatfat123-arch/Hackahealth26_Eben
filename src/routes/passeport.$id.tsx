@@ -34,5 +34,5 @@ function PublicPassport() {
   if (res.archived) return <div className="passport-page status-page"><Mascot pose="inquiete" size={140} /><h1 className="bo-title">Ce passeport n’est plus actif.</h1><p>Merci de votre attention et de votre gentillesse.</p></div>;
   const { row, urls } = res;
   const r = row as unknown as PatientRow;
-  return <PassportView data={toViewData(rowToDraft(r), urls, r.updated_at)} />;
+  return <PassportView data={toViewData(rowToDraft(r), urls, r.updated_at, typeof r.age === "string" ? r.age : undefined)} />;
 }

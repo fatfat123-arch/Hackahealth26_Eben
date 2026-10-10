@@ -24,15 +24,10 @@ export type PatientResult = {
 
 const idSchema = z.string().uuid();
 const JSON_COLUMNS = new Set(["dictionary", "communicates", "understanding_needs", "tools", "facilitators", "interests", "dislikes", "additional", "section_order"]);
-const EDITABLE = new Set(["name", "age", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", ...JSON_COLUMNS]);
+const EDITABLE = new Set(["name", "birth_date", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", ...JSON_COLUMNS]);
 
 function editableValues(values: Record<string, unknown>) {
   const clean = Object.fromEntries(Object.entries(values).filter(([key]) => EDITABLE.has(key)));
-  if ("age" in clean && clean["age"] !== null) {
-    const age = Number(clean["age"]);
-    if (!Number.isInteger(age) || age < 0 || age > 130) throw new Error("L’âge doit être compris entre 0 et 130 ans.");
-    clean["age"] = age;
-  }
   return clean;
 }
 

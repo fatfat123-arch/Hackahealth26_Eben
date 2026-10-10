@@ -133,7 +133,7 @@ function PatientPage() {
 }
 
 const COLUMN: Record<keyof PatientDraft, string> = {
-  name: "name", age: "age", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
+  name: "name", birthDate: "birth_date", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
   photoPath: "photo_path", dictionary: "dictionary", communicates: "communicates", understandingNeeds: "understanding_needs", tools: "tools", facilitators: "facilitators",
   interests: "interests", dislikes: "dislikes", additional: "additional", sectionOrder: "section_order",
 };
