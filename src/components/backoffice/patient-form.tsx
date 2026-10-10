@@ -11,16 +11,16 @@ import { SECTION_TITLES } from "@/lib/section-order";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
-export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
+export type FieldKey = "photo" | "name" | "age" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
 export const FIELD_LABELS: Record<FieldKey, string> = {
-  photo: "Photo", name: "Nom", birthDate: "Date de naissance", phone: "Téléphone", address: "Adresse", reminder: "Message important",
+  photo: "Photo", name: "Nom", age: "Âge", phone: "Téléphone", address: "Adresse", reminder: "Message important",
   about: "À propos de moi", howTo: "Comment utiliser cette page", dictionary: "Mon dictionnaire", communicates: "Je communique",
   understandingNeeds: "Ce dont j’ai besoin pour comprendre", tools: "Mes outils de communication", facilitators: "Ce qui facilite ma communication et la relation",
   interests: "Mes centres d’intérêt", dislikes: "Mes peurs / Ce que je n’aime pas", additional: "Autres informations", sectionOrder: "Ordre des sections",
 };
 /** Draft keys saved together with each editable field. */
 export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
-  photo: ["photoPath"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
+  photo: ["photoPath"], name: ["name"], age: ["age"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
   about: ["about"], howTo: ["howTo"], dictionary: ["dictionary"], communicates: ["communicates"], understandingNeeds: ["understandingNeeds"],
   tools: ["tools"], facilitators: ["facilitators"], interests: ["interests"], dislikes: ["dislikes"], additional: ["additional"], sectionOrder: ["sectionOrder"],
 };
@@ -45,6 +45,7 @@ type Props = {
   inline?: InlineCtl;
   folder: string;
   updatedAt: string | null;
+  canCartoonise?: boolean;
 };
 
 const kindLabel: Record<DictItem["type"], string> = { image: "Photo", gif: "Image animée", video: "Vidéo", audio: "Son" };
@@ -116,7 +117,7 @@ function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode, 
   </Tabs.Root>;
 }
 
-export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt, inline: inlineProp }: Props) {
+export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt, canCartoonise = false, inline: inlineProp }: Props) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [orderMessage, setOrderMessage] = useState("");
@@ -197,10 +198,10 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
               handleUpload(f, e.id, p => setEntry(i, { path: p, type: t ?? "image", posterPath: undefined }), file => !!mediaTypeFromFile(file), !!cartoonise[e.id]);
             }} />
           </label>
-          <label className="bo-cartoonise-choice">
+          {canCartoonise && <label className="bo-cartoonise-choice">
             <input type="checkbox" checked={!!cartoonise[e.id]} onChange={ev => setCartoonise(current => ({ ...current, [e.id]: ev.target.checked }))} />
             <span><strong>Transformer les vidéos en dessin animé</strong><small>Optionnel. Le traitement peut prendre plusieurs minutes et la vidéo obtenue est sans son.</small></span>
-          </label>
+          </label>}
           <Field label="Signification (titre)"><input className="bo-input" value={e.title} onChange={ev => setEntry(i, { title: ev.target.value })} placeholder="Par exemple : J’ai soif" /></Field>
           <Field label="Explication"><input className="bo-input" value={e.description} onChange={ev => setEntry(i, { description: ev.target.value })} /></Field>
           <Field label="Description du média" hint="Pour les personnes qui ne voient pas ou n’entendent pas."><input className="bo-input" value={e.alt} onChange={ev => setEntry(i, { alt: ev.target.value })} /></Field>
@@ -224,14 +225,14 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       </div>
   </>;
   const text = (k: "howTo" | "about") => <Field label="Texte"><textarea className="bo-input bo-textarea" value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
-  const input = (k: "name" | "birthDate" | "address" | "reminder" | "phone", label: string, type = "text", hint?: string) =>
-    <Field label={label} hint={hint}><input className="bo-input" type={type} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
+  const input = (k: "name" | "age" | "address" | "reminder" | "phone", label: string, type = "text", hint?: string) =>
+    <Field label={label} hint={hint}><input className="bo-input" type={type} min={k === "age" ? 0 : undefined} max={k === "age" ? 130 : undefined} inputMode={k === "age" ? "numeric" : undefined} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
   const phoneEdit = <>{input("phone", "Téléphone", "tel")}<Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field></>;
 
   const info = inline
     ? <section className="bo-card"><h2>Informations</h2><dl className="bo-read-list">
         {Row("name", draft.name, input("name", "Nom (obligatoire)"))}
-        {Row("birthDate", draft.birthDate ? formatDateFr(draft.birthDate) : "", input("birthDate", "Date de naissance", "date"))}
+        {Row("age", draft.age ? `${draft.age} ans` : "", input("age", "Âge", "number", "Nombre d’années, entre 0 et 130."))}
         {Row("phone", draft.phone && <>{draft.phone}{draft.phoneNote && ` (${draft.phoneNote})`}</>, phoneEdit)}
         {Row("address", draft.address, input("address", "Adresse"))}
         {Row("reminder", draft.reminder, input("reminder", "Message important", "text", "Affiché en évidence sous le profil."))}
@@ -240,7 +241,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     : <section className="bo-card"><h2>Informations</h2>
       <div className="bo-grid2">
         {input("name", "Nom (obligatoire)")}
-        {input("birthDate", "Date de naissance", "date")}
+        {input("age", "Âge", "number", "Nombre d’années, entre 0 et 130.")}
         {phoneEdit}
         {input("address", "Adresse")}
         {input("reminder", "Message important", "text", "Affiché en évidence sous le profil.")}

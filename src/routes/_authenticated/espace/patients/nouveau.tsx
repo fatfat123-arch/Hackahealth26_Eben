@@ -49,7 +49,7 @@ function NewPatient() {
       <Link to="/espace/tutoriel" search={{ id }} target="_blank" className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
     </div>
     {error && <p className="bo-error" role="alert">{error}</p>}
-    <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly={false} folder={id} updatedAt={null} />
+    <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly={false} folder={id} updatedAt={null} canCartoonise={me.isAdmin} />
     <div className="bo-actions bo-actions-end">
       <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> {busy ? "Enregistrement…" : "Enregistrer le profil"}</button>
     </div>

@@ -19,7 +19,7 @@ export type DictionaryEntry = {
 
 export const passport = {
   name: "Julien Morel",
-  birthDate: "14 mars 1998",
+  age: "28 ans",
   phone: "+41 00 000 00 00",
   phoneHref: "tel:+41000000000",
   phoneNote: "",

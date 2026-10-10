@@ -58,6 +58,7 @@ function PublicLink({ id, name }: { id: string; name: string }) {
 
 function PatientPage() {
   const { id } = Route.useParams();
+  const { me } = Route.useRouteContext();
   const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({ queryKey: ["patient", id], queryFn: () => loadPatient(id) });
   const [preview, setPreview] = useState(false);
@@ -126,13 +127,13 @@ function PatientPage() {
     {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Le changement est visible tout de suite sur la page publique.</p></div></div>}
     {err && <p className="bo-error" role="alert">{err}</p>}
     <PublicLink id={id} name={data.row.name} />
-    <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly folder={id} updatedAt={data.row.updated_at}
+    <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly folder={id} updatedAt={data.row.updated_at} canCartoonise={me.isAdmin}
       inline={{ editing, busy, onEdit: startEdit, onSave: k => { void saveField(k); }, onCancel: cancel }} />
   </>;
 }
 
 const COLUMN: Record<keyof PatientDraft, string> = {
-  name: "name", birthDate: "birth_date", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
+  name: "name", age: "age", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
   photoPath: "photo_path", dictionary: "dictionary", communicates: "communicates", understandingNeeds: "understanding_needs", tools: "tools", facilitators: "facilitators",
   interests: "interests", dislikes: "dislikes", additional: "additional", sectionOrder: "section_order",
 };

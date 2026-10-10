@@ -7,7 +7,7 @@ import { db, iso, json } from "@/server/db.server";
 import { mediaFile, signedMediaUrl } from "@/server/media.server";
 
 type PatientRecord = RowDataPacket & {
-  id: string; name: string; birth_date: string | Date | null; phone: string; phone_note: string; address: string;
+  id: string; name: string; age: number | null; birth_date: string | Date | null; phone: string; phone_note: string; address: string;
   about: string; how_to: string; reminder: string; photo_path: string | null; dictionary: unknown;
   communicates: unknown; understanding_needs: unknown; tools: unknown; facilitators: unknown; interests: unknown;
   dislikes: unknown; additional: unknown; section_order: unknown; created_by: string | null;
@@ -15,7 +15,7 @@ type PatientRecord = RowDataPacket & {
 };
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 export type PatientResult = {
-  id: string; name: string; birth_date: string | null; phone: string; phone_note: string; address: string;
+  id: string; name: string; age: number | null; birth_date: string | null; phone: string; phone_note: string; address: string;
   about: string; how_to: string; reminder: string; photo_path: string | null; created_by: string | null;
   created_at: string | null; updated_at: string | null; archived_at: string | null;
   dictionary: JsonValue[]; communicates: string[]; understanding_needs: string[]; tools: string[]; facilitators: string[];
@@ -24,7 +24,17 @@ export type PatientResult = {
 
 const idSchema = z.string().uuid();
 const JSON_COLUMNS = new Set(["dictionary", "communicates", "understanding_needs", "tools", "facilitators", "interests", "dislikes", "additional", "section_order"]);
-const EDITABLE = new Set(["name", "birth_date", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", ...JSON_COLUMNS]);
+const EDITABLE = new Set(["name", "age", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", ...JSON_COLUMNS]);
+
+function editableValues(values: Record<string, unknown>) {
+  const clean = Object.fromEntries(Object.entries(values).filter(([key]) => EDITABLE.has(key)));
+  if ("age" in clean && clean["age"] !== null) {
+    const age = Number(clean["age"]);
+    if (!Number.isInteger(age) || age < 0 || age > 130) throw new Error("L’âge doit être compris entre 0 et 130 ans.");
+    clean["age"] = age;
+  }
+  return clean;
+}
 
 function patient(row: PatientRecord): PatientResult {
   return { ...row, birth_date: row.birth_date ? String(row.birth_date).slice(0, 10) : null,
@@ -54,13 +64,13 @@ export const getPatient = createServerFn({ method: "GET" }).middleware([requireA
   return rows[0] ? patient(rows[0]) : null;
 });
 export const createPatient = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => z.object({ id: idSchema, row: z.record(z.unknown()) }).parse(v)).handler(async ({ data, context }) => {
-  const clean = Object.fromEntries(Object.entries(data.row).filter(([k]) => EDITABLE.has(k)));
+  const clean = editableValues(data.row);
   const keys = Object.keys(clean); const values = keys.map((k) => JSON_COLUMNS.has(k) ? JSON.stringify(clean[k] ?? []) : clean[k]) as (string | number | boolean | Date | null)[];
   await db().execute(`INSERT INTO patients (id,created_by,${keys.map((k) => `\`${k}\``).join(",")}) VALUES (?,?,${keys.map(() => "?").join(",")})`, [data.id, context.user.id, ...values]);
   return { ok: true };
 });
 export const updatePatient = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => z.object({ id: idSchema, changes: z.record(z.unknown()) }).parse(v)).handler(async ({ data }) => {
-  const entries = Object.entries(data.changes).filter(([k]) => EDITABLE.has(k));
+  const entries = Object.entries(editableValues(data.changes));
   if (!entries.length) return { ok: true };
   const values = entries.map(([k, v]) => JSON_COLUMNS.has(k) ? JSON.stringify(v ?? []) : v) as (string | number | boolean | Date | null)[];
   await db().execute(`UPDATE patients SET ${entries.map(([k]) => `\`${k}\`=?`).join(",")} WHERE id=?`, [...values, data.id]);

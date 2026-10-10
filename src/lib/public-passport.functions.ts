@@ -3,19 +3,18 @@ import { z } from "zod";
 import type { RowDataPacket } from "mysql2";
 import { db, iso, json } from "@/server/db.server";
 import { signedMediaUrl } from "@/server/media.server";
-type PublicRow = RowDataPacket & { id: string; name: string; birth_date: Date | string | null; phone: string; phone_note: string; address: string; about: string; how_to: string; reminder: string; photo_path: string | null; dictionary: unknown; communicates: unknown; understanding_needs: unknown; tools: unknown; facilitators: unknown; interests: unknown; dislikes: unknown; additional: unknown; section_order: unknown; updated_at: Date | string; archived_at: Date | string | null };
+type PublicRow = RowDataPacket & { id: string; name: string; age: number | null; phone: string; phone_note: string; address: string; about: string; how_to: string; reminder: string; photo_path: string | null; dictionary: unknown; communicates: unknown; understanding_needs: unknown; tools: unknown; facilitators: unknown; interests: unknown; dislikes: unknown; additional: unknown; section_order: unknown; updated_at: Date | string; archived_at: Date | string | null };
 
 // Public read of ONE patient by id (the QR code target). Only this patient's media gets signed URLs.
 export const getPublicPassport = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    const [rows] = await db().execute<PublicRow[]>("SELECT id,name,birth_date,phone,phone_note,address,about,how_to,reminder,photo_path,dictionary,communicates,understanding_needs,tools,facilitators,interests,dislikes,additional,section_order,updated_at,archived_at FROM patients WHERE id=? LIMIT 1", [data.id]);
+    const [rows] = await db().execute<PublicRow[]>("SELECT id,name,age,phone,phone_note,address,about,how_to,reminder,photo_path,dictionary,communicates,understanding_needs,tools,facilitators,interests,dislikes,additional,section_order,updated_at,archived_at FROM patients WHERE id=? LIMIT 1", [data.id]);
     const raw = rows[0];
     const row = raw ? { ...raw,
       dictionary: json(raw.dictionary, []), communicates: json(raw.communicates, []), understanding_needs: json(raw.understanding_needs, []),
       tools: json(raw.tools, []), facilitators: json(raw.facilitators, []), interests: json(raw.interests, []), dislikes: json(raw.dislikes, []),
       additional: json(raw.additional, []), section_order: json(raw.section_order, []), updated_at: iso(raw.updated_at), archived_at: iso(raw.archived_at),
-      birth_date: raw.birth_date ? String(raw.birth_date).slice(0, 10) : null,
     } : null;
     if (!row) return null;
     if (row.archived_at) return { archived: true as const };
