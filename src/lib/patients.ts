@@ -1,6 +1,7 @@
 import type { DictionaryEntry } from "@/data/passport";
 import { defaultSectionOrder, normalizeSectionOrder, type SectionKey } from "@/lib/section-order";
 import type { PassportViewData } from "@/components/passport/passport-view";
+import { formatSwissPhone, swissPhoneError } from "@/lib/swiss-phone";
 
 export const MEDIA_BUCKET = "passport-media";
 
@@ -73,7 +74,7 @@ export const emptyDraft = (): PatientDraft => ({
 
 export function rowToDraft(r: PatientRow): PatientDraft {
   return {
-    name: r.name, birthDate: r.birth_date ?? "", phone: r.phone, phoneNote: r.phone_note, address: r.address,
+    name: r.name, birthDate: r.birth_date ?? "", phone: r.phone, phoneNote: r.phone_note, address: r.address ?? "",
     about: r.about, howTo: r.how_to, reminder: r.reminder, photoPath: r.photo_path, photoPositionY: r.photo_position_y ?? 50,
     communicates: r.communicates ?? [], understandingNeeds: r.understanding_needs ?? [], tools: r.tools ?? [], facilitators: r.facilitators ?? [],
     dictionary: Array.isArray(r.dictionary) ? (r.dictionary as DictItem[]) : [],
@@ -85,7 +86,7 @@ export function rowToDraft(r: PatientRow): PatientDraft {
 export function draftToRow(d: PatientDraft) {
   const clean = (l: string[]) => l.map(s => s.trim()).filter(Boolean);
   return {
-    name: d.name.trim(), birth_date: d.birthDate || null, phone: d.phone.trim(), phone_note: d.phoneNote.trim(),
+    name: d.name.trim(), birth_date: d.birthDate || null, phone: formatSwissPhone(d.phone), phone_note: d.phoneNote.trim(),
     address: d.address.trim(), about: d.about.trim(), how_to: d.howTo.trim(), reminder: d.reminder.trim(),
     photo_path: d.photoPath, photo_position_y: Math.min(100, Math.max(0, Math.round(d.photoPositionY))),
     communicates: clean(d.communicates), understanding_needs: clean(d.understandingNeeds), tools: clean(d.tools), facilitators: clean(d.facilitators), dictionary: d.dictionary.filter(e => e.path),
@@ -124,8 +125,8 @@ export function patientValidationError(d: Pick<PatientDraft, "name" | "birthDate
     if (Number.isNaN(selected.getTime())) return "La date de naissance n’est pas valide.";
     if (selected > limit) return "La date de naissance ne peut pas être dans le futur.";
   }
-  if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(d.phone)) return "Le numéro de téléphone ne peut pas contenir de lettres.";
-  if (d.phone && !/^\+?[0-9 ()'./-]+$/.test(d.phone)) return "Le numéro de téléphone contient un caractère non autorisé.";
+  const phoneError = swissPhoneError(d.phone);
+  if (phoneError) return phoneError;
   return null;
 }
 
@@ -139,7 +140,6 @@ export function toViewData(d: PatientDraft, urls: Record<string, string>, update
     contactName: "",
     contactRelationship: "",
     contactPhone: d.phone,
-    address: d.address || "—",
     updatedAt: updatedAt ? formatDateFr(updatedAt) : "Pas encore enregistré",
     updatedAtISO: updatedAt ?? "",
     portrait: d.photoPath ? urls[d.photoPath] : null,

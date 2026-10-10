@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAuth } from "@/lib/auth.functions";
 import { dateOnly, db, iso, json } from "@/server/db.server";
 import { mediaFile, signedMediaUrl } from "@/server/media.server";
+import { formatSwissPhone, swissPhoneError } from "@/lib/swiss-phone";
 
 type PatientRecord = RowDataPacket & {
   id: string; name: string; age: number | null; birth_date: string | Date | null; phone: string; phone_note: string; address: string;
@@ -29,7 +30,11 @@ const EDITABLE = new Set(["name", "birth_date", "phone", "phone_note", "address"
 function editableValues(values: Record<string, unknown>) {
   const clean = Object.fromEntries(Object.entries(values).filter(([key]) => EDITABLE.has(key)));
   if (typeof clean["birth_date"] === "string" && clean["birth_date"] > new Date().toISOString().slice(0, 10)) throw new Error("La date de naissance ne peut pas être dans le futur.");
-  if (typeof clean["phone"] === "string" && (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(clean["phone"]) || (clean["phone"] && !/^\+?[0-9 ()'./-]+$/.test(clean["phone"])))) throw new Error("Le numéro de téléphone n’est pas valide.");
+  if (typeof clean["phone"] === "string") {
+    const phoneError = swissPhoneError(clean["phone"]);
+    if (phoneError) throw new Error(phoneError);
+    clean["phone"] = formatSwissPhone(clean["phone"]);
+  }
   if ("photo_position_y" in clean) clean["photo_position_y"] = Math.min(100, Math.max(0, Math.round(Number(clean["photo_position_y"]) || 50)));
   return clean;
 }

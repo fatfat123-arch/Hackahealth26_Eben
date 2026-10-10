@@ -11,16 +11,16 @@ import { SECTION_TITLES } from "@/lib/section-order";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
-export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
+export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
 export const FIELD_LABELS: Record<FieldKey, string> = {
-  photo: "Photo", name: "Nom", birthDate: "Date de naissance", phone: "Téléphone", address: "Adresse", reminder: "Message important",
+  photo: "Photo", name: "Nom", birthDate: "Date de naissance", phone: "Téléphone", reminder: "Message important",
   about: "À propos de moi", howTo: "Comment utiliser cette page", dictionary: "Mon dictionnaire", communicates: "Je communique",
   understandingNeeds: "Ce dont j’ai besoin pour comprendre", tools: "Mes outils de communication", facilitators: "Ce qui facilite ma communication et la relation",
   interests: "Mes centres d’intérêt", dislikes: "Mes peurs / Ce que je n’aime pas", additional: "Autres informations", sectionOrder: "Ordre des sections",
 };
 /** Draft keys saved together with each editable field. */
 export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
-  photo: ["photoPath", "photoPositionY"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
+  photo: ["photoPath", "photoPositionY"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], reminder: ["reminder"],
   about: ["about"], howTo: ["howTo"], dictionary: ["dictionary"], communicates: ["communicates"], understandingNeeds: ["understandingNeeds"],
   tools: ["tools"], facilitators: ["facilitators"], interests: ["interests"], dislikes: ["dislikes"], additional: ["additional"], sectionOrder: ["sectionOrder"],
 };
@@ -248,16 +248,15 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       {draft.photoPath && <Field label="Cadrage vertical de la photo" hint="Déplacez le curseur pour choisir la partie visible du portrait."><input type="range" min="0" max="100" step="1" value={draft.photoPositionY} onChange={e => set("photoPositionY", Number(e.target.value))} aria-label="Position verticale de la photo" /></Field>}
   </>;
   const text = (k: "howTo" | "about") => <Field label="Texte"><textarea className="bo-input bo-textarea" value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
-  const input = (k: "name" | "birthDate" | "address" | "reminder" | "phone", label: string, type = "text", hint?: string) =>
-    <Field label={label} hint={hint}><input className="bo-input" type={type} max={k === "birthDate" ? new Date().toISOString().slice(0, 10) : undefined} inputMode={k === "phone" ? "tel" : undefined} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
-  const phoneEdit = <>{input("phone", "Téléphone", "tel", "Chiffres uniquement, avec éventuellement +, espaces, parenthèses, points ou tirets.")}<Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field></>;
+  const input = (k: "name" | "birthDate" | "reminder" | "phone", label: string, type = "text", hint?: string) =>
+    <Field label={label} hint={hint}><input className="bo-input" type={type} max={k === "birthDate" ? new Date().toISOString().slice(0, 10) : undefined} inputMode={k === "phone" ? "tel" : undefined} autoComplete={k === "phone" ? "tel" : undefined} placeholder={k === "phone" ? "+41 79 123 45 67" : undefined} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
+  const phoneEdit = <>{input("phone", "Téléphone suisse", "tel", "Mobile ou fixe : +41 79 123 45 67 ou 021 123 45 67.")}<Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field></>;
 
   const info = inline
     ? <section className="bo-card"><h2>Informations</h2><dl className="bo-read-list">
         {Row("name", draft.name, input("name", "Nom (obligatoire)"))}
         {Row("birthDate", draft.birthDate ? formatDateFr(draft.birthDate) : "", input("birthDate", "Date de naissance", "date"))}
         {Row("phone", draft.phone && <>{draft.phone}{draft.phoneNote && ` (${draft.phoneNote})`}</>, phoneEdit)}
-        {Row("address", draft.address, input("address", "Adresse"))}
         {Row("reminder", draft.reminder, input("reminder", "Message important", "text", "Affiché en évidence sous le profil."))}
         <ReadValue label="Dernière mise à jour" value={formatDateFr(updatedAt)} />
       </dl></section>
@@ -266,7 +265,6 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
         {input("name", "Nom (obligatoire)")}
         {input("birthDate", "Date de naissance", "date")}
         {phoneEdit}
-        {input("address", "Adresse")}
         {input("reminder", "Message important", "text", "Affiché en évidence sous le profil.")}
       </div>
       <p className="bo-hint">Dernière mise à jour : {updatedAt ? formatDateFr(updatedAt) : "pas encore enregistré"} (mise à jour automatique à chaque enregistrement).</p>

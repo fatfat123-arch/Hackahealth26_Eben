@@ -1,4 +1,4 @@
-import { Info, Plus, Minus, Cake, MapPin, CalendarCheck } from "lucide-react";
+import { Info, Plus, Minus, Cake, CalendarCheck } from "lucide-react";
 import { Mascot } from "@/components/mascot";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
@@ -25,7 +25,6 @@ export type PassportViewData = {
   contactName: string;
   contactRelationship: string;
   contactPhone: string;
-  address: string;
   updatedAt: string;
   updatedAtISO: string;
   portrait?: string | null | undefined;
@@ -112,7 +111,6 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
           </section>
           <dl className="profile-details">
             <div><dt><Cake aria-hidden="true" />Âge</dt><dd>{data.age || "—"}</dd></div>
-            <div><dt><MapPin aria-hidden="true" />Adresse</dt><dd>{data.address || "—"}</dd></div>
             <div className="last-updated"><dt><CalendarCheck aria-hidden="true" />Dernière mise à jour</dt><dd><time dateTime={data.updatedAtISO}>{data.updatedAt}</time></dd></div>
           </dl>
         </div>
