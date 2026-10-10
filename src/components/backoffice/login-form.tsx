@@ -27,6 +27,7 @@ export function LoginForm() {
   }
 
   return (
+    <div className="login-scene">
     <div className="bo-login">
       <div className="heading-symbol" aria-hidden="true"><MessageCircle size={32} strokeWidth={1.6} /></div>
       <h1 className="bo-title">Connexion</h1>
@@ -42,6 +43,7 @@ export function LoginForm() {
         {error && <p className="bo-error" role="alert">{error}</p>}
         <button className="bo-btn bo-btn-primary" type="submit" disabled={busy}>{busy ? "Connexion…" : "Se connecter"}</button>
       </form>
+    </div>
     </div>
   );
 }

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/passeport/$id")({
     return res;
   },
   head: ({ loaderData }) => {
-    const name = loaderData?.row.name ?? "Passeport";
+    const name = loaderData && !loaderData.archived ? loaderData.row.name : "Passeport";
     return { meta: [
       { title: `Passeport de communication — ${name}` },
       { name: "description", content: `Comment communiquer avec ${name} : ses gestes, ses centres d’intérêt et ce qui est important pour cette personne.` },
@@ -27,7 +27,9 @@ export const Route = createFileRoute("/passeport/$id")({
 });
 
 function PublicPassport() {
-  const { row, urls } = Route.useLoaderData();
+  const res = Route.useLoaderData();
+  if (res.archived) return <div className="passport-page"><h1 className="bo-title">Ce passeport n’est plus actif.</h1></div>;
+  const { row, urls } = res;
   const r = row as unknown as PatientRow;
   return <PassportView data={toViewData(rowToDraft(r), urls, r.updated_at)} />;
 }

@@ -9,9 +9,9 @@ export async function fetchMe(): Promise<Me | null> {
   if (!user) return null;
   const [{ data: roles }, { data: profile }] = await Promise.all([
     supabase.from("user_roles").select("role").eq("user_id", user.id),
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name,archived_at").eq("id", user.id).maybeSingle(),
   ]);
-  const list = (roles ?? []).map(r => r.role);
+  const list = profile?.archived_at ? [] : (roles ?? []).map(r => r.role);
   return { id: user.id, email: user.email ?? "", name: profile?.full_name ?? "", isAdmin: list.includes("admin"), isStaff: list.length > 0 };
 }
 

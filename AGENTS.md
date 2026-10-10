@@ -20,3 +20,6 @@
 - Roles (`admin`, `caregiver`) live in `user_roles` and are checked with `has_role`/`is_staff` in RLS; creating/editing caregiver accounts goes through admin-checked server functions. Why: permissions enforced server-side, never by hidden buttons.
 - Back-office pages live under `src/routes/_authenticated/espace/`; public sign-ups are disabled so only admins create accounts.
 - Enrich the public passport view object with contact display fields at the patient-to-view boundary without changing patient persistence or forms; keep unknown real contact identities unnamed to avoid misrepresenting who answers the stored number.
+- Archiving uses nullable `archived_at` on `patients` and `profiles`; `is_staff`/`has_role` ignore archived accounts and the public server function returns only an "inactive" flag for archived patients. Why: one switch enforced server-side everywhere.
+- Account role changes, archiving and deletion go through admin-checked server functions that refuse self-targeting and keep at least one active admin. Why: safeguards must not depend on the interface.
+- Public passport links are built by `src/lib/site-url.ts` (`PUBLISHED_ORIGIN`), never from the preview address. Why: QR codes must point to the published site.

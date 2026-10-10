@@ -1,3 +1,4 @@
+import { publicPassportUrl } from "@/lib/site-url";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
 function Tutorial() {
   const { id } = Route.useSearch();
   const [url, setUrl] = useState("");
-  useEffect(() => { setUrl(id ? `${window.location.origin}/passeport/${id}` : ""); }, [id]);
+  useEffect(() => { setUrl(id ? publicPassportUrl(id) : ""); }, [id]);
   const link = url || "l’adresse de la page publique du patient";
 
   return <article className="bo-tutorial">
