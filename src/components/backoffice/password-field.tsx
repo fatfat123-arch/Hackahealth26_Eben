@@ -3,19 +3,20 @@ import { Copy, Eye, EyeOff, KeyRound } from "lucide-react";
 
 const UP = "ABCDEFGHJKLMNPQRSTUVWXYZ", LOW = "abcdefghijkmnopqrstuvwxyz", DIG = "23456789", SYM = "!@#$%&*?-_+=";
 
-function pick(set: string) {
+function randInt(n: number) {
   const a = new Uint32Array(1);
-  const limit = Math.floor(0x100000000 / set.length) * set.length;
+  const limit = Math.floor(0x100000000 / n) * n;
   do crypto.getRandomValues(a); while (a[0]! >= limit);
-  return set[a[0]! % set.length]!;
+  return a[0]! % n;
 }
+const pick = (set: string) => set[randInt(set.length)]!;
 
 /** Strong random password (crypto.getRandomValues), always containing each character class. */
 export function generatePassword(length = 16): string {
   const all = UP + LOW + DIG + SYM;
   const chars = [pick(UP), pick(LOW), pick(DIG), pick(SYM)];
   while (chars.length < length) chars.push(pick(all));
-  for (let i = chars.length - 1; i > 0; i--) { const j = DIG.length && Number.parseInt(String(crypto.getRandomValues(new Uint32Array(1))[0]! % (i + 1)), 10); [chars[i], chars[j]] = [chars[j]!, chars[i]!]; }
+  for (let i = chars.length - 1; i > 0; i--) { const j = randInt(i + 1); [chars[i], chars[j]] = [chars[j]!, chars[i]!]; }
   return chars.join("");
 }
 

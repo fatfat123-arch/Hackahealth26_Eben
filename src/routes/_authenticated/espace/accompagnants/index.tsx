@@ -10,6 +10,7 @@ import { requireAdmin } from "@/lib/caregivers";
 import { formatDateFr } from "@/lib/patients";
 import { BackLink } from "@/components/backoffice/back-link";
 import { askConfirm } from "@/components/backoffice/confirm-dialog";
+import { PasswordField } from "@/components/backoffice/password-field";
 import { EmptyState } from "@/components/mascot";
 
 export const Route = createFileRoute("/_authenticated/espace/accompagnants/")({
@@ -51,11 +52,11 @@ function Caregivers() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim()) { setErr("Le nom et l’adresse e-mail sont obligatoires."); return; }
-    if (form.password.length < 8) { setErr("Le mot de passe temporaire doit contenir au moins 8 caractères."); return; }
+    if (form.password.length < 8) { setErr("Le mot de passe doit contenir au moins 8 caractères."); return; }
     setBusy(true); setErr("");
     try {
       await create({ data: form });
-      setMsg(`Le compte de ${form.name} a été créé. Transmettez-lui son adresse e-mail et son mot de passe temporaire.`);
+      setMsg(`Le compte de ${form.name} a été créé. Transmettez-lui son adresse e-mail et son mot de passe.`);
       setForm({ name: "", email: "", password: "", role: "caregiver" }); setOpen(false);
       await qc.invalidateQueries({ queryKey: ["caregivers"] });
     } catch (e2) { setErr(e2 instanceof Error ? e2.message : "Le compte n’a pas pu être créé."); }
@@ -87,7 +88,7 @@ function Caregivers() {
       <h2>Nouveau compte</h2>
       <label className="bo-field"><span>Nom</span><input className="bo-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} autoComplete="off" /></label>
       <label className="bo-field"><span>Adresse e-mail</span><input className="bo-input" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} autoComplete="off" /></label>
-      <label className="bo-field"><span>Mot de passe temporaire</span><input className="bo-input" type="text" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} autoComplete="new-password" /><small className="bo-hint">Au moins 8 caractères.</small></label>
+      <PasswordField value={form.password} onChange={v => setForm({ ...form, password: v })} />
       <fieldset className="bo-radio-group"><legend>Rôle</legend>
         <label><input type="radio" name="role" checked={form.role === "caregiver"} onChange={() => setForm({ ...form, role: "caregiver" })} /> Accompagnant</label>
         <label><input type="radio" name="role" checked={form.role === "admin"} onChange={() => setForm({ ...form, role: "admin" })} /> Administrateur</label>
