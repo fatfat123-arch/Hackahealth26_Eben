@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:init": "node --env-file=.env scripts/init-db.mjs",
-    "db:create-admin": "node --env-file=.env scripts/create-admin.mjs"
+    "db:create-admin": "node --env-file=.env scripts/create-admin.mjs",
+    "ip-ranges:update": "node scripts/update-swiss-ip-ranges.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

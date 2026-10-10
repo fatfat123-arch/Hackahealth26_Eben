@@ -44,6 +44,7 @@ npm test                # run automated tests
 npm run lint            # run ESLint
 npm run db:init         # create/update the MariaDB schema
 npm run db:create-admin # create or reset an administrator
+npm run ip-ranges:update # refresh Swiss address ranges from RIPE NCC
 ```
 
 ## Production
@@ -63,6 +64,10 @@ Start command:
 ```sh
 npm start
 ```
+
+Set `SWISS_IP_ONLY=true` in the server-side `.env` file to restrict the whole
+site to Swiss source IP addresses. The bundled ranges come from RIPE NCC and
+can be refreshed with `npm run ip-ranges:update`.
 
 ## Cartooniser
 
