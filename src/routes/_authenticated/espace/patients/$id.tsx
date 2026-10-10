@@ -1,9 +1,7 @@
-import { publicPassportUrl, linkUsesPreview } from "@/lib/site-url";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import QRCode from "qrcode";
-import { BookOpen, ListOrdered, Copy, Download, Eye } from "lucide-react";
+import { BookOpen, ListOrdered, Eye } from "lucide-react";
 import { getPatient, updatePatient } from "@/lib/patients.functions";
 import { signPaths } from "@/lib/session";
 import { draftPaths, draftToRow, patientValidationError, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
@@ -13,6 +11,7 @@ import { PreviewPanel } from "@/components/backoffice/preview-panel";
 import { BackLink } from "@/components/backoffice/back-link";
 import { Mascot } from "@/components/mascot";
 import { consumeJustSaved } from "@/lib/saved-flag";
+import { PublicPassportLink } from "@/components/backoffice/public-passport-link";
 
 export const Route = createFileRoute("/_authenticated/espace/patients/$id")({
   head: () => ({ meta: [{ title: "Profil du patient — Espace professionnel" }, { name: "description", content: "Consulter et modifier un passeport de communication." }, { property: "og:title", content: "Profil du patient" }, { property: "og:description", content: "Consulter et modifier un passeport de communication." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -25,35 +24,6 @@ async function loadPatient(id: string) {
   const row = data as unknown as PatientRow;
   const draft = rowToDraft(row);
   return { row, draft, urls: await signPaths(draftPaths(draft)) };
-}
-
-function PublicLink({ id, name }: { id: string; name: string }) {
-  const [url, setUrl] = useState("");
-  const [qr, setQr] = useState("");
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    const u = publicPassportUrl(id);
-    setUrl(u);
-    QRCode.toDataURL(u, { width: 600, margin: 2, color: { dark: "#004d95", light: "#ffffff" } }).then(setQr);
-  }, [id]);
-  async function copy() {
-    try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); }
-  }
-  const file = `qr-passeport-${name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-")}.png`;
-  return <section className="bo-card bo-link-card" aria-labelledby="link-title">
-    <div>
-      <h2 id="link-title">Lien vers la page publique</h2>
-      <p>C’est l’adresse à mettre dans le code QR ou la puce NFC.</p>
-      {linkUsesPreview() && <p className="bo-hint">Ce lien utilise l’adresse de prévisualisation. Publiez le site pour obtenir le lien définitif à mettre sur le code QR ou la puce NFC.</p>}
-      <p className="bo-url"><a href={url} target="_blank" rel="noreferrer">{url}</a></p>
-      <div className="bo-actions">
-        <button type="button" className="bo-btn bo-btn-outline" onClick={copy}><Copy aria-hidden="true" /> Copier le lien</button>
-        {qr && <a className="bo-btn bo-btn-outline" href={qr} download={file}><Download aria-hidden="true" /> Télécharger le code QR</a>}
-      </div>
-      {copied && <p role="status" className="bo-hint">Lien copié.</p>}
-    </div>
-    {qr && <img className="bo-qr" src={qr} alt={`Code QR menant au passeport de ${name}`} width={180} height={180} />}
-  </section>;
 }
 
 function PatientPage() {
@@ -127,7 +97,7 @@ function PatientPage() {
     <p className="bo-hint">Pour modifier une information, cliquez sur le crayon à côté de celle-ci.</p>
     {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Le changement est visible tout de suite sur la page publique.</p></div></div>}
     {err && <p className="bo-error" role="alert">{err}</p>}
-    <PublicLink id={id} name={data.row.name} />
+    <PublicPassportLink key={id} id={id} name={data.row.name} />
     <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly folder={id} updatedAt={data.row.updated_at} canCartoonise={me.isAdmin}
       inline={{ editing, busy, onEdit: startEdit, onSave: k => { void saveField(k); }, onCancel: cancel }} />
   </>;

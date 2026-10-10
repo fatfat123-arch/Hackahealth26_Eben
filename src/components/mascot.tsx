@@ -2,8 +2,10 @@ import salut from "@/assets/mascotte-salut.png";
 import joie from "@/assets/mascotte-joie.png";
 import inquiete from "@/assets/mascotte-inquiete.png";
 import qr from "@/assets/mascotte-qr.png";
+import carte from "@/assets/mascotte-carte.png";
 
-const poses = { salut, joie, inquiete, qr } as const;
+export const mascotArtwork = { salut, joie, inquiete, qr, carte } as const;
+const poses = mascotArtwork;
 export type MascotPose = keyof typeof poses;
 
 /** Decorative mascot — always on a white area, hidden from screen readers. */
