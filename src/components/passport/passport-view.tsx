@@ -114,15 +114,15 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
             <div><dt><MapPin aria-hidden="true" />Adresse</dt><dd>{data.address || "—"}</dd></div>
             <div className="last-updated"><dt><CalendarCheck aria-hidden="true" />Dernière mise à jour</dt><dd><time dateTime={data.updatedAtISO}>{data.updatedAt}</time></dd></div>
           </dl>
-          <section className="passport-contact" aria-labelledby="contact-title">
-            <h2 id="contact-title">Ma personne de contact</h2>
-            <p>Pour m'aider, vous pouvez appeler :</p>
-            {data.contactName && <p className="passport-contact-name">{data.contactName}{data.contactRelationship && `, ${data.contactRelationship}`}</p>}
-            {data.contactPhone ? <Button asChild className="passport-contact-call">
-              <a href={contactHref}><span>{contactFirstName ? `Appeler ${contactFirstName}` : "Appeler ma personne de contact"}</span><span>{data.contactPhone}</span></a>
-            </Button> : <p>Aucun numéro renseigné.</p>}
-          </section>
         </div>
+      </section>
+      <section className="passport-contact" aria-labelledby="contact-title">
+        <h2 id="contact-title">Ma personne de contact</h2>
+        <p>Pour m'aider, vous pouvez appeler :</p>
+        {data.contactName && <p className="passport-contact-name">{data.contactName}{data.contactRelationship && `, ${data.contactRelationship}`}</p>}
+        {data.contactPhone ? <Button asChild className="passport-contact-call">
+          <a href={contactHref}><span>{contactFirstName ? `Appeler ${contactFirstName}` : "Appeler ma personne de contact"}</span><span>{data.contactPhone}</span></a>
+        </Button> : <p>Aucun numéro renseigné.</p>}
       </section>
       {data.reminder && <aside className="communication-note"><Info aria-hidden="true" /><p>{data.reminder}</p></aside>}
       <Accordion type="multiple" className="passport-sections" aria-label="Les rubriques de mon passeport">
