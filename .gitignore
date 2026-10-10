@@ -1,1 +1,3 @@
 *.mp4
+/videos/
+__pycache__/

@@ -1,0 +1,42 @@
+From the project root, using the existing isolated environment:
+
+  .venv-whitebox/bin/python Cartooniser/cartoonise.py recording.mov
+
+Short preview (the full input is still copied):
+
+  .venv-whitebox/bin/python Cartooniser/cartoonise.py recording.mov --duration 3
+
+Smaller output and fewer inference calls:
+
+  .venv-whitebox/bin/python Cartooniser/cartoonise.py recording.mov --max-fps 15 --crf 26
+
+Each invocation reserves videos/runN containing:
+  input.<original extension>  Unchanged copy, including any source audio.
+  output.mp4                 Silent H.264/yuv420p video with faststart.
+  run.json                   Settings, timing, frame counts, hash and status.
+Use --runs-dir PATH to choose another parent folder. Failed runs retain the
+input and a failure report; incomplete outputs are removed.
+
+Default: all frames, original presentation timestamps rebased to zero, original
+playback duration, CRF 23, veryfast encoding. Rotation is applied to pixels;
+odd dimensions are padded by one pixel as required for yuv420p. Phone variable
+frame rates are supported. Missing/non-increasing timestamps are rejected.
+A missing final-frame duration may be estimated, with a warning in run.json.
+HDR/PQ/HLG recordings require conversion to SDR first.
+
+Higher --crf reduces output size and quality, not neural inference work.
+--preset controls encoding speed versus compression efficiency.
+--max-fps skips model calls and holds selected frames until the next selected
+source timestamp. Playback duration is unchanged, but motion is less smooth.
+It is a maximum, not a target: actual rate depends on source timestamps.
+The model still uses 512x512 inputs; merely shrinking a file does not speed it up.
+The existing cartoon filter is unchanged; no face blur is applied.
+
+Fresh environment:
+  python3 -m venv .venv-cartooniser
+  .venv-cartooniser/bin/python -m pip install -r Cartooniser/requirements.txt
+  .venv-cartooniser/bin/python Cartooniser/cartoonise.py recording.mov
+
+Integration tests (additional fixture-generation dependency):
+  .venv-whitebox/bin/python -m pip install imageio-ffmpeg
+  .venv-whitebox/bin/python -m unittest discover -s Cartooniser/tests -v
