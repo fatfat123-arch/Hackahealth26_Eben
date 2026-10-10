@@ -4,15 +4,6 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { BackLink } from "@/components/backoffice/back-link";
 import { Mascot } from "@/components/mascot";
-import { TutorialPhotos } from "@/components/backoffice/tutorial-photos";
-import nfc01 from "@/assets/nfc-01-accueil.jpg.asset.json";
-import nfc02 from "@/assets/nfc-02-ecrire.jpg.asset.json";
-import nfc03 from "@/assets/nfc-03-enregistrement.jpg.asset.json";
-import nfc04 from "@/assets/nfc-04-url-vide.jpg.asset.json";
-import nfc05 from "@/assets/nfc-05-url-remplie.jpg.asset.json";
-import nfc06 from "@/assets/nfc-06-url-ajoutee.jpg.asset.json";
-import nfc07 from "@/assets/nfc-07-ecrire-tag.jpg.asset.json";
-import nfc08 from "@/assets/nfc-08-ecriture-terminee.jpg.asset.json";
 
 export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
   validateSearch: (s) => z.object({ id: z.string().optional() }).parse(s),
@@ -60,16 +51,6 @@ function Tutorial() {
         <li>Testez : approchez un autre téléphone de la puce et vérifiez que le passeport s’ouvre.</li>
       </ol>
       <p>Conseil : vous pouvez verrouiller la puce dans l’application pour éviter qu’elle soit modifiée par erreur. Ce verrouillage est définitif.</p>
-      <TutorialPhotos photos={[
-        { src: nfc01.url, alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré", highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 } },
-        { src: nfc02.url, alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
-        { src: nfc03.url, alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
-        { src: nfc04.url, alt: "Champ URL de NFC Tools, mention Renseignez votre URL entourée ; l’option URL / URI n’apparaît pas sur cet écran", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
-        { src: nfc05.url, alt: "Champ URL rempli avec le lien du passeport dans NFC Tools, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
-        { src: nfc06.url, alt: "Enregistrement URL ajouté dans NFC Tools, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
-        { src: nfc07.url, alt: "Boîte de dialogue demandant d’approcher un tag NFC pour l’écriture" },
-        { src: nfc08.url, alt: "Confirmation « Écriture terminée » dans NFC Tools" },
-      ]} />
     </section>
     <section className="bo-card">
       <h2>4. Mettre à jour le passeport</h2>

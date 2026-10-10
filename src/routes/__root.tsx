@@ -11,7 +11,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Button } from "@/components/ui/button";
 import { Mascot } from "@/components/mascot";
 import { ConfirmHost } from "@/components/backoffice/confirm-dialog";
@@ -42,9 +41,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+  useEffect(() => { console.error(error); }, [error]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">

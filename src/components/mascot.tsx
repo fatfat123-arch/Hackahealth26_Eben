@@ -1,14 +1,17 @@
-import salut from "@/assets/mascotte-salut.png.asset.json";
-import joie from "@/assets/mascotte-joie.png.asset.json";
-import inquiete from "@/assets/mascotte-inquiete.png.asset.json";
-import qr from "@/assets/mascotte-qr.png.asset.json";
+import { CircleHelp, Heart, QrCode, Smile, type LucideIcon } from "lucide-react";
 
-const poses = { salut, joie, inquiete, qr } as const;
+const poses: Record<"salut" | "joie" | "inquiete" | "qr", LucideIcon> = {
+  salut: Smile,
+  joie: Heart,
+  inquiete: CircleHelp,
+  qr: QrCode,
+};
 export type MascotPose = keyof typeof poses;
 
-/** Decorative mascot — always on a white area, hidden from screen readers. */
+/** Decorative brand mark, hidden from screen readers. */
 export function Mascot({ pose, size = 96, className = "" }: { pose: MascotPose; size?: number; className?: string }) {
-  return <img className={`mascot ${className}`} src={poses[pose].url} alt="" aria-hidden="true" width={size} height={size} loading="lazy" />;
+  const Icon = poses[pose];
+  return <span className={`mascot ${className}`} aria-hidden="true" style={{ width: size, height: size }}><Icon /></span>;
 }
 
 export function EmptyState({ text, children }: { text: string; children?: React.ReactNode }) {

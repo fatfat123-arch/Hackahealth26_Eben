@@ -1,14 +1,3 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
-
 ## Application architecture
 - Keep tutorial screenshot enlargement and percentage-based highlights in TutorialPhotos, using Radix Dialog and unmodified source images. Why: accessible closing and aligned annotations at every size.
 - Keep the public passport’s replaceable fictional profile and media references in `src/data/passport.ts`; the page must consume this single source rather than embed person-specific content throughout the UI.
