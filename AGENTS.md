@@ -13,6 +13,7 @@
 - Keep the public passport’s replaceable fictional profile and media references in `src/data/passport.ts`; the page must consume this single source rather than embed person-specific content throughout the UI.
 - Use Radix multiple accordions for the public sections, with no default open values, to retain keyboard accessibility and independent expansion.
 - Keep dictionary playback in a dedicated browser-safe component with user-controlled audio/video and a pause control for GIFs, so media remains accessible without introducing server dependencies.
+- Use the shared DictionaryGrid and DictionaryMedia for enlarged dictionary viewing on every display surface; use dnd-kit handles and arrow controls to reorder the existing dictionary JSON array without introducing position columns. Why: one accessible viewer and one saved order across public, preview and staff views.
 - Render the primary main landmark in the root layout and define page-specific metadata on every content route to preserve accessible structure and sharing information.
 - Patient passports live in the `patients` table (dictionary as jsonb, lists as text[]); `src/data/passport.ts` only feeds the demo page at `/demo`. Why: one shared, editable source for the back-office and `/passeport/$id`.
 - The app entry point `/` is the staff login form, shared with `/connexion` through one component, so both addresses behave identically. Why: the back-office is the primary use of the app; the fictional demo passport is a sample reachable at `/demo`.

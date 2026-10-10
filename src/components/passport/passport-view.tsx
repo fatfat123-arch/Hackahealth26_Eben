@@ -2,7 +2,7 @@ import { Info, Plus, Minus, Cake, MapPin, CalendarCheck } from "lucide-react";
 import { Mascot } from "@/components/mascot";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
-import { DictionaryCard } from "@/components/passport/dictionary-card";
+import { DictionaryGrid } from "@/components/passport/dictionary-grid";
 import type { DictionaryEntry } from "@/data/passport";
 import { Button } from "@/components/ui/button";
 import dictionaryIcon from "@/assets/passport-dictionnaire.png.asset.json";
@@ -103,7 +103,7 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
         {data.dictionary.length > 0 && <AccordionItem value="dictionary" className="passport-section">
           <SectionHeader title="Mon dictionnaire" icon={dictionaryIcon.url} />
           <AccordionContent className="section-content">
-            <div className="dictionary-grid">{data.dictionary.map(entry => <DictionaryCard key={entry.id} entry={entry} />)}</div>
+            <DictionaryGrid entries={data.dictionary} />
           </AccordionContent>
         </AccordionItem>}
         {([["communicates", "Je communique"], ["understanding", "Ce dont j’ai besoin pour comprendre"], ["tools", "Mes outils de communication"], ["facilitators", "Ce qui facilite ma communication et la relation"]] as const).map(([v, t]) => {
