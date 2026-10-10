@@ -1,0 +1,45 @@
+Face blur after White-box (no neural cartoonization rerun)
+
+Use the existing project .venv. No new Python dependencies are needed.
+Input: existing cartoon MP4. Output: new filename, H.264/yuv420p/faststart MP4.
+CFR timing/resolution are retained; the existing pipeline trims/re-encodes AAC
+on the same timeline. VFR is refused. Source files and existing outputs are protected.
+
+Single-view cartoon output:
+  .venv/bin/python face_blur.py whitebox.mp4 blurred.mp4 --strength 0.12
+
+Existing original-left/cartoon-right preview:
+  .venv/bin/python face_blur.py actual_benchmark_whitebox_3s.mp4 blur_test.mp4 --comparison-input --strength 0.12
+
+The default strength is 0.12; omit --strength to use it.
+Override --strength to compare other values with different output names. Always start from
+the SAME unblurred White-box output; blurring an already blurred file compounds
+blur. Strength 0 bypasses filtering but still re-encodes the video.
+
+--comparison-input detects faces on the left and blurs corresponding positions
+on the right. Views must be aligned, equal-size copies of the same frames.
+The left remains identifiable: this comparison is NOT an anonymized export.
+For a shareable single-view result, run White-box without --compare, then blur.
+
+Optional --start SECONDS --duration SECONDS select a short segment.
+Optional --box x,y,width,height bypasses detection with a fixed face region in
+pixels relative to ONE view. Use only when that box contains the face throughout
+that segment. --threshold controls detection confidence (default 0.7).
+
+Automatic mode detects each frame and matches boxes by overlap with fixed temporal
+smoothing. Current detection bounds are included so the smoothed mask cannot lag
+behind them. Multiple detected faces are supported. Missing detections hold the
+last box for up to ten frames, then processing aborts without publishing output.
+A failure on the first frame also aborts. Held detections are counted at completion;
+review them for motion, occlusion or detector mistakes. Detection is not infallible.
+
+Gaussian blur is strongest in the face interior with a feathered elliptical edge.
+This does not segment hands: fingers crossing the face are blurred too. It makes
+facial details less readable but does not guarantee anonymity; voice, hair,
+clothing and other identifying details remain.
+
+Local detector model (MIT license; license included in models/YUNET_LICENSE):
+https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet
+Downloaded model:
+https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
+Runtime performs no network access. --model accepts another compatible YuNet file.

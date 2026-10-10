@@ -1,0 +1,146 @@
+RAIN RIG INSPECTION
+Source: /home/yazan/Documents/Hackahealth26_Eben/rain_v3.2.blend
+SHA-256: 831ab6d837c679040285862b15dc9ee5180b018442a88aeaf92aaa7509b80258
+Blender: 5.1.1
+Armature: RIG-rain (2166 bones)
+World matrix: identity; model faces world -Y; +Z is up.
+
+Arms / FK:
+  MSTR-Clavicle.L | parent=FK-Chest_Child | rotation=XYZ | collections=Main Controls, Main FK Controls
+  Root_Upperarm.L | parent=MSTR-Clavicle.L | rotation=XYZ | collections=Limb Roots
+  MSTR-Clavicle.R | parent=FK-Chest_Child | rotation=XYZ | collections=Main Controls, Main FK Controls
+  Root_Upperarm.R | parent=MSTR-Clavicle.R | rotation=XYZ | collections=Limb Roots
+  FK-Upperarm_Parent.L | parent=HNG-Upperarm_Parent.L | rotation=XYZ | collections=FK Left Arm
+  FK-Upperarm.L | parent=FK-Upperarm_Parent.L | rotation=XYZ | collections=Extras
+  FK-Forearm.L | parent=FK-Upperarm.L | rotation=ZYX | collections=FK Left Arm
+  FK-Hand.L | parent=FK-Forearm.L | rotation=XYZ | collections=FK Left Arm
+  FK-Upperarm_Parent.R | parent=HNG-Upperarm_Parent.R | rotation=XYZ | collections=FK Right Arm
+  FK-Upperarm.R | parent=FK-Upperarm_Parent.R | rotation=XYZ | collections=Extras
+  FK-Forearm.R | parent=FK-Upperarm.R | rotation=ZYX | collections=FK Right Arm
+  FK-Hand.R | parent=FK-Forearm.R | rotation=XYZ | collections=FK Right Arm
+
+Wrist IK:
+  IK-Hand_Parent.L | parent=IK-P-Hand_Parent.L | rotation=XYZ | collections=IK Left Arm
+  IK-Hand_Parent.R | parent=IK-P-Hand_Parent.R | rotation=XYZ | collections=IK Right Arm
+
+Elbow poles:
+  IK-Pole-Forearm.L | parent=IK-P-Pole-Forearm.L | rotation=XYZ | collections=IK Left Arm
+  IK-Pole-Forearm.R | parent=IK-P-Pole-Forearm.R | rotation=XYZ | collections=IK Right Arm
+
+Torso:
+  MSTR-Pelvis_Parent | parent=ROOT_Child | rotation=XYZ | collections=IK Controls
+  MSTR-Pelvis | parent=MSTR-Pelvis_Parent | rotation=XYZ | collections=Extras
+  MSTR-Chest_Parent | parent=MSTR-Pelvis | rotation=XYZ | collections=IK Spine
+  MSTR-Chest | parent=MSTR-Chest_Parent | rotation=XYZ | collections=Extras
+  IK-CTR-Spine2 | parent=MSTR-Chest | rotation=XYZ | collections=IK Spine Tweak
+  IK-CTR-Spine3 | parent=MSTR-Chest | rotation=QUATERNION | collections=IK Spine Tweak
+  IK-CTR-Spine1 | parent=MSTR-Pelvis | rotation=XYZ | collections=IK Spine Tweak
+  MSTR-Hips | parent=MSTR-Pelvis | rotation=XYZ | collections=FK Spine, IK Spine
+  FK-Spine | parent=MSTR-Pelvis | rotation=ZYX | collections=FK Spine
+  FK-RibCage | parent=FK-Spine_Child | rotation=ZYX | collections=FK Spine
+  FK-Chest | parent=FK-Ribcage_Child | rotation=ZYX | collections=FK Spine
+
+Head / neck:
+  FK-Head | parent=P-FK-Head | rotation=XYZ | collections=Main FK Controls
+  MSTR-Head_Lower | parent=DEF-Head | rotation=XYZ | collections=Face Main Extras
+  MSTR-Head_Upper | parent=DEF-Head | rotation=XYZ | collections=Face Main Extras
+  FK-Neck | parent=P-FK-Neck | rotation=XYZ | collections=Main FK Controls
+
+Legs:
+  FK-Toe.L | parent=None | rotation=XYZ | collections=Main FK Controls
+  FK-Thigh_Parent.L | parent=HNG-Thigh.L | rotation=XYZ | collections=FK Left Leg
+  FK-Shin.L | parent=FK-Thigh.L | rotation=ZYX | collections=FK Left Leg
+  FK-Foot.L | parent=FK-Shin.L | rotation=XYZ | collections=FK Left Leg
+  FK-Toe.R | parent=None | rotation=XYZ | collections=Main FK Controls
+  FK-Thigh_Parent.R | parent=HNG-Thigh.R | rotation=XYZ | collections=FK Right Leg
+  FK-Shin.R | parent=FK-Thigh.R | rotation=ZYX | collections=FK Right Leg
+  FK-Foot.R | parent=FK-Shin.R | rotation=XYZ | collections=FK Right Leg
+  IK-Pole-Shin.L | parent=IK-P-Pole-Shin.L | rotation=XYZ | collections=IK Left Leg
+  MSTR-Foot_Parent.L | parent=MSTR-P-Foot_Parent.L | rotation=XYZ | collections=IK Left Leg
+  ROLL-Foot_Control.L | parent=MSTR-Foot.L | rotation=XYZ | collections=IK Left Leg
+  IK-Pole-Shin.R | parent=IK-P-Pole-Shin.R | rotation=XYZ | collections=IK Right Leg
+  MSTR-Foot_Parent.R | parent=MSTR-P-Foot_Parent.R | rotation=XYZ | collections=IK Right Leg
+  ROLL-Foot_Control.R | parent=MSTR-Foot.R | rotation=XYZ | collections=IK Right Leg
+
+Fingers:
+  CARP-Index.L | parent=DEF-Hand.L | rotation=YZX | collections=Fingers
+  FK-Index1.L | parent=CARP-Index.L | rotation=YZX | collections=Fingers
+  FK-Index2.L | parent=DEF-Index2.L | rotation=YZX | collections=Fingers
+  FK-Index3.L | parent=DEF-Index3.L | rotation=YZX | collections=Fingers
+  CARP-Middle.L | parent=DEF-Hand.L | rotation=YZX | collections=Fingers
+  FK-Middle1.L | parent=CARP-Middle.L | rotation=YZX | collections=Fingers
+  FK-Middle2.L | parent=DEF-Middle2.L | rotation=YZX | collections=Fingers
+  FK-Middle3.L | parent=DEF-Middle3.L | rotation=YZX | collections=Fingers
+  CARP-Ring.L | parent=DEF-Hand.L | rotation=YZX | collections=Fingers
+  FK-Ring1.L | parent=CARP-Ring.L | rotation=YZX | collections=Fingers
+  FK-Ring2.L | parent=FK-Ring1.L | rotation=YZX | collections=Fingers
+  FK-Ring3.L | parent=FK-Ring2.L | rotation=YZX | collections=Fingers
+  CARP-Pinky.L | parent=DEF-Hand.L | rotation=YZX | collections=Fingers
+  FK-Pinky1.L | parent=CARP-Pinky.L | rotation=YZX | collections=Fingers
+  FK-Pinky2.L | parent=FK-Pinky1.L | rotation=YZX | collections=Fingers
+  FK-Pinky3.L | parent=FK-Pinky2.L | rotation=YZX | collections=Fingers
+  FK-Thumb1.L | parent=DEF-Hand.L | rotation=ZXY | collections=Fingers
+  FK-Thumb2.L | parent=FK-Thumb1.L | rotation=YZX | collections=Fingers
+  FK-Thumb3.L | parent=DEF-Thumb2.L | rotation=YZX | collections=Fingers
+  CARP-Index.R | parent=DEF-Hand.R | rotation=YZX | collections=Fingers
+  FK-Index1.R | parent=CARP-Index.R | rotation=YZX | collections=Fingers
+  FK-Index2.R | parent=DEF-Index2.R | rotation=YZX | collections=Fingers
+  FK-Index3.R | parent=DEF-Index3.R | rotation=YZX | collections=Fingers
+  CARP-Middle.R | parent=DEF-Hand.R | rotation=YZX | collections=Fingers
+  FK-Middle1.R | parent=CARP-Middle.R | rotation=YZX | collections=Fingers
+  FK-Middle2.R | parent=DEF-Middle2.R | rotation=YZX | collections=Fingers
+  FK-Middle3.R | parent=DEF-Middle3.R | rotation=YZX | collections=Fingers
+  CARP-Ring.R | parent=DEF-Hand.R | rotation=YZX | collections=Fingers
+  FK-Ring1.R | parent=CARP-Ring.R | rotation=YZX | collections=Fingers
+  FK-Ring2.R | parent=FK-Ring1.R | rotation=YZX | collections=Fingers
+  FK-Ring3.R | parent=FK-Ring2.R | rotation=YZX | collections=Fingers
+  CARP-Pinky.R | parent=DEF-Hand.R | rotation=YZX | collections=Fingers
+  FK-Pinky1.R | parent=CARP-Pinky.R | rotation=YZX | collections=Fingers
+  FK-Pinky2.R | parent=FK-Pinky1.R | rotation=YZX | collections=Fingers
+  FK-Pinky3.R | parent=FK-Pinky2.R | rotation=YZX | collections=Fingers
+  FK-Thumb1.R | parent=DEF-Hand.R | rotation=ZXY | collections=Fingers
+  FK-Thumb2.R | parent=FK-Thumb1.R | rotation=YZX | collections=Fingers
+  FK-Thumb3.R | parent=DEF-Thumb2.R | rotation=YZX | collections=Fingers
+
+IK/FK properties (source values):
+{
+  "ik_spine": 1.0,
+  "ik_arm_right": 1.0,
+  "ik_leg_left": 1.0,
+  "ik_leg_right": 1.0,
+  "ik_fingers_right": 1.0,
+  "ik_fingers_left": 1.0,
+  "ik_stretch_arms": 1.0,
+  "ik_stretch_legs": 0.0,
+  "ik_stretch_spine": 0.0,
+  "ik_pole_follow_hands": 0.0,
+  "ik_pole_follow_feet": 1.0,
+  "grab_parent_left": 1,
+  "grab_parent_right": 1,
+  "ik_arm_left": 1.0,
+  "fk_hinge_arm_left": 0.0,
+  "fk_hinge_leg_left": 0.0,
+  "fk_hinge_arm_right": 0.0,
+  "fk_hinge_leg_right": 0.0,
+  "ik_parents_arm_left": 0,
+  "ik_parents_leg_left": 0,
+  "ik_parents_arm_right": 0,
+  "ik_parents_leg_right": 0
+}
+
+Arms: ik_arm_left/right = 1 selects IK; = 0 selects FK (verified driver links).
+Arms use two-bone IK on IK-Forearm.L/R targeting IK-Hand_Loc.L/R.
+Pole targets: IK-Pole-Forearm.L/R; pole angle approximately -pi/2.
+Animator wrist control: IK-Hand_Parent.L/R -> IK-Hand.L/R -> IK-Hand_Loc.L/R.
+IK-Hand_Loc has Copy Location from IK-Arm_Stretch tail. Do not key mechanism bone.
+Wrist parent switch 0=ROOT_Child, 1=MSTR-Pelvis, 2=FK-Chest, 3=MSTR-Clavicle.
+Elbow pole uses same spaces plus IK-Hand when ik_pole_follow_hands is enabled.
+Tests use space 0, pole-follow off and arm stretch off.
+PoseBone.matrix uses armature-object space; location/rotation channels use parent/rest local space.
+The script explicitly converts world matrices through rig.matrix_world.inverted().
+No constraints or source bone names were inferred from another rig.
+
+Source issue: invalid driver DEF-Spine3.bbone_easeout, expression scale-1, target STR-Spine4.
+Embedded cloudrig.py and rain_shading.py were not executed; existing simple drivers remain active.
+Flatpak build has OpenColorIO 2.5 config / 2.4.2 library mismatch; preview uses fallback color management.
+See rig_inventory.json for all bone matrices, constraints and driver bindings.

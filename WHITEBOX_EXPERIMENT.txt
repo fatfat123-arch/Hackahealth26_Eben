@@ -1,0 +1,38 @@
+White-box cartoonization local experiment
+
+Source: https://github.com/SystemErrorWang/White-box-Cartoonization
+Revision: ee97277d7fd873b89e9b8e1341efe74e10dd4124
+Checkpoint: test_code/saved_models/model-33999
+Upstream author: Xinrui Wang. Code/weights licensed CC BY-NC-SA 4.0;
+upstream prohibits commercial application. Retain upstream attribution/license.
+
+Setup (separate from the OpenCV environment):
+  git clone https://github.com/SystemErrorWang/White-box-Cartoonization.git experiments/White-box-Cartoonization
+  git -C experiments/White-box-Cartoonization checkout ee97277d7fd873b89e9b8e1341efe74e10dd4124
+  python3 -m venv .venv-whitebox
+  .venv-whitebox/bin/python -m pip install -r requirements-whitebox.txt
+
+Test:
+  .venv-whitebox/bin/python whitebox_preview.py sign_language.mp4 comparison_5s_whitebox.mp4 --start 0 --duration 5 --compare
+
+Original is left; neural result is right. The experimental runner limits clips
+to ten seconds. Use a new output filename for each invocation.
+
+Only TensorFlow imports are adapted in memory: tensorflow.compat.v1 and tf_slim
+replace TF1 and tensorflow.contrib.slim. Original upstream files are unchanged.
+Architecture, all 36 restored generator tensors, BGR normalization to [-1,1],
+bilinear interpolation convention, and radius-1 guided filter (epsilon 0.005)
+follow upstream inference. No random initialization is used for inference.
+
+Benchmark frames remain 1280x720 at 30 fps, with no rescaling/cropping. Other sizes
+are reflect-padded to multiples of eight, then unpadded after inference. The
+existing cartoonize.py pipeline handles frame streaming, timestamp checks,
+encoding, and synchronized audio. Its displayed OpenCV filter presets are
+bypassed by this runner. The original OpenCV code and environment are unchanged.
+
+This neural image model processes frames independently, without a temporal
+consistency model. Repeated identical input was pixel-identical in the local
+CPU test, but moving video can still flicker and fine gesture/face details can
+change. Review playback and compare contact, fingers, and overlapping limbs.
+
+whitebox_sample_5s.jpg is a native-size original/result comparison at second 5.
