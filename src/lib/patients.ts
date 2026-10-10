@@ -1,4 +1,5 @@
 import type { DictionaryEntry } from "@/data/passport";
+import { defaultSectionOrder, normalizeSectionOrder, type SectionKey } from "@/lib/section-order";
 import type { PassportViewData } from "@/components/passport/passport-view";
 
 export const MEDIA_BUCKET = "passport-media";
@@ -32,6 +33,7 @@ export type PatientDraft = {
   interests: string[];
   dislikes: string[];
   additional: string[];
+  sectionOrder: SectionKey[];
 };
 
 export type PatientRow = {
@@ -53,6 +55,7 @@ export type PatientRow = {
   interests: string[];
   dislikes: string[];
   additional: string[];
+  section_order?: string[];
   updated_at: string;
   created_by?: string | null;
 };
@@ -61,7 +64,7 @@ export const DEFAULT_HOW_TO = "Cette page vous aide à comprendre ce que je souh
 
 export const emptyDraft = (): PatientDraft => ({
   name: "", birthDate: "", phone: "", phoneNote: "", address: "", about: "", howTo: DEFAULT_HOW_TO, reminder: "",
-  photoPath: null, dictionary: [], communicates: [], understandingNeeds: [], tools: [], facilitators: [], interests: [], dislikes: [], additional: [],
+  photoPath: null, dictionary: [], communicates: [], understandingNeeds: [], tools: [], facilitators: [], interests: [], dislikes: [], additional: [], sectionOrder: defaultSectionOrder(),
 });
 
 export function rowToDraft(r: PatientRow): PatientDraft {
@@ -71,6 +74,7 @@ export function rowToDraft(r: PatientRow): PatientDraft {
     communicates: r.communicates ?? [], understandingNeeds: r.understanding_needs ?? [], tools: r.tools ?? [], facilitators: r.facilitators ?? [],
     dictionary: Array.isArray(r.dictionary) ? (r.dictionary as DictItem[]) : [],
     interests: r.interests ?? [], dislikes: r.dislikes ?? [], additional: r.additional ?? [],
+    sectionOrder: normalizeSectionOrder(r.section_order),
   };
 }
 
@@ -82,6 +86,7 @@ export function draftToRow(d: PatientDraft) {
     photo_path: d.photoPath,
     communicates: clean(d.communicates), understanding_needs: clean(d.understandingNeeds), tools: clean(d.tools), facilitators: clean(d.facilitators), dictionary: d.dictionary.filter(e => e.path),
     interests: clean(d.interests), dislikes: clean(d.dislikes), additional: clean(d.additional),
+    section_order: normalizeSectionOrder(d.sectionOrder),
   };
 }
 
@@ -120,6 +125,7 @@ export function toViewData(d: PatientDraft, urls: Record<string, string>, update
     })),
     communicates: d.communicates.filter(Boolean), understandingNeeds: d.understandingNeeds.filter(Boolean), tools: d.tools.filter(Boolean), facilitators: d.facilitators.filter(Boolean),
     interests: d.interests.filter(Boolean), dislikes: d.dislikes.filter(Boolean), additional: d.additional.filter(Boolean),
+    sectionOrder: d.sectionOrder,
   };
 }
 
