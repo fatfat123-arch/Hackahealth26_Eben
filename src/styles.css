@@ -441,3 +441,17 @@
   .dictionary-dialog-nav .bo-btn { flex: 1; padding: 12px 8px; font-size: 16px; }
   .dictionary-dialog-title { font-size: 22px; }
 }
+
+/* Per-field editing on the patient profile */
+.bo-edit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.bo-pencil { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -8px -8px 0 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #004d95; cursor: pointer; }
+.bo-pencil svg { width: 20px; height: 20px; }
+.bo-pencil:hover { background: var(--tint-blue, #f3f7fb); border-color: #d5e0ec; }
+.bo-pencil:focus-visible { outline: 3px solid #004d95; outline-offset: 2px; }
+.bo-read-edit { grid-template-columns: 200px minmax(0, 1fr) 44px; align-items: start; }
+.bo-read-edit .bo-pencil { margin: -10px 0 0; }
+.bo-card-editing { border-color: #004d95; }
+.bo-read-edit.bo-card-editing { padding: 12px; border: 1px solid #004d95; border-radius: 8px; }
+.bo-inline-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.bo-btn-sm { min-height: 44px; padding: 8px 16px; }
+@media (max-width: 720px) { .bo-read-edit { grid-template-columns: minmax(0, 1fr) 44px; } .bo-read-edit dd { grid-column: 1 / -1; grid-row: 2; } }

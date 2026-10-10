@@ -8,3 +8,4 @@
 - [x] Crop the four supplied icons and add them to the existing accordion headers.
 - [x] Verify the public passport, contact link and unchanged accordion behavior.
 - [x] Show the login page at `/` on app open, keeping the sample passport at `/demo`.- [x] Illustrated login, admin accounts, row menus (archive/delete), public page synced and open without login.
+- [x] Per-field pencil editing on the patient profile page.
