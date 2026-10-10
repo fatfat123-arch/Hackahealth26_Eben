@@ -10,6 +10,7 @@ export type DictItem = {
   title: string;
   description: string;
   path: string;
+  originalPath?: string | undefined;
   posterPath?: string | undefined;
   alt: string;
   transcript?: string | undefined;
@@ -94,7 +95,7 @@ export function draftToRow(d: PatientDraft) {
 export function draftPaths(d: PatientDraft): string[] {
   const p: string[] = [];
   if (d.photoPath) p.push(d.photoPath);
-  for (const e of d.dictionary) { if (e.path) p.push(e.path); if (e.posterPath) p.push(e.posterPath); }
+  for (const e of d.dictionary) { if (e.path) p.push(e.path); if (e.originalPath) p.push(e.originalPath); if (e.posterPath) p.push(e.posterPath); }
   return p;
 }
 

@@ -1,5 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
-import { Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
+import { Pencil, Plus, Save, Trash2, Upload, WandSparkles, X } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
 import { DictionaryGrid } from "@/components/passport/dictionary-grid";
@@ -121,7 +121,6 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [orderMessage, setOrderMessage] = useState("");
-  const [cartoonise, setCartoonise] = useState<Record<string, boolean>>({});
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   const set = <K extends keyof PatientDraft>(k: K, v: PatientDraft[K]) => onChange({ ...draft, [k]: v });
   function moveEntry(from: number, to: number) {
@@ -142,6 +141,28 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       apply(path);
     } catch (cause) { setError(cause instanceof Error && cause.message ? cause.message : "Le fichier n’a pas pu être envoyé. Réessayez."); }
     finally { setUploading(null); }
+  }
+
+  async function toggleCartooniser(entry: DictItem, index: number) {
+    if (entry.type !== "video" || !entry.path) return;
+    if (entry.originalPath) {
+      setEntry(index, { path: entry.originalPath, originalPath: undefined });
+      return;
+    }
+    const source = urls[entry.path];
+    if (!source) { setError("La vidéo originale n’est pas disponible. Rechargez la page puis réessayez."); return; }
+    setError(""); setUploading(`cartoon-${entry.id}`);
+    try {
+      const response = await fetch(source);
+      if (!response.ok) throw new Error("La vidéo originale n’a pas pu être chargée.");
+      const input = new File([await response.blob()], "video-originale.mp4", { type: response.headers.get("content-type") || "video/mp4" });
+      const output = await cartooniseVideo(input);
+      const cartoonPath = await uploadFile(output, folder);
+      onUrls({ ...urls, [cartoonPath]: URL.createObjectURL(output) });
+      setEntry(index, { path: cartoonPath, originalPath: entry.path, posterPath: undefined });
+    } catch (cause) {
+      setError(cause instanceof Error && cause.message ? cause.message : "La transformation en dessin animé a échoué.");
+    } finally { setUploading(null); }
   }
 
   const setEntry = (i: number, patch: Partial<DictItem>) => set("dictionary", draft.dictionary.map((e, j) => j === i ? { ...e, ...patch } : e));
@@ -195,13 +216,14 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
             <input type="file" accept="image/*,video/*,audio/*" className="sr-only" onChange={ev => {
               const f = ev.target.files?.[0];
               const t = f ? mediaTypeFromFile(f) : null;
-              handleUpload(f, e.id, p => setEntry(i, { path: p, type: t ?? "image", posterPath: undefined }), file => !!mediaTypeFromFile(file), !!cartoonise[e.id]);
+              handleUpload(f, e.id, p => setEntry(i, { path: p, type: t ?? "image", originalPath: undefined, posterPath: undefined }), file => !!mediaTypeFromFile(file));
             }} />
           </label>
-          {canCartoonise && <label className="bo-cartoonise-choice">
-            <input type="checkbox" checked={!!cartoonise[e.id]} onChange={ev => setCartoonise(current => ({ ...current, [e.id]: ev.target.checked }))} />
-            <span><strong>Transformer les vidéos en dessin animé</strong><small>Optionnel. Le traitement peut prendre plusieurs minutes et la vidéo obtenue est sans son.</small></span>
-          </label>}
+          {canCartoonise && e.type === "video" && e.path && <button type="button" className={`bo-cartoonise-button${e.originalPath ? " is-active" : ""}`} disabled={uploading === `cartoon-${e.id}`} aria-pressed={!!e.originalPath} aria-label={e.originalPath ? "Retirer le filtre dessin animé" : "Appliquer le filtre dessin animé"} title={e.originalPath ? "Retirer le filtre dessin animé" : "Appliquer le filtre dessin animé"} onClick={() => void toggleCartooniser(e, i)}>
+            <WandSparkles aria-hidden="true" />
+            <span className="sr-only">{e.originalPath ? "Retirer le filtre dessin animé" : "Appliquer le filtre dessin animé"}</span>
+          </button>}
+          {uploading === `cartoon-${e.id}` && <p className="bo-hint" role="status">Transformation en cours… Cela peut prendre plusieurs minutes.</p>}
           <Field label="Signification (titre)"><input className="bo-input" value={e.title} onChange={ev => setEntry(i, { title: ev.target.value })} placeholder="Par exemple : J’ai soif" /></Field>
           <Field label="Explication"><input className="bo-input" value={e.description} onChange={ev => setEntry(i, { description: ev.target.value })} /></Field>
           <Field label="Description du média" hint="Pour les personnes qui ne voient pas ou n’entendent pas."><input className="bo-input" value={e.alt} onChange={ev => setEntry(i, { alt: ev.target.value })} /></Field>

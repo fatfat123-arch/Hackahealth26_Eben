@@ -45,8 +45,8 @@ function patient(row: PatientRecord): PatientResult {
 function paths(row: PatientResult) {
   const result: string[] = [];
   if (row.photo_path) result.push(row.photo_path);
-  for (const item of json<{ path?: string; posterPath?: string }[]>(row.dictionary, [])) {
-    if (item.path) result.push(item.path); if (item.posterPath) result.push(item.posterPath);
+  for (const item of json<{ path?: string; originalPath?: string; posterPath?: string }[]>(row.dictionary, [])) {
+    if (item.path) result.push(item.path); if (item.originalPath) result.push(item.originalPath); if (item.posterPath) result.push(item.posterPath);
   }
   return result;
 }
