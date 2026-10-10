@@ -10,3 +10,5 @@
 - [x] Verify the public passport, contact link and unchanged accordion behavior.
 - [x] Show the login page at `/` on app open, keeping the sample passport at `/demo`.- [x] Illustrated login, admin accounts, row menus (archive/delete), public page synced and open without login.
 - [x] Per-field pencil editing on the patient profile page.
+- [x] Password show/hide, generation, copy, admin reset; label "Mot de passe".
+- [x] Per-patient section order (drag, Monter/Descendre, default reset) used everywhere.

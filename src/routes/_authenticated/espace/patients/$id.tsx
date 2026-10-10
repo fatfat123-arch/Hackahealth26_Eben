@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { BookOpen, Copy, Download, Eye } from "lucide-react";
+import { BookOpen, ListOrdered, Copy, Download, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { signPaths } from "@/lib/session";
 import { draftPaths, draftToRow, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
@@ -113,6 +113,7 @@ function PatientPage() {
     <div className="bo-actions">
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => setPreview(true)}><Eye aria-hidden="true" /> Aperçu</button>
       <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
+      <button type="button" className="bo-btn bo-btn-outline" onClick={async () => { await startEdit("sectionOrder"); requestAnimationFrame(() => document.getElementById("section-order")?.scrollIntoView({ block: "start" })); }}><ListOrdered aria-hidden="true" /> Réorganiser les sections</button>
     </div>
     <p className="bo-hint">Pour modifier une information, cliquez sur le crayon à côté de celle-ci.</p>
     {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Le changement est visible tout de suite sur la page publique.</p></div></div>}
@@ -126,5 +127,5 @@ function PatientPage() {
 const COLUMN: Record<keyof PatientDraft, string> = {
   name: "name", birthDate: "birth_date", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
   photoPath: "photo_path", dictionary: "dictionary", communicates: "communicates", understandingNeeds: "understanding_needs", tools: "tools", facilitators: "facilitators",
-  interests: "interests", dislikes: "dislikes", additional: "additional",
+  interests: "interests", dislikes: "dislikes", additional: "additional", sectionOrder: "section_order",
 };

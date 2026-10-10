@@ -8,7 +8,7 @@ export const getPublicPassport = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("patients")
-      .select("id,name,birth_date,phone,phone_note,address,about,how_to,reminder,photo_path,dictionary,communicates,understanding_needs,tools,facilitators,interests,dislikes,additional,updated_at,archived_at")
+      .select("id,name,birth_date,phone,phone_note,address,about,how_to,reminder,photo_path,dictionary,communicates,understanding_needs,tools,facilitators,interests,dislikes,additional,section_order,updated_at,archived_at")
       .eq("id", data.id)
       .maybeSingle();
     if (!row) return null;

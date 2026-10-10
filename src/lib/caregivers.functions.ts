@@ -110,3 +110,17 @@ export const deleteAccount = createServerFn({ method: "POST" })
     if (error) throw new Error("Le compte n’a pas pu être supprimé.");
     return { ok: true };
   });
+
+export const resetPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), password: z.string().min(8).max(128) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as unknown as Ctx);
+    const sb = await assertSafeTarget(context as unknown as Ctx, data.id, false);
+    const { error } = await sb.auth.admin.updateUserById(data.id, { password: data.password });
+    if (error) {
+      if ((error as { code?: string }).code === "weak_password") throw new Error("Ce mot de passe est trop facile à deviner ou a déjà fuité sur internet. Choisissez-en un autre.");
+      throw new Error("Le mot de passe n’a pas pu être modifié.");
+    }
+    return { ok: true };
+  });

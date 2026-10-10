@@ -7,21 +7,23 @@ import { DictionaryGrid } from "@/components/passport/dictionary-grid";
 import { SortableDictionaryEntry } from "@/components/backoffice/sortable-dictionary-entry";
 import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
+import { SectionOrderEditor } from "@/components/backoffice/section-order-editor";
+import { SECTION_TITLES } from "@/lib/section-order";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { MEDIA_BUCKET, mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
-export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional";
+export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
 export const FIELD_LABELS: Record<FieldKey, string> = {
   photo: "Photo", name: "Nom", birthDate: "Date de naissance", phone: "Téléphone", address: "Adresse", reminder: "Message important",
   about: "À propos de moi", howTo: "Comment utiliser cette page", dictionary: "Mon dictionnaire", communicates: "Je communique",
   understandingNeeds: "Ce dont j’ai besoin pour comprendre", tools: "Mes outils de communication", facilitators: "Ce qui facilite ma communication et la relation",
-  interests: "Mes centres d’intérêt", dislikes: "Mes peurs / Ce que je n’aime pas", additional: "Autres informations",
+  interests: "Mes centres d’intérêt", dislikes: "Mes peurs / Ce que je n’aime pas", additional: "Autres informations", sectionOrder: "Ordre des sections",
 };
 /** Draft keys saved together with each editable field. */
 export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
   photo: ["photoPath"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
   about: ["about"], howTo: ["howTo"], dictionary: ["dictionary"], communicates: ["communicates"], understandingNeeds: ["understandingNeeds"],
-  tools: ["tools"], facilitators: ["facilitators"], interests: ["interests"], dislikes: ["dislikes"], additional: ["additional"],
+  tools: ["tools"], facilitators: ["facilitators"], interests: ["interests"], dislikes: ["dislikes"], additional: ["additional"], sectionOrder: ["sectionOrder"],
 };
 export type InlineCtl = { editing: FieldKey | null; busy: boolean; onEdit: (k: FieldKey) => void; onSave: (k: FieldKey) => void; onCancel: (k: FieldKey) => void };
 
@@ -232,5 +234,8 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     </>, <>
       {list("additional")}
     </>]} />
+    <div id="section-order">{Card("sectionOrder",
+      <ol className="bo-section-order-read">{draft.sectionOrder.map(k => <li key={k}>{SECTION_TITLES[k]}</li>)}</ol>,
+      <SectionOrderEditor order={draft.sectionOrder} onChange={o => set("sectionOrder", o)} />)}</div>
   </>;
 }

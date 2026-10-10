@@ -3,6 +3,8 @@ import { Mascot } from "@/components/mascot";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { DictionaryGrid } from "@/components/passport/dictionary-grid";
+import { normalizeSectionOrder, SECTION_TITLES, type SectionKey } from "@/lib/section-order";
+import type { ReactNode } from "react";
 import type { DictionaryEntry } from "@/data/passport";
 import { Button } from "@/components/ui/button";
 import dictionaryIcon from "@/assets/passport-dictionnaire.png.asset.json";
@@ -35,6 +37,7 @@ export type PassportViewData = {
   interests: string[];
   dislikes: string[];
   additional: string[];
+  sectionOrder?: SectionKey[];
 };
 
 function SectionHeader({ title, icon }: { title: string; icon: string }) {
@@ -56,6 +59,25 @@ function TagList({ items }: { items: string[] }) {
 function BulletList({ items }: { items: string[] }) {
   if (items.length === 0) return <p>Aucune information pour le moment.</p>;
   return <ul className="passport-list">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>;
+}
+
+const ICONS: Record<SectionKey, string> = {
+  dictionary: dictionaryIcon.url, communicates: informationIcon.url, understandingNeeds: informationIcon.url, tools: informationIcon.url,
+  facilitators: informationIcon.url, interests: interestsIcon.url, dislikes: dislikesIcon.url, additional: informationIcon.url,
+};
+
+function renderSection(k: SectionKey, data: PassportViewData) {
+  let body: ReactNode;
+  if (k === "dictionary") { if (!data.dictionary.length) return null; body = <DictionaryGrid entries={data.dictionary} />; }
+  else {
+    const items = data[k] ?? [];
+    if (!items.length) return null;
+    body = k === "interests" || k === "dislikes" ? <TagList items={items} /> : <BulletList items={items} />;
+  }
+  return <AccordionItem key={k} value={k} className="passport-section">
+    <SectionHeader title={SECTION_TITLES[k]} icon={ICONS[k]} />
+    <AccordionContent className="section-content">{body}</AccordionContent>
+  </AccordionItem>;
 }
 
 export function PassportView({ data, demo = false }: { data: PassportViewData; demo?: boolean }) {
@@ -100,31 +122,7 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
       </section>
       {data.reminder && <aside className="communication-note"><Info aria-hidden="true" /><p>{data.reminder}</p></aside>}
       <Accordion type="multiple" className="passport-sections" aria-label="Les rubriques de mon passeport">
-        {data.dictionary.length > 0 && <AccordionItem value="dictionary" className="passport-section">
-          <SectionHeader title="Mon dictionnaire" icon={dictionaryIcon.url} />
-          <AccordionContent className="section-content">
-            <DictionaryGrid entries={data.dictionary} />
-          </AccordionContent>
-        </AccordionItem>}
-        {([["communicates", "Je communique"], ["understanding", "Ce dont j’ai besoin pour comprendre"], ["tools", "Mes outils de communication"], ["facilitators", "Ce qui facilite ma communication et la relation"]] as const).map(([v, t]) => {
-          const items = (v === "understanding" ? data.understandingNeeds : data[v]) ?? [];
-          return items.length > 0 && <AccordionItem key={v} value={v} className="passport-section">
-            <SectionHeader title={t} icon={informationIcon.url} />
-            <AccordionContent className="section-content"><BulletList items={items} /></AccordionContent>
-          </AccordionItem>;
-        })}
-        {data.interests.length > 0 && <AccordionItem value="interests" className="passport-section">
-          <SectionHeader title="Mes centres d’intérêt" icon={interestsIcon.url} />
-          <AccordionContent className="section-content"><TagList items={data.interests} /></AccordionContent>
-        </AccordionItem>}
-        {data.dislikes.length > 0 && <AccordionItem value="dislikes" className="passport-section">
-          <SectionHeader title="Mes peurs / Ce que je n’aime pas" icon={dislikesIcon.url} />
-          <AccordionContent className="section-content"><TagList items={data.dislikes} /></AccordionContent>
-        </AccordionItem>}
-        {data.additional.length > 0 && <AccordionItem value="other" className="passport-section">
-          <SectionHeader title="Autres informations" icon={informationIcon.url} />
-          <AccordionContent className="section-content"><BulletList items={data.additional} /></AccordionContent>
-        </AccordionItem>}
+        {normalizeSectionOrder(data.sectionOrder).map(k => renderSection(k, data))}
       </Accordion>
       <footer className="passport-footer">
         <p>Merci de prendre le temps de me comprendre.</p>
