@@ -10,6 +10,8 @@ import { draftPaths, draftToRow, rowToDraft, type PatientDraft, type PatientRow 
 import { PatientForm } from "@/components/backoffice/patient-form";
 import { PreviewPanel } from "@/components/backoffice/preview-panel";
 import { BackLink } from "@/components/backoffice/back-link";
+import { Mascot } from "@/components/mascot";
+import { consumeJustSaved } from "@/lib/saved-flag";
 
 export const Route = createFileRoute("/_authenticated/espace/patients/$id")({
   head: () => ({ meta: [{ title: "Profil du patient — Espace professionnel" }, { name: "description", content: "Consulter et modifier un passeport de communication." }, { property: "og:title", content: "Profil du patient" }, { property: "og:description", content: "Consulter et modifier un passeport de communication." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -62,7 +64,7 @@ function PatientPage() {
   const [draft, setDraft] = useState<PatientDraft | null>(null);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState(() => consumeJustSaved(id) ? "Profil enregistré" : "");
   const [err, setErr] = useState("");
   const [from, setFrom] = useState<"view" | "edit">("view");
 
@@ -80,10 +82,10 @@ function PatientPage() {
     setBusy(true); setErr("");
     const { error } = await supabase.from("patients").update(draftToRow(draft)).eq("id", id);
     setBusy(false);
-    if (error) { setErr("Les modifications n’ont pas pu être enregistrées."); return; }
+    if (error) { setErr("Désolé, les modifications n’ont pas pu être enregistrées. Merci de réessayer."); return; }
     await qc.invalidateQueries({ queryKey: ["patient", id] });
     await qc.invalidateQueries({ queryKey: ["patients"] });
-    setMode("view"); setMsg("Modifications enregistrées.");
+    setMode("view"); setMsg("Profil enregistré"); window.scrollTo(0, 0);
   }
 
   if (mode === "preview") return <PreviewPanel draft={draft} urls={urls} updatedAt={data.row.updated_at} onClose={() => setMode(from)} />;
@@ -100,7 +102,7 @@ function PatientPage() {
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => { setFrom(editing ? "edit" : "view"); setMode("preview"); }}><Eye aria-hidden="true" /> Aperçu</button>
       <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
     </div>
-    {msg && <p className="bo-success" role="status">{msg}</p>}
+    {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Les changements sont visibles tout de suite sur la page publique.</p></div></div>}
     {err && <p className="bo-error" role="alert">{err}</p>}
     {!editing && <PublicLink id={id} name={data.row.name} />}
     <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly={!editing} folder={id} updatedAt={data.row.updated_at} />

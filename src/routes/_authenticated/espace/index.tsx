@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { UserRound, UsersRound } from "lucide-react";
+import { Mascot } from "@/components/mascot";
 
 export const Route = createFileRoute("/_authenticated/espace/")({
   beforeLoad: ({ context }) => { if (!context.me.isAdmin) throw redirect({ to: "/espace/patients" }); },
@@ -8,9 +9,10 @@ export const Route = createFileRoute("/_authenticated/espace/")({
 });
 
 function AdminHome() {
+  const { me } = Route.useRouteContext();
+  const first = (me.name || "").trim().split(/\s+/)[0];
   return <>
-    <h1 className="bo-title">Accueil</h1>
-    <div className="title-underline" />
+    <div className="bo-greeting"><Mascot pose="salut" size={120} /><div><h1 className="bo-title">{first ? `Bonjour, ${first}` : "Bonjour"}</h1><div className="title-underline" /><p className="bo-lead">Que souhaitez-vous faire aujourd’hui ?</p></div></div>
     <div className="bo-choices">
       <Link to="/espace/patients" className="bo-choice"><UserRound aria-hidden="true" /><span>Profils des patients</span></Link>
       <Link to="/espace/accompagnants" className="bo-choice"><UsersRound aria-hidden="true" /><span>Profils des accompagnants</span></Link>

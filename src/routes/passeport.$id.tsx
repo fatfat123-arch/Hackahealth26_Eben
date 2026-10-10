@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { PassportView } from "@/components/passport/passport-view";
 import { getPublicPassport } from "@/lib/public-passport.functions";
+import { Mascot } from "@/components/mascot";
 import { rowToDraft, toViewData, type PatientRow } from "@/lib/patients";
 
 export const Route = createFileRoute("/passeport/$id")({
@@ -22,13 +23,13 @@ export const Route = createFileRoute("/passeport/$id")({
       { name: "robots", content: "noindex" },
     ] };
   },
-  notFoundComponent: () => <div className="passport-page"><h1 className="bo-title">Passeport introuvable</h1><p>Ce passeport n’existe pas ou n’est plus disponible.</p></div>,
+  notFoundComponent: () => <div className="passport-page status-page"><Mascot pose="inquiete" size={140} /><h1 className="bo-title">Passeport introuvable</h1><p>Désolé, ce passeport n’existe pas ou n’est plus disponible.</p></div>,
   component: PublicPassport,
 });
 
 function PublicPassport() {
   const res = Route.useLoaderData();
-  if (res.archived) return <div className="passport-page"><h1 className="bo-title">Ce passeport n’est plus actif.</h1></div>;
+  if (res.archived) return <div className="passport-page status-page"><Mascot pose="inquiete" size={140} /><h1 className="bo-title">Ce passeport n’est plus actif.</h1><p>Merci de votre attention et de votre gentillesse.</p></div>;
   const { row, urls } = res;
   const r = row as unknown as PatientRow;
   return <PassportView data={toViewData(rowToDraft(r), urls, r.updated_at)} />;

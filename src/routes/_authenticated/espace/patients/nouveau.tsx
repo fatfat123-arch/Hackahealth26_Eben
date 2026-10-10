@@ -7,6 +7,7 @@ import { draftToRow, emptyDraft } from "@/lib/patients";
 import { PatientForm } from "@/components/backoffice/patient-form";
 import { PreviewPanel } from "@/components/backoffice/preview-panel";
 import { BackLink } from "@/components/backoffice/back-link";
+import { markJustSaved } from "@/lib/saved-flag";
 
 export const Route = createFileRoute("/_authenticated/espace/patients/nouveau")({
   head: () => ({ meta: [{ title: "Nouveau profil — Espace professionnel" }, { name: "description", content: "Créer un nouveau passeport de communication." }, { property: "og:title", content: "Nouveau profil" }, { property: "og:description", content: "Créer un nouveau passeport de communication." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -29,8 +30,9 @@ function NewPatient() {
     setBusy(true); setError("");
     const { error } = await supabase.from("patients").insert({ id, ...draftToRow(draft), created_by: me.id });
     setBusy(false);
-    if (error) { setError("Le profil n’a pas pu être enregistré."); return; }
+    if (error) { setError("Désolé, le profil n’a pas pu être enregistré. Merci de réessayer."); return; }
     await qc.invalidateQueries({ queryKey: ["patients"] });
+    markJustSaved(id);
     navigate({ to: "/espace/patients/$id", params: { id } });
   }
 
@@ -48,7 +50,7 @@ function NewPatient() {
     {error && <p className="bo-error" role="alert">{error}</p>}
     <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly={false} folder={id} updatedAt={null} />
     <div className="bo-actions bo-actions-end">
-      <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> Enregistrer</button>
+      <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> {busy ? "Enregistrement…" : "Enregistrer le profil"}</button>
     </div>
   </>;
 }
