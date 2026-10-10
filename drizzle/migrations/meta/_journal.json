@@ -22,6 +22,13 @@
       "when": 1791624033721,
       "tag": "0002_communication_sections",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791638120138,
+      "tag": "0003_patient_section_order",
+      "breakpoints": true
     }
   ]
 }

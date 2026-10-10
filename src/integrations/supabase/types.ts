@@ -36,6 +36,7 @@ export type Database = {
           photo_alt: string
           photo_path: string | null
           reminder: string
+          section_order: string[]
           tools: string[]
           understanding_needs: string[]
           updated_at: string
@@ -61,6 +62,7 @@ export type Database = {
           photo_alt?: string
           photo_path?: string | null
           reminder?: string
+          section_order?: string[]
           tools?: string[]
           understanding_needs?: string[]
           updated_at?: string
@@ -86,6 +88,7 @@ export type Database = {
           photo_alt?: string
           photo_path?: string | null
           reminder?: string
+          section_order?: string[]
           tools?: string[]
           understanding_needs?: string[]
           updated_at?: string
