@@ -23,6 +23,8 @@ export const Route = createFileRoute("/passeport/$id")({
       { name: "robots", content: "noindex" },
     ] };
   },
+  staleTime: 0,
+  errorComponent: () => <div className="passport-page status-page"><h1 className="bo-title">Le passeport n’a pas pu être chargé.</h1><p>Merci de réessayer dans un instant.</p></div>,
   notFoundComponent: () => <div className="passport-page status-page"><Mascot pose="inquiete" size={140} /><h1 className="bo-title">Passeport introuvable</h1><p>Désolé, ce passeport n’existe pas ou n’est plus disponible.</p></div>,
   component: PublicPassport,
 });

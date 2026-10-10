@@ -104,14 +104,21 @@ function PatientPage() {
   }
   function cancel(k: FieldKey) { revert(k); setEditing(null); setErr(""); }
 
-  if (preview) return <PreviewPanel draft={draft} urls={urls} updatedAt={data.row.updated_at} onClose={() => setPreview(false)} />;
+  async function openPreview() {
+    setErr("");
+    try { await qc.refetchQueries({ queryKey: ["patient", id], exact: true }); setPreview(true); }
+    catch { setErr("L’aperçu n’a pas pu être chargé. Merci de réessayer."); }
+  }
+
+  // The preview always shows the latest saved record, never unsaved edits or a cached copy.
+  if (preview) return <PreviewPanel draft={data.draft} urls={{ ...urls, ...data.urls }} updatedAt={data.row.updated_at} onClose={() => setPreview(false)} />;
 
   return <>
     <BackLink to="/espace/patients/liste">Retour à la liste</BackLink>
     <h1 className="bo-title">{data.row.name}</h1>
     <div className="title-underline" />
     <div className="bo-actions">
-      <button type="button" className="bo-btn bo-btn-outline" onClick={() => setPreview(true)}><Eye aria-hidden="true" /> Aperçu</button>
+      <button type="button" className="bo-btn bo-btn-outline" onClick={openPreview}><Eye aria-hidden="true" /> Aperçu</button>
       <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
       <button type="button" className="bo-btn bo-btn-outline" onClick={async () => { await startEdit("sectionOrder"); requestAnimationFrame(() => document.getElementById("section-order")?.scrollIntoView({ block: "start" })); }}><ListOrdered aria-hidden="true" /> Réorganiser les sections</button>
     </div>
