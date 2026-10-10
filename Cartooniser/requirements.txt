@@ -1,4 +1,4 @@
-tensorflow
-opencv-python
+tensorflow-cpu
+opencv-python-headless
 numpy
 av>=17,<18
