@@ -1,3 +1,4 @@
+import { publicPassportUrl, linkUsesPreview } from "@/lib/site-url";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -29,7 +30,7 @@ function PublicLink({ id, name }: { id: string; name: string }) {
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState(false);
   useEffect(() => {
-    const u = `${window.location.origin}/passeport/${id}`;
+    const u = publicPassportUrl(id);
     setUrl(u);
     QRCode.toDataURL(u, { width: 600, margin: 2, color: { dark: "#004d95", light: "#ffffff" } }).then(setQr);
   }, [id]);
@@ -41,6 +42,7 @@ function PublicLink({ id, name }: { id: string; name: string }) {
     <div>
       <h2 id="link-title">Lien vers la page publique</h2>
       <p>C’est l’adresse à mettre dans le code QR ou la puce NFC.</p>
+      {linkUsesPreview() && <p className="bo-hint">Ce lien utilise l’adresse de prévisualisation. Publiez le site pour obtenir le lien définitif à mettre sur le code QR ou la puce NFC.</p>}
       <p className="bo-url"><a href={url} target="_blank" rel="noreferrer">{url}</a></p>
       <div className="bo-actions">
         <button type="button" className="bo-btn bo-btn-outline" onClick={copy}><Copy aria-hidden="true" /> Copier le lien</button>
