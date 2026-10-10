@@ -89,7 +89,7 @@ function PatientPage() {
     setBusy(false);
     if (error) { setErr("Désolé, la modification n’a pas pu être enregistrée. Merci de réessayer."); return false; }
     setEditing(null);
-    setMsg(`${FIELD_LABELS[k]} enregistré`);
+    setMsg(`Modification enregistrée : ${FIELD_LABELS[k]}`);
     await qc.invalidateQueries({ queryKey: ["patient", id] });
     await qc.invalidateQueries({ queryKey: ["patients"] });
     return true;

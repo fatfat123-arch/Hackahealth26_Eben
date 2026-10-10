@@ -25,3 +25,4 @@
 - Account role changes, archiving and deletion go through admin-checked server functions that refuse self-targeting and keep at least one active admin. Why: safeguards must not depend on the interface.
 - Public passport links are built by `src/lib/site-url.ts` (`PUBLISHED_ORIGIN`), never from the preview address. Why: QR codes must point to the published site.
 - Mascot images are rendered only through `src/components/mascot.tsx` (decorative, aria-hidden); delete confirmations go through `askConfirm` + the single `ConfirmHost` mounted in the root. Why: one place enforces mascot placement rules and one accessible dialog replaces browser confirms.
+- The patient profile page is read-only with one field in edit mode at a time; each pencil saves only that field's columns (mapping in `FIELD_DRAFT_KEYS` in patient-form), while the create page keeps the full form. Why: small, safe edits that appear immediately on the public passport.
