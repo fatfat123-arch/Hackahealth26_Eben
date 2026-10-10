@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { BackLink } from "@/components/backoffice/back-link";
 import { Mascot } from "@/components/mascot";
+import nfc01 from "@/assets/nfc-01-accueil.jpg.asset.json";
+import nfc02 from "@/assets/nfc-02-ecrire.jpg.asset.json";
+import nfc03 from "@/assets/nfc-03-enregistrement.jpg.asset.json";
+import nfc04 from "@/assets/nfc-04-url-vide.jpg.asset.json";
+import nfc05 from "@/assets/nfc-05-url-remplie.jpg.asset.json";
+import nfc06 from "@/assets/nfc-06-url-ajoutee.jpg.asset.json";
+import nfc07 from "@/assets/nfc-07-ecrire-tag.jpg.asset.json";
+import nfc08 from "@/assets/nfc-08-ecriture-terminee.jpg.asset.json";
 
 export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
   validateSearch: (s) => z.object({ id: z.string().optional() }).parse(s),
@@ -51,6 +59,16 @@ function Tutorial() {
         <li>Testez : approchez un autre téléphone de la puce et vérifiez que le passeport s’ouvre.</li>
       </ol>
       <p>Conseil : vous pouvez verrouiller la puce dans l’application pour éviter qu’elle soit modifiée par erreur. Ce verrouillage est définitif.</p>
+      <div className="bo-tutorial-photos">
+        <img src={nfc01.url} alt="Écran d’accueil de l’application NFC Tools, onglet Lire" />
+        <img src={nfc02.url} alt="Onglet Écrire de NFC Tools, avec le bouton Ajouter un enregistrement" />
+        <img src={nfc03.url} alt="Liste des types d’enregistrement dans NFC Tools, avec l’option URL / URI" />
+        <img src={nfc04.url} alt="Champ permettant de renseigner l’URL dans NFC Tools" />
+        <img src={nfc05.url} alt="Champ URL rempli avec le lien du passeport dans NFC Tools" />
+        <img src={nfc06.url} alt="Enregistrement URL ajouté dans NFC Tools" />
+        <img src={nfc07.url} alt="Boîte de dialogue demandant d’approcher un tag NFC pour l’écriture" />
+        <img src={nfc08.url} alt="Confirmation « Écriture terminée » dans NFC Tools" />
+      </div>
     </section>
     <section className="bo-card">
       <h2>4. Mettre à jour le passeport</h2>

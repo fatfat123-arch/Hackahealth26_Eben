@@ -455,3 +455,7 @@
 .bo-inline-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .bo-btn-sm { min-height: 44px; padding: 8px 16px; }
 @media (max-width: 720px) { .bo-read-edit { grid-template-columns: minmax(0, 1fr) 44px; } .bo-read-edit dd { grid-column: 1 / -1; grid-row: 2; } }
+
+/* Tutorial photos */
+.bo-tutorial-photos { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+.bo-tutorial-photos img { display: block; width: 100%; max-width: 600px; height: auto; border: 1px solid #d5e0ec; border-radius: 8px; }
