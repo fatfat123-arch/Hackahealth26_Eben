@@ -71,7 +71,7 @@
 .section-title { display: flex; align-items: center; gap: 18px; }
 .section-icon { width: 48px; height: 48px; flex-shrink: 0; object-fit: contain; }
 .passport-contact { margin: 0 0 32px; padding: 26px; background: var(--tint-yellow); border: 1px solid var(--contact-border); border-radius: 12px; }
-.profile-copy .passport-contact-name { margin-top: 8px; font-weight: 500; }
+.passport-contact-name { margin-top: 8px; font-weight: 500; }
 .passport-contact-call { min-height: 56px; height: auto; max-width: 100%; margin-top: 18px; padding: 12px 24px; border-radius: 12px; background: var(--primary); color: var(--background); font-size: 17px; line-height: 1.5; display: inline-flex; flex-wrap: wrap; column-gap: 18px; row-gap: 4px; white-space: normal; text-align: center; text-decoration: none; box-shadow: none; transition: none; }
 .passport-contact-call:hover { background: var(--primary); }
 .passport-contact-call:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; box-shadow: none; }
@@ -345,6 +345,7 @@
 .profile-details dt svg { width: 20px; height: 20px; color: var(--primary); flex-shrink: 0; stroke-width: 1.7; }
 .profile-details dd { color: var(--foreground); }
 .communication-note { margin: 56px 0 40px; }
+.passport-contact { margin-top: 40px; }
 .passport-sections { gap: 18px; }
 .passport-trigger { background: var(--background); border: 1px solid var(--line); border-left: 4px solid var(--accent); }
 .passport-trigger[data-state=open] { border-color: var(--line); border-left-color: var(--accent); }
