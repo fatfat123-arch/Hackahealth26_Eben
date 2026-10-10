@@ -1,0 +1,4 @@
+tensorflow
+opencv-python
+numpy
+av>=17,<18
