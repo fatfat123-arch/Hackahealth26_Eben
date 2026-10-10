@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { BookOpen, ListOrdered, Copy, Download, Eye } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getPatient, updatePatient } from "@/lib/patients.functions";
 import { signPaths } from "@/lib/session";
 import { draftPaths, draftToRow, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
 import { PatientForm, FIELD_DRAFT_KEYS, FIELD_LABELS, type FieldKey } from "@/components/backoffice/patient-form";
@@ -20,8 +20,7 @@ export const Route = createFileRoute("/_authenticated/espace/patients/$id")({
 });
 
 async function loadPatient(id: string) {
-  const { data, error } = await supabase.from("patients").select("*").eq("id", id).maybeSingle();
-  if (error) throw error;
+  const data = await getPatient({ data: id });
   if (!data) return null;
   const row = data as unknown as PatientRow;
   const draft = rowToDraft(row);
@@ -85,9 +84,10 @@ function PatientPage() {
     const full = draftToRow(draft) as Record<string, unknown>;
     const cols = Object.fromEntries(FIELD_DRAFT_KEYS[k].map(key => { const c = COLUMN[key]; return [c, full[c]]; }));
     setBusy(true); setErr("");
-    const { error } = await supabase.from("patients").update(cols as never).eq("id", id);
+    let failed = false;
+    try { await updatePatient({ data: { id, changes: cols } }); } catch { failed = true; }
     setBusy(false);
-    if (error) { setErr("Désolé, la modification n’a pas pu être enregistrée. Merci de réessayer."); return false; }
+    if (failed) { setErr("Désolé, la modification n’a pas pu être enregistrée. Merci de réessayer."); return false; }
     setEditing(null);
     setMsg(`Modification enregistrée : ${FIELD_LABELS[k]}`);
     await qc.invalidateQueries({ queryKey: ["patient", id] });

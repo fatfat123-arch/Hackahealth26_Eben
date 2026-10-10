@@ -1,6 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
 import { Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import * as Tabs from "@radix-ui/react-tabs";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
 import { DictionaryGrid } from "@/components/passport/dictionary-grid";
@@ -10,7 +9,7 @@ import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } fro
 import { SectionOrderEditor } from "@/components/backoffice/section-order-editor";
 import { SECTION_TITLES } from "@/lib/section-order";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
-import { MEDIA_BUCKET, mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
+import { mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
 export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
 export const FIELD_LABELS: Record<FieldKey, string> = {
@@ -51,22 +50,17 @@ type Props = {
 const kindLabel: Record<DictItem["type"], string> = { image: "Photo", gif: "Image animée", video: "Vidéo", audio: "Son" };
 
 async function uploadFile(file: File, folder: string) {
-  const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const path = `patients/${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
-  if (error) throw error;
-  return path;
+  const body = new FormData(); body.append("file", file); body.append("patientId", folder);
+  const response = await fetch("/api/upload", { method: "POST", body });
+  if (!response.ok) throw new Error(await response.text());
+  return (await response.json() as { path: string }).path;
 }
 
 async function cartooniseVideo(file: File) {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) throw new Error("Session expirée");
   const body = new FormData();
   body.append("video", file);
   const response = await fetch("/api/cartoonise", {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     body,
   });
   if (!response.ok) throw new Error(await response.text());

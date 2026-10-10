@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { logout } from "@/lib/auth.functions";
 import { meQuery } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated")({
     const me = await context.queryClient.fetchQuery(meQuery);
     if (!me) throw redirect({ to: "/connexion" });
     if (!me.isStaff) {
-      await supabase.auth.signOut();
+      await logout();
       context.queryClient.clear();
       throw redirect({ to: "/connexion" });
     }
@@ -28,7 +28,7 @@ function BackofficeLayout() {
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
-    await supabase.auth.signOut();
+    await logout();
     await router.invalidate();
     navigate({ to: "/connexion", replace: true });
   }

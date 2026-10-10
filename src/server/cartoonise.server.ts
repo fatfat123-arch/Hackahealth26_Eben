@@ -12,20 +12,10 @@ function positiveInteger(value: string | undefined, fallback: number) {
 }
 
 async function requireStaff(request: Request) {
-  const header = request.headers.get("authorization") ?? "";
-  if (!header.startsWith("Bearer ")) throw new Response("Non autorisé", { status: 401 });
-  const token = header.slice(7).trim();
-  if (!token) throw new Response("Non autorisé", { status: 401 });
-
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: auth, error: authError } = await supabaseAdmin.auth.getUser(token);
-  if (authError || !auth.user) throw new Response("Non autorisé", { status: 401 });
-
-  const [{ data: role }, { data: profile }] = await Promise.all([
-    supabaseAdmin.from("user_roles").select("role").eq("user_id", auth.user.id).maybeSingle(),
-    supabaseAdmin.from("profiles").select("archived_at").eq("id", auth.user.id).maybeSingle(),
-  ]);
-  if (!role || profile?.archived_at) throw new Response("Accès refusé", { status: 403 });
+  const cookie = request.headers.get("cookie")?.match(/(?:^|;\s*)eh_session=([^;]+)/)?.[1];
+  const { sessionUserFromToken } = await import("@/server/auth.server");
+  const user = await sessionUserFromToken(cookie ? decodeURIComponent(cookie) : null);
+  if (!user || user.archived_at) throw new Response("Non autorisé", { status: 401 });
 }
 
 function runCartooniser(input: string, runsDir: string) {

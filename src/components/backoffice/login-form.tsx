@@ -1,8 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { fetchMe } from "@/lib/session";
+import { login, logout } from "@/lib/auth.functions";
 
 export function LoginForm() {
   const queryClient = useQueryClient();
@@ -15,13 +14,13 @@ export function LoginForm() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true); setError("");
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) { setBusy(false); setError("Adresse e-mail ou mot de passe incorrect."); return; }
+    let me;
+    try { me = await login({ data: { email: email.trim(), password } }); }
+    catch { setBusy(false); setError("Adresse e-mail ou mot de passe incorrect."); return; }
     queryClient.removeQueries({ queryKey: ["me"] });
-    const me = await fetchMe();
     queryClient.setQueryData(["me"], me);
     setBusy(false);
-    if (!me?.isStaff) { await supabase.auth.signOut(); setError("Ce compte n’a pas accès à l’espace professionnel."); return; }
+    if (!me?.isStaff) { await logout(); setError("Ce compte n’a pas accès à l’espace professionnel."); return; }
     navigate({ to: me.isAdmin ? "/espace" : "/espace/patients" });
   }
 

@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ApiCartooniseRouteImport } from './routes/api/cartoonise'
+import { Route as ApiMediaRouteImport } from './routes/api/media'
+import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as PasseportIdRouteImport } from './routes/passeport.$id'
 import { Route as AuthenticatedEspaceIndexRouteImport } from './routes/_authenticated/espace/index'
 import { Route as AuthenticatedEspaceTutorielRouteImport } from './routes/_authenticated/espace/tutoriel'
@@ -46,6 +48,16 @@ const DemoRoute = DemoRouteImport.update({
 const ApiCartooniseRoute = ApiCartooniseRouteImport.update({
   id: '/api/cartoonise',
   path: '/api/cartoonise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMediaRoute = ApiMediaRouteImport.update({
+  id: '/api/media',
+  path: '/api/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadRoute = ApiUploadRouteImport.update({
+  id: '/api/upload',
+  path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PasseportIdRoute = PasseportIdRouteImport.update({
@@ -107,6 +119,8 @@ export interface FileRoutesByFullPath {
   '/connexion': typeof ConnexionRoute
   '/demo': typeof DemoRoute
   '/api/cartoonise': typeof ApiCartooniseRoute
+  '/api/media': typeof ApiMediaRoute
+  '/api/upload': typeof ApiUploadRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/espace/': typeof AuthenticatedEspaceIndexRoute
@@ -122,6 +136,8 @@ export interface FileRoutesByTo {
   '/connexion': typeof ConnexionRoute
   '/demo': typeof DemoRoute
   '/api/cartoonise': typeof ApiCartooniseRoute
+  '/api/media': typeof ApiMediaRoute
+  '/api/upload': typeof ApiUploadRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/espace': typeof AuthenticatedEspaceIndexRoute
@@ -139,6 +155,8 @@ export interface FileRoutesById {
   '/connexion': typeof ConnexionRoute
   '/demo': typeof DemoRoute
   '/api/cartoonise': typeof ApiCartooniseRoute
+  '/api/media': typeof ApiMediaRoute
+  '/api/upload': typeof ApiUploadRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/_authenticated/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/_authenticated/espace/': typeof AuthenticatedEspaceIndexRoute
@@ -156,6 +174,8 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/demo'
     | '/api/cartoonise'
+    | '/api/media'
+    | '/api/upload'
     | '/passeport/$id'
     | '/espace/tutoriel'
     | '/espace/'
@@ -171,6 +191,8 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/demo'
     | '/api/cartoonise'
+    | '/api/media'
+    | '/api/upload'
     | '/passeport/$id'
     | '/espace/tutoriel'
     | '/espace'
@@ -187,6 +209,8 @@ export interface FileRouteTypes {
     | '/connexion'
     | '/demo'
     | '/api/cartoonise'
+    | '/api/media'
+    | '/api/upload'
     | '/passeport/$id'
     | '/_authenticated/espace/tutoriel'
     | '/_authenticated/espace/'
@@ -204,6 +228,8 @@ export interface RootRouteChildren {
   ConnexionRoute: typeof ConnexionRoute
   DemoRoute: typeof DemoRoute
   ApiCartooniseRoute: typeof ApiCartooniseRoute
+  ApiMediaRoute: typeof ApiMediaRoute
+  ApiUploadRoute: typeof ApiUploadRoute
   PasseportIdRoute: typeof PasseportIdRoute
 }
 
@@ -242,6 +268,20 @@ declare module '@tanstack/react-router' {
       path: '/api/cartoonise'
       fullPath: '/api/cartoonise'
       preLoaderRoute: typeof ApiCartooniseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/media': {
+      id: '/api/media'
+      path: '/api/media'
+      fullPath: '/api/media'
+      preLoaderRoute: typeof ApiMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload': {
+      id: '/api/upload'
+      path: '/api/upload'
+      fullPath: '/api/upload'
+      preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/passeport/$id': {
@@ -344,6 +384,8 @@ const rootRouteChildren: RootRouteChildren = {
   ConnexionRoute: ConnexionRoute,
   DemoRoute: DemoRoute,
   ApiCartooniseRoute: ApiCartooniseRoute,
+  ApiMediaRoute: ApiMediaRoute,
+  ApiUploadRoute: ApiUploadRoute,
   PasseportIdRoute: PasseportIdRoute,
 }
 export const routeTree = rootRouteImport

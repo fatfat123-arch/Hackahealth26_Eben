@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RowMenu, CONFIRM_DELETE } from "@/components/backoffice/row-menu";
-import { draftPaths, rowToDraft, MEDIA_BUCKET, type PatientRow } from "@/lib/patients";
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { archivePatient, deletePatient, listPatients } from "@/lib/patients.functions";
 import { signPaths } from "@/lib/session";
 import { formatDateFr } from "@/lib/patients";
 import { BackLink } from "@/components/backoffice/back-link";
@@ -17,10 +16,9 @@ export const Route = createFileRoute("/_authenticated/espace/patients/liste")({
 });
 
 async function loadPatients() {
-  const { data, error } = await supabase.from("patients").select("id,name,photo_path,updated_at,archived_at").order("name");
-  if (error) throw error;
-  const urls = await signPaths((data ?? []).map(p => p.photo_path ?? ""));
-  return { patients: data ?? [], urls };
+  const data = await listPatients();
+  const urls = await signPaths(data.map((p) => String(p.photo_path ?? "")));
+  return { patients: data, urls };
 }
 
 function PatientList() {
@@ -30,19 +28,14 @@ function PatientList() {
   const qc = useQueryClient();
   async function setArchive(id: string, value: boolean) {
     setErr("");
-    const { error } = await supabase.from("patients").update({ archived_at: value ? new Date().toISOString() : null }).eq("id", id);
-    if (error) setErr("Désolé, le profil n’a pas pu être modifié. Merci de réessayer."); else await qc.invalidateQueries({ queryKey: ["patients"] });
+    try { await archivePatient({ data: { id, archived: value } }); await qc.invalidateQueries({ queryKey: ["patients"] }); }
+    catch { setErr("Désolé, le profil n’a pas pu être modifié. Merci de réessayer."); }
   }
   async function remove(id: string) {
     if (!(await askConfirm(CONFIRM_DELETE))) return;
     setErr("");
-    const { data: row } = await supabase.from("patients").select("*").eq("id", id).maybeSingle();
-    if (row) {
-      const paths = draftPaths(rowToDraft(row as unknown as PatientRow));
-      if (paths.length) await supabase.storage.from(MEDIA_BUCKET).remove(paths);
-    }
-    const { error } = await supabase.from("patients").delete().eq("id", id);
-    if (error) setErr("Désolé, le profil n’a pas pu être supprimé. Merci de réessayer."); else await qc.invalidateQueries({ queryKey: ["patients"] });
+    try { await deletePatient({ data: id }); await qc.invalidateQueries({ queryKey: ["patients"] }); }
+    catch { setErr("Désolé, le profil n’a pas pu être supprimé. Merci de réessayer."); }
   }
   const { data, isLoading, error } = useQuery({ queryKey: ["patients"], queryFn: loadPatients, refetchInterval: 30_000 });
   const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();

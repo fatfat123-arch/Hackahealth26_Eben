@@ -3,8 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
 import { UserPlus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { createCaregiver, promoteToAdmin, setAccountArchived, deleteAccount } from "@/lib/caregivers.functions";
+import { createCaregiver, promoteToAdmin, setAccountArchived, deleteAccount, listCaregivers } from "@/lib/caregivers.functions";
 import { RowMenu, CONFIRM_DELETE, type RowAction } from "@/components/backoffice/row-menu";
 import { requireAdmin } from "@/lib/caregivers";
 import { formatDateFr } from "@/lib/patients";
@@ -20,13 +19,7 @@ export const Route = createFileRoute("/_authenticated/espace/accompagnants/")({
 });
 
 async function loadCaregivers() {
-  const { data: roles, error } = await supabase.from("user_roles").select("user_id,role");
-  if (error) throw error;
-  const admins = new Set((roles ?? []).filter(r => r.role === "admin").map(r => r.user_id));
-  const ids = [...new Set((roles ?? []).map(r => r.user_id))];
-  if (!ids.length) return [];
-  const { data } = await supabase.from("profiles").select("id,full_name,email,created_at,archived_at").in("id", ids).order("full_name");
-  return (data ?? []).map(p => ({ ...p, isAdmin: admins.has(p.id) }));
+  return listCaregivers();
 }
 
 function Caregivers() {

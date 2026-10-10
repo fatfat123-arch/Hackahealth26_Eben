@@ -3,8 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { KeyRound, Pencil, Save, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { updateCaregiver, resetPassword } from "@/lib/caregivers.functions";
+import { updateCaregiver, resetPassword, getCaregiver } from "@/lib/caregivers.functions";
 import { requireAdmin } from "@/lib/caregivers";
 import { formatDateFr } from "@/lib/patients";
 import { PasswordField } from "@/components/backoffice/password-field";
@@ -17,11 +16,7 @@ export const Route = createFileRoute("/_authenticated/espace/accompagnants/$id")
 });
 
 async function load(id: string) {
-  const [{ data: profile }, { data: patients }] = await Promise.all([
-    supabase.from("profiles").select("id,full_name,email,created_at").eq("id", id).maybeSingle(),
-    supabase.from("patients").select("id,name,updated_at").eq("created_by", id).order("name"),
-  ]);
-  return { profile, patients: patients ?? [] };
+  return getCaregiver({ data: id });
 }
 
 function CaregiverPage() {

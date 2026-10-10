@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { BookOpen, Eye, Save } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { createPatient } from "@/lib/patients.functions";
 import { draftToRow, emptyDraft } from "@/lib/patients";
 import { PatientForm } from "@/components/backoffice/patient-form";
 import { PreviewPanel } from "@/components/backoffice/preview-panel";
@@ -28,9 +28,10 @@ function NewPatient() {
   async function save() {
     if (!draft.name.trim()) { setError("Le nom est obligatoire."); window.scrollTo(0, 0); return; }
     setBusy(true); setError("");
-    const { error } = await supabase.from("patients").insert({ id, ...draftToRow(draft), created_by: me.id });
+    let failed = false;
+    try { await createPatient({ data: { id, row: draftToRow(draft) } }); } catch { failed = true; }
     setBusy(false);
-    if (error) { setError("Désolé, le profil n’a pas pu être enregistré. Merci de réessayer."); return; }
+    if (failed) { setError("Désolé, le profil n’a pas pu être enregistré. Merci de réessayer."); return; }
     await qc.invalidateQueries({ queryKey: ["patients"] });
     markJustSaved(id);
     navigate({ to: "/espace/patients/$id", params: { id } });
