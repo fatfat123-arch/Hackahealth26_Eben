@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, MessageCircle } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { meQuery } from "@/lib/session";
 
@@ -37,7 +37,7 @@ function BackofficeLayout() {
     <div className="bo-shell">
       <header className="bo-header">
         <div className="bo-header-inner">
-          <Link to="/espace" className="bo-brand"><MessageCircle aria-hidden="true" /><span>Passeport de communication</span></Link>
+          <Link to="/espace" className="bo-brand"><span>Passeport de communication</span></Link>
           <div className="bo-header-right">
             {me && <span className="bo-user">{me.name || me.email} · {me.isAdmin ? "Administrateur" : "Accompagnant"}</span>}
             <button type="button" className="bo-btn bo-btn-outline" onClick={signOut}><LogOut aria-hidden="true" /> Déconnexion</button>

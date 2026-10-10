@@ -45,7 +45,6 @@
 }
 .passport-page { max-width: 1100px; margin: 0 auto; padding: 51px 0 30px; }
 .passport-heading { position: relative; padding-bottom: 34px; }
-.heading-symbol { display: inline-flex; color: var(--primary); margin-bottom: 12px; }
 .passport-heading h1 { color: var(--primary); font-size: 40px; line-height: 1.2; font-weight: 700; margin: 0; }
 .title-underline { background: var(--accent); width: 64px; height: 4px; margin-top: 23px; }
 .profile-section { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 48px; align-items: start; }
@@ -187,8 +186,7 @@
 .photo-placeholder { width: 220px; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 8px; background: var(--tint-blue); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 16px; }
 .bo-header { border-bottom: 1px solid var(--line); background: var(--background); }
 .bo-header-inner { max-width: 1100px; margin: 0 auto; padding: 16px 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.bo-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 19px; min-height: 44px; text-decoration: none; }
-.bo-brand svg { width: 24px; height: 24px; }
+.bo-brand { display: inline-flex; align-items: center; color: var(--primary); font-weight: 600; font-size: 19px; min-height: 44px; text-decoration: none; }
 .bo-header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .bo-user { font-size: 16px; color: var(--muted-foreground); }
 .bo-page { max-width: 1100px; margin: 0 auto; padding: 40px 0 64px; }
