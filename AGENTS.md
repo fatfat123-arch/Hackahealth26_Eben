@@ -23,3 +23,4 @@
 - Archiving uses nullable `archived_at` on `patients` and `profiles`; `is_staff`/`has_role` ignore archived accounts and the public server function returns only an "inactive" flag for archived patients. Why: one switch enforced server-side everywhere.
 - Account role changes, archiving and deletion go through admin-checked server functions that refuse self-targeting and keep at least one active admin. Why: safeguards must not depend on the interface.
 - Public passport links are built by `src/lib/site-url.ts` (`PUBLISHED_ORIGIN`), never from the preview address. Why: QR codes must point to the published site.
+- Mascot images are rendered only through `src/components/mascot.tsx` (decorative, aria-hidden); delete confirmations go through `askConfirm` + the single `ConfirmHost` mounted in the root. Why: one place enforces mascot placement rules and one accessible dialog replaces browser confirms.
