@@ -64,6 +64,16 @@ Start command:
 npm start
 ```
 
+Optional HTTP Basic protection is configured in the server-side `.env` file:
+
+```text
+HTTP_BASIC_AUTH_USERNAME=eh-passport
+HTTP_BASIC_AUTH_PASSWORD=choose-a-strong-password
+```
+
+The protection is enabled only when `HTTP_BASIC_AUTH_PASSWORD` is set. The
+password must never be committed to Git.
+
 ## Cartooniser
 
 The optional media-processing pipeline lives in `Cartooniser/`. See
