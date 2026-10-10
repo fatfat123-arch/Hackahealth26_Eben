@@ -1,5 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Pencil, Plus, Save, Trash2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import * as Tabs from "@radix-ui/react-tabs";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
@@ -10,12 +10,38 @@ import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } fro
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { MEDIA_BUCKET, mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
+export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "address" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional";
+export const FIELD_LABELS: Record<FieldKey, string> = {
+  photo: "Photo", name: "Nom", birthDate: "Date de naissance", phone: "Téléphone", address: "Adresse", reminder: "Message important",
+  about: "À propos de moi", howTo: "Comment utiliser cette page", dictionary: "Mon dictionnaire", communicates: "Je communique",
+  understandingNeeds: "Ce dont j’ai besoin pour comprendre", tools: "Mes outils de communication", facilitators: "Ce qui facilite ma communication et la relation",
+  interests: "Mes centres d’intérêt", dislikes: "Mes peurs / Ce que je n’aime pas", additional: "Autres informations",
+};
+/** Draft keys saved together with each editable field. */
+export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
+  photo: ["photoPath"], name: ["name"], birthDate: ["birthDate"], phone: ["phone", "phoneNote"], address: ["address"], reminder: ["reminder"],
+  about: ["about"], howTo: ["howTo"], dictionary: ["dictionary"], communicates: ["communicates"], understandingNeeds: ["understandingNeeds"],
+  tools: ["tools"], facilitators: ["facilitators"], interests: ["interests"], dislikes: ["dislikes"], additional: ["additional"],
+};
+export type InlineCtl = { editing: FieldKey | null; busy: boolean; onEdit: (k: FieldKey) => void; onSave: (k: FieldKey) => void; onCancel: (k: FieldKey) => void };
+
+function PencilBtn({ k, inline }: { k: FieldKey; inline: InlineCtl }) {
+  return <button type="button" className="bo-pencil" aria-label={`Modifier ${FIELD_LABELS[k]}`} onClick={() => inline.onEdit(k)}><Pencil aria-hidden="true" /></button>;
+}
+function EditBar({ k, inline }: { k: FieldKey; inline: InlineCtl }) {
+  return <div className="bo-inline-actions">
+    <button type="button" className="bo-btn bo-btn-primary bo-btn-sm" onClick={() => inline.onSave(k)} disabled={inline.busy}><Save aria-hidden="true" /> {inline.busy ? "Enregistrement…" : "Enregistrer"}</button>
+    <button type="button" className="bo-btn bo-btn-outline bo-btn-sm" onClick={() => inline.onCancel(k)} disabled={inline.busy}><X aria-hidden="true" /> Annuler</button>
+  </div>;
+}
+
 type Props = {
   draft: PatientDraft;
   onChange: (d: PatientDraft) => void;
   urls: Record<string, string>;
   onUrls: (u: Record<string, string>) => void;
   readOnly: boolean;
+  inline?: InlineCtl;
   folder: string;
   updatedAt: string | null;
 };
@@ -38,10 +64,10 @@ function ReadValue({ label, value }: { label: string; value: ReactNode }) {
   return <div className="bo-read"><dt>{label}</dt><dd>{value || "—"}</dd></div>;
 }
 
-function ListEditor({ title, items, onChange, readOnly }: { title: string; items: string[]; onChange: (l: string[]) => void; readOnly: boolean }) {
+function ListEditor({ title, items, onChange, readOnly, hideLegend }: { title: string; items: string[]; onChange: (l: string[]) => void; readOnly: boolean; hideLegend?: boolean }) {
   const id = useId();
   return <fieldset className="bo-fieldset">
-    <legend>{title}</legend>
+    <legend className={hideLegend ? "sr-only" : undefined}>{title}</legend>
     {readOnly ? (items.length ? <ul className="passport-list">{items.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p>Aucune information.</p>) : <>
       {items.map((t, i) => <div key={i} className="bo-row">
         <label className="sr-only" htmlFor={`${id}-${i}`}>{title}, point {i + 1}</label>
@@ -64,7 +90,7 @@ function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode, 
   </Tabs.Root>;
 }
 
-export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt }: Props) {
+export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt, inline: inlineProp }: Props) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [orderMessage, setOrderMessage] = useState("");
@@ -91,69 +117,37 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
 
   const setEntry = (i: number, patch: Partial<DictItem>) => set("dictionary", draft.dictionary.map((e, j) => j === i ? { ...e, ...patch } : e));
 
-  if (readOnly) {
-    return <Steps parts={[<>
-      <section className="bo-card"><h2>Photo</h2>
-        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={`Photo de ${draft.name.trim().split(/\s+/)[0]}`} /> : <p>Aucune photo.</p>}
-      </section>
-      <section className="bo-card"><h2>Comment utiliser cette page</h2><p className="bo-pre">{draft.howTo || "—"}</p></section>
-      <section className="bo-card"><h2>À propos de moi</h2><p className="bo-pre">{draft.about || "—"}</p></section>
-      <section className="bo-card"><h2>Informations</h2>
-        <dl className="bo-read-list">
-          <ReadValue label="Nom" value={draft.name} />
-          <ReadValue label="Date de naissance" value={draft.birthDate ? formatDateFr(draft.birthDate) : ""} />
-          <ReadValue label="Téléphone" value={draft.phone && <>{draft.phone}{draft.phoneNote && ` (${draft.phoneNote})`}</>} />
-          <ReadValue label="Adresse" value={draft.address} />
-          <ReadValue label="Message important" value={draft.reminder} />
-          <ReadValue label="Dernière mise à jour" value={formatDateFr(updatedAt)} />
-        </dl>
-      </section>
-</>, <>
-      <section className="bo-card"><h2>Mon dictionnaire</h2>
-        {draft.dictionary.length === 0 ? <p>Aucune entrée.</p> : <DictionaryGrid entries={draft.dictionary.map(e => ({ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }))} />}
-      </section>
-</>, <>
-      <section className="bo-card"><ListEditor title="Je communique" items={draft.communicates} onChange={() => {}} readOnly /></section>
-      <section className="bo-card"><ListEditor title="Ce dont j’ai besoin pour comprendre" items={draft.understandingNeeds} onChange={() => {}} readOnly /></section>
-      <section className="bo-card"><ListEditor title="Mes outils de communication" items={draft.tools} onChange={() => {}} readOnly /></section>
-      <section className="bo-card"><ListEditor title="Ce qui facilite ma communication et la relation" items={draft.facilitators} onChange={() => {}} readOnly /></section>
-</>, <>
-      <section className="bo-card"><ListEditor title="Mes centres d’intérêt" items={draft.interests} onChange={() => {}} readOnly /></section>
-      <section className="bo-card"><ListEditor title="Mes peurs / Ce que je n’aime pas" items={draft.dislikes} onChange={() => {}} readOnly /></section>
-</>, <>
-      <section className="bo-card"><ListEditor title="Autres informations" items={draft.additional} onChange={() => {}} readOnly /></section>
-</>]} />;
-  }
+  const inline: InlineCtl | undefined = inlineProp ?? (readOnly ? { editing: null, busy: false, onEdit: () => {}, onSave: () => {}, onCancel: () => {} } : undefined);
+  const canEdit = !!inlineProp;
+  const firstName = draft.name.trim().split(/\s+/)[0];
+  const isEditing = (k: FieldKey) => !inline || inline.editing === k;
 
-  return <>
-    {error && <p className="bo-error" role="alert">{error}</p>}
-    <Steps parts={[<>
-    <section className="bo-card"><h2>Photo</h2>
-      <div className="bo-photo-edit">
-        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt="Photo actuelle" /> : <div className="photo-placeholder">Pas de photo</div>}
-        <div className="bo-stack">
-          <label className="bo-btn bo-btn-outline bo-file"><Upload aria-hidden="true" /> {uploading === "photo" ? "Envoi en cours…" : draft.photoPath ? "Remplacer la photo" : "Choisir une photo"}
-            <input type="file" accept="image/*" className="sr-only" onChange={e => handleUpload(e.target.files?.[0], "photo", p => set("photoPath", p), f => f.type.startsWith("image/"))} />
-          </label>
-          {draft.photoPath && <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("photoPath", null)}>Retirer la photo</button>}
-        </div>
-      </div>
-    </section>
-    <section className="bo-card"><h2>Comment utiliser cette page</h2><Field label="Texte"><textarea className="bo-input bo-textarea" value={draft.howTo} onChange={e => set("howTo", e.target.value)} /></Field></section>
-    <section className="bo-card"><h2>À propos de moi</h2><Field label="Texte"><textarea className="bo-input bo-textarea" value={draft.about} onChange={e => set("about", e.target.value)} /></Field></section>
-    <section className="bo-card"><h2>Informations</h2>
-      <div className="bo-grid2">
-        <Field label="Nom (obligatoire)"><input className="bo-input" required value={draft.name} onChange={e => set("name", e.target.value)} /></Field>
-        <Field label="Date de naissance"><input className="bo-input" type="date" value={draft.birthDate} onChange={e => set("birthDate", e.target.value)} /></Field>
-        <Field label="Téléphone"><input className="bo-input" type="tel" value={draft.phone} onChange={e => set("phone", e.target.value)} /></Field>
-        <Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field>
-        <Field label="Adresse"><input className="bo-input" value={draft.address} onChange={e => set("address", e.target.value)} /></Field>
-        <Field label="Message important" hint="Affiché en évidence sous le profil."><input className="bo-input" value={draft.reminder} onChange={e => set("reminder", e.target.value)} /></Field>
-      </div>
-      <p className="bo-hint">Dernière mise à jour : {updatedAt ? formatDateFr(updatedAt) : "pas encore enregistré"} (mise à jour automatique à chaque enregistrement).</p>
-    </section>
-</>, <>
-    <section className="bo-card"><h2>Mon dictionnaire</h2>
+  /** A card section: full form when creating, read view + pencil on the profile page. */
+  function Card(k: FieldKey, read: ReactNode, edit: ReactNode, title: ReactNode = <h2>{FIELD_LABELS[k]}</h2>) {
+    if (!inline) return <section className="bo-card">{title}{edit}</section>;
+    const on = inline.editing === k;
+    return <section className={`bo-card${on ? " bo-card-editing" : ""}`}>
+      <div className="bo-edit-head">{title}{canEdit && !on && <PencilBtn k={k} inline={inline} />}</div>
+      {on ? <>{edit}<EditBar k={k} inline={inline} /></> : read}
+    </section>;
+  }
+  /** One line of the information list. */
+  function Row(k: FieldKey, read: ReactNode, edit: ReactNode) {
+    if (!inline) return edit;
+    const on = inline.editing === k;
+    return <div className={`bo-read bo-read-edit${on ? " bo-card-editing" : ""}`}>
+      <dt>{FIELD_LABELS[k]}</dt>
+      <dd>{on ? <>{edit}<EditBar k={k} inline={inline} /></> : (read || "—")}</dd>
+      {canEdit && !on && <PencilBtn k={k} inline={inline} />}
+    </div>;
+  }
+  const list = (k: "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional") =>
+    Card(k, <ListEditor title={FIELD_LABELS[k]} items={draft[k]} onChange={() => {}} readOnly hideLegend />,
+      <ListEditor title={FIELD_LABELS[k]} items={draft[k]} onChange={l => set(k, l)} readOnly={false} hideLegend={!!inline} />, inline ? <h2>{FIELD_LABELS[k]}</h2> : null);
+
+  const photoRead = draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={`Photo de ${firstName}`} /> : <p>Aucune photo.</p>;
+  const dictRead = draft.dictionary.length === 0 ? <p>Aucune entrée.</p> : <DictionaryGrid entries={draft.dictionary.map(e => ({ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }))} />;
+  const dictEdit = isEditing("dictionary") ? <>
       <p className="sr-only" role="status">{orderMessage}</p>
       <DndContext sensors={sensors} collisionDetection={closestCenter} accessibility={{ screenReaderInstructions: { draggable: "Pour déplacer une entrée, appuyez sur Espace, utilisez les flèches, puis appuyez sur Espace pour confirmer ou Échap pour annuler." }, announcements: {
         onDragStart: () => "Déplacement de l’entrée commencé.",
@@ -185,17 +179,58 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       </SortableContext>
       </DndContext>
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("dictionary", [...draft.dictionary, { id: crypto.randomUUID(), type: "image", title: "", description: "", path: "", alt: "" }])}><Plus aria-hidden="true" /> Ajouter une entrée</button>
-    </section>
-</>, <>
-    <section className="bo-card"><ListEditor title="Je communique" items={draft.communicates} onChange={l => set("communicates", l)} readOnly={false} /></section>
-    <section className="bo-card"><ListEditor title="Ce dont j’ai besoin pour comprendre" items={draft.understandingNeeds} onChange={l => set("understandingNeeds", l)} readOnly={false} /></section>
-    <section className="bo-card"><ListEditor title="Mes outils de communication" items={draft.tools} onChange={l => set("tools", l)} readOnly={false} /></section>
-    <section className="bo-card"><ListEditor title="Ce qui facilite ma communication et la relation" items={draft.facilitators} onChange={l => set("facilitators", l)} readOnly={false} /></section>
-</>, <>
-    <section className="bo-card"><ListEditor title="Mes centres d’intérêt" items={draft.interests} onChange={l => set("interests", l)} readOnly={false} /></section>
-    <section className="bo-card"><ListEditor title="Mes peurs / Ce que je n’aime pas" items={draft.dislikes} onChange={l => set("dislikes", l)} readOnly={false} /></section>
-</>, <>
-    <section className="bo-card"><ListEditor title="Autres informations" items={draft.additional} onChange={l => set("additional", l)} readOnly={false} /></section>
-</>]} />
+  </> : null;
+  const photoEdit = <>
+      <div className="bo-photo-edit">
+        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt="Photo actuelle" /> : <div className="photo-placeholder">Pas de photo</div>}
+        <div className="bo-stack">
+          <label className="bo-btn bo-btn-outline bo-file"><Upload aria-hidden="true" /> {uploading === "photo" ? "Envoi en cours…" : draft.photoPath ? "Remplacer la photo" : "Choisir une photo"}
+            <input type="file" accept="image/*" className="sr-only" onChange={e => handleUpload(e.target.files?.[0], "photo", p => set("photoPath", p), f => f.type.startsWith("image/"))} />
+          </label>
+          {draft.photoPath && <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("photoPath", null)}>Retirer la photo</button>}
+        </div>
+      </div>
+  </>;
+  const text = (k: "howTo" | "about") => <Field label="Texte"><textarea className="bo-input bo-textarea" value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
+  const input = (k: "name" | "birthDate" | "address" | "reminder" | "phone", label: string, type = "text", hint?: string) =>
+    <Field label={label} hint={hint}><input className="bo-input" type={type} required={k === "name"} value={draft[k]} onChange={e => set(k, e.target.value)} /></Field>;
+  const phoneEdit = <>{input("phone", "Téléphone", "tel")}<Field label="À propos du numéro" hint="Par exemple : Ma personne de confiance"><input className="bo-input" value={draft.phoneNote} onChange={e => set("phoneNote", e.target.value)} /></Field></>;
+
+  const info = inline
+    ? <section className="bo-card"><h2>Informations</h2><dl className="bo-read-list">
+        {Row("name", draft.name, input("name", "Nom (obligatoire)"))}
+        {Row("birthDate", draft.birthDate ? formatDateFr(draft.birthDate) : "", input("birthDate", "Date de naissance", "date"))}
+        {Row("phone", draft.phone && <>{draft.phone}{draft.phoneNote && ` (${draft.phoneNote})`}</>, phoneEdit)}
+        {Row("address", draft.address, input("address", "Adresse"))}
+        {Row("reminder", draft.reminder, input("reminder", "Message important", "text", "Affiché en évidence sous le profil."))}
+        <ReadValue label="Dernière mise à jour" value={formatDateFr(updatedAt)} />
+      </dl></section>
+    : <section className="bo-card"><h2>Informations</h2>
+      <div className="bo-grid2">
+        {input("name", "Nom (obligatoire)")}
+        {input("birthDate", "Date de naissance", "date")}
+        {phoneEdit}
+        {input("address", "Adresse")}
+        {input("reminder", "Message important", "text", "Affiché en évidence sous le profil.")}
+      </div>
+      <p className="bo-hint">Dernière mise à jour : {updatedAt ? formatDateFr(updatedAt) : "pas encore enregistré"} (mise à jour automatique à chaque enregistrement).</p>
+    </section>;
+
+  return <>
+    {error && <p className="bo-error" role="alert">{error}</p>}
+    <Steps parts={[<>
+      {Card("photo", photoRead, photoEdit)}
+      {Card("howTo", <p className="bo-pre">{draft.howTo || "—"}</p>, text("howTo"))}
+      {Card("about", <p className="bo-pre">{draft.about || "—"}</p>, text("about"))}
+      {info}
+    </>, <>
+      {Card("dictionary", dictRead, dictEdit)}
+    </>, <>
+      {list("communicates")}{list("understandingNeeds")}{list("tools")}{list("facilitators")}
+    </>, <>
+      {list("interests")}{list("dislikes")}
+    </>, <>
+      {list("additional")}
+    </>]} />
   </>;
 }
