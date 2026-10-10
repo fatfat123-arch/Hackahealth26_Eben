@@ -3,7 +3,7 @@ import type { RowDataPacket } from "mysql2";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireAuth } from "@/lib/auth.functions";
-import { db, iso, json } from "@/server/db.server";
+import { dateOnly, db, iso, json } from "@/server/db.server";
 import { mediaFile, signedMediaUrl } from "@/server/media.server";
 
 type PatientRecord = RowDataPacket & {
@@ -35,7 +35,7 @@ function editableValues(values: Record<string, unknown>) {
 }
 
 function patient(row: PatientRecord): PatientResult {
-  return { ...row, birth_date: row.birth_date ? String(row.birth_date).slice(0, 10) : null,
+  return { ...row, birth_date: dateOnly(row.birth_date),
     dictionary: json<JsonValue[]>(row.dictionary, []), communicates: json(row.communicates, []), understanding_needs: json(row.understanding_needs, []),
     tools: json(row.tools, []), facilitators: json(row.facilitators, []), interests: json(row.interests, []), dislikes: json(row.dislikes, []),
     additional: json(row.additional, []), section_order: json(row.section_order, []), created_at: iso(row.created_at), updated_at: iso(row.updated_at), archived_at: iso(row.archived_at) };

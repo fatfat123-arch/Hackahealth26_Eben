@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { RowDataPacket } from "mysql2";
-import { db, iso, json } from "@/server/db.server";
+import { dateOnly, db, iso, json } from "@/server/db.server";
 import { signedMediaUrl } from "@/server/media.server";
 import { ageFromBirthDate } from "@/lib/patients";
 type PublicRow = RowDataPacket & { id: string; name: string; birth_date: Date | string | null; phone: string; phone_note: string; address: string; about: string; how_to: string; reminder: string; photo_path: string | null; photo_position_y: number; dictionary: unknown; communicates: unknown; understanding_needs: unknown; tools: unknown; facilitators: unknown; interests: unknown; dislikes: unknown; additional: unknown; section_order: unknown; updated_at: Date | string; archived_at: Date | string | null };
@@ -16,7 +16,7 @@ export const getPublicPassport = createServerFn({ method: "GET" })
       dictionary: json(raw.dictionary, []), communicates: json(raw.communicates, []), understanding_needs: json(raw.understanding_needs, []),
       tools: json(raw.tools, []), facilitators: json(raw.facilitators, []), interests: json(raw.interests, []), dislikes: json(raw.dislikes, []),
       additional: json(raw.additional, []), section_order: json(raw.section_order, []), updated_at: iso(raw.updated_at), archived_at: iso(raw.archived_at),
-      age: ageFromBirthDate(raw.birth_date ? String(raw.birth_date).slice(0, 10) : null),
+      age: ageFromBirthDate(dateOnly(raw.birth_date)),
     } : null;
     if (!row) return null;
     if (row.archived_at) return { archived: true as const };

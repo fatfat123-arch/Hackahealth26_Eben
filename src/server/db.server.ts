@@ -30,6 +30,20 @@ export function iso(value: Date | string | null | undefined) {
   return value ? new Date(value).toISOString() : null;
 }
 
+/** Preserve a MariaDB DATE as YYYY-MM-DD without locale or timezone conversion. */
+export function dateOnly(value: Date | string | null | undefined) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return null;
+    const year = value.getUTCFullYear();
+    const month = String(value.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(value.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  const match = String(value).match(/^\d{4}-\d{2}-\d{2}/);
+  return match?.[0] ?? null;
+}
+
 export function json<T>(value: unknown, fallback: T): T {
   if (value == null) return fallback;
   if (typeof value === "string") {
