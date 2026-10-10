@@ -7,10 +7,14 @@ import { normalizeSectionOrder, SECTION_TITLES, type SectionKey } from "@/lib/se
 import type { ReactNode } from "react";
 import type { DictionaryEntry } from "@/data/passport";
 import { Button } from "@/components/ui/button";
-import dictionaryIcon from "@/assets/passport-dictionnaire.png.asset.json";
+import dictionaryIcon from "@/assets/icone-dictionnaire.png.asset.json";
+import communicatesIcon from "@/assets/icone-communique.png.asset.json";
+import understandingIcon from "@/assets/icone-comprendre.png.asset.json";
+import toolsIcon from "@/assets/icone-outils.png.asset.json";
+import facilitatorsIcon from "@/assets/icone-faciliter.png.asset.json";
+import notesIcon from "@/assets/icone-notes.png.asset.json";
 import interestsIcon from "@/assets/passport-interets.png.asset.json";
 import dislikesIcon from "@/assets/passport-peurs.png.asset.json";
-import informationIcon from "@/assets/passport-informations.png.asset.json";
 
 export type PassportViewData = {
   name: string;
@@ -62,8 +66,8 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 const ICONS: Record<SectionKey, string> = {
-  dictionary: dictionaryIcon.url, communicates: informationIcon.url, understandingNeeds: informationIcon.url, tools: informationIcon.url,
-  facilitators: informationIcon.url, interests: interestsIcon.url, dislikes: dislikesIcon.url, additional: informationIcon.url,
+  dictionary: dictionaryIcon.url, communicates: communicatesIcon.url, understandingNeeds: understandingIcon.url, tools: toolsIcon.url,
+  facilitators: facilitatorsIcon.url, interests: interestsIcon.url, dislikes: dislikesIcon.url, additional: notesIcon.url,
 };
 
 function renderSection(k: SectionKey, data: PassportViewData) {
