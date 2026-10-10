@@ -41,7 +41,7 @@ export function DictionaryMedia({ entry, enlarged = false, suspended = false }: 
         {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
       </Button>
     </>}
-    {entry.type === "video" && <video ref={video} controls playsInline preload="none" poster={entry.poster} aria-label={entry.alt}>
+    {entry.type === "video" && <video ref={video} controls playsInline preload="metadata" poster={entry.poster} aria-label={entry.alt}>
       <source src={entry.source} />Votre navigateur ne permet pas de lire cette vidéo.
     </video>}
     {entry.type === "audio" && <div className="audio-media">

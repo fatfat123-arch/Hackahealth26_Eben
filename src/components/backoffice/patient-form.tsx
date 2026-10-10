@@ -56,6 +56,20 @@ async function uploadFile(file: File, folder: string) {
   return (await response.json() as { path: string }).path;
 }
 
+async function imageAsWebp(file: File) {
+  if (!/^image\/(jpeg|png)$/.test(file.type)) return file;
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1920 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/webp", 0.86));
+  if (!blob) return file;
+  return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, { type: "image/webp" });
+}
+
 async function cartooniseVideo(file: File) {
   const body = new FormData();
   body.append("video", file);
@@ -121,7 +135,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     if (accept && !accept(file)) { setError("Ce type de fichier n’est pas accepté."); return; }
     setError(""); setUploading(key);
     try {
-      const uploaded = useCartooniser && file.type.startsWith("video/") ? await cartooniseVideo(file) : file;
+      const uploaded = useCartooniser && file.type.startsWith("video/") ? await cartooniseVideo(file) : await imageAsWebp(file);
       const path = await uploadFile(uploaded, folder);
       onUrls({ ...urls, [path]: URL.createObjectURL(uploaded) });
       apply(path);
