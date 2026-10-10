@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/espace/patients/liste")({
 });
 
 async function loadPatients() {
-  const { data, error } = await supabase.from("patients").select("id,name,photo_path,photo_alt,updated_at,archived_at").order("name");
+  const { data, error } = await supabase.from("patients").select("id,name,photo_path,updated_at,archived_at").order("name");
   if (error) throw error;
   const urls = await signPaths((data ?? []).map(p => p.photo_path ?? ""));
   return { patients: data ?? [], urls };

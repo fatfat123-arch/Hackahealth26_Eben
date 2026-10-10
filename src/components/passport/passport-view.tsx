@@ -28,6 +28,10 @@ export type PassportViewData = {
   howTo: string;
   reminder: string;
   dictionary: DictionaryEntry[];
+  communicates?: string[];
+  understandingNeeds?: string[];
+  tools?: string[];
+  facilitators?: string[];
   interests: string[];
   dislikes: string[];
   additional: string[];
@@ -67,7 +71,7 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
       </header>
       <section className="profile-section" aria-label={`Profil de ${data.name}`}>
         <figure className="profile-photo">
-          {data.portrait ? <img src={data.portrait} alt={data.portraitAlt || `Photo de ${data.name}`} width={1024} height={1024} fetchPriority="high" />
+          {data.portrait ? <img src={data.portrait} alt={`Photo de ${firstName || data.name}`} width={1024} height={1024} fetchPriority="high" />
             : <div className="photo-placeholder" role="img" aria-label="Aucune photo">Pas de photo</div>}
         </figure>
         <div className="profile-copy">
@@ -96,25 +100,31 @@ export function PassportView({ data, demo = false }: { data: PassportViewData; d
       </section>
       {data.reminder && <aside className="communication-note"><Info aria-hidden="true" /><p>{data.reminder}</p></aside>}
       <Accordion type="multiple" className="passport-sections" aria-label="Les rubriques de mon passeport">
-        <AccordionItem value="dictionary" className="passport-section">
+        {data.dictionary.length > 0 && <AccordionItem value="dictionary" className="passport-section">
           <SectionHeader title="Mon dictionnaire" icon={dictionaryIcon.url} />
           <AccordionContent className="section-content">
-            {data.dictionary.length === 0 ? <p>Aucune entrée pour le moment.</p> :
-              <div className="dictionary-grid">{data.dictionary.map(entry => <DictionaryCard key={entry.id} entry={entry} />)}</div>}
+            <div className="dictionary-grid">{data.dictionary.map(entry => <DictionaryCard key={entry.id} entry={entry} />)}</div>
           </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="interests" className="passport-section">
+        </AccordionItem>}
+        {([["communicates", "Je communique"], ["understanding", "Ce dont j’ai besoin pour comprendre"], ["tools", "Mes outils de communication"], ["facilitators", "Ce qui facilite ma communication et la relation"]] as const).map(([v, t]) => {
+          const items = (v === "understanding" ? data.understandingNeeds : data[v]) ?? [];
+          return items.length > 0 && <AccordionItem key={v} value={v} className="passport-section">
+            <SectionHeader title={t} icon={informationIcon.url} />
+            <AccordionContent className="section-content"><BulletList items={items} /></AccordionContent>
+          </AccordionItem>;
+        })}
+        {data.interests.length > 0 && <AccordionItem value="interests" className="passport-section">
           <SectionHeader title="Mes centres d’intérêt" icon={interestsIcon.url} />
           <AccordionContent className="section-content"><TagList items={data.interests} /></AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="dislikes" className="passport-section">
+        </AccordionItem>}
+        {data.dislikes.length > 0 && <AccordionItem value="dislikes" className="passport-section">
           <SectionHeader title="Mes peurs / Ce que je n’aime pas" icon={dislikesIcon.url} />
           <AccordionContent className="section-content"><TagList items={data.dislikes} /></AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="other" className="passport-section">
+        </AccordionItem>}
+        {data.additional.length > 0 && <AccordionItem value="other" className="passport-section">
           <SectionHeader title="Autres informations" icon={informationIcon.url} />
           <AccordionContent className="section-content"><BulletList items={data.additional} /></AccordionContent>
-        </AccordionItem>
+        </AccordionItem>}
       </Accordion>
       <footer className="passport-footer">
         <p>Merci de prendre le temps de me comprendre.</p>

@@ -48,9 +48,9 @@ function ListEditor({ title, items, onChange, readOnly }: { title: string; items
   </fieldset>;
 }
 
-const STEPS = [["identite", "Identité"], ["dictionnaire", "Dictionnaire"], ["gouts", "Centres d’intérêt et peurs"], ["autres", "Autres informations"]] as const;
+const STEPS = [["identite", "Identité"], ["dictionnaire", "Dictionnaire"], ["communication", "Communication"], ["gouts", "Centres d’intérêt et peurs"], ["autres", "Autres informations"]] as const;
 
-function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode] }) {
+function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode, ReactNode] }) {
   return <Tabs.Root defaultValue="identite" className="bo-steps-tabs">
     <Tabs.List className="bo-tablist" aria-label="Étapes du profil">
       {STEPS.map(([v, l], i) => <Tabs.Trigger key={v} value={v} className="bo-steptab"><span className="bo-step-num" aria-hidden="true">{i + 1}</span>{l}</Tabs.Trigger>)}
@@ -81,7 +81,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
   if (readOnly) {
     return <Steps parts={[<>
       <section className="bo-card"><h2>Photo</h2>
-        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={draft.photoAlt || `Photo de ${draft.name}`} /> : <p>Aucune photo.</p>}
+        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={`Photo de ${draft.name.trim().split(/\s+/)[0]}`} /> : <p>Aucune photo.</p>}
       </section>
       <section className="bo-card"><h2>Comment utiliser cette page</h2><p className="bo-pre">{draft.howTo || "—"}</p></section>
       <section className="bo-card"><h2>À propos de moi</h2><p className="bo-pre">{draft.about || "—"}</p></section>
@@ -102,6 +102,11 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
         </div>}
       </section>
 </>, <>
+      <section className="bo-card"><ListEditor title="Je communique" items={draft.communicates} onChange={() => {}} readOnly /></section>
+      <section className="bo-card"><ListEditor title="Ce dont j’ai besoin pour comprendre" items={draft.understandingNeeds} onChange={() => {}} readOnly /></section>
+      <section className="bo-card"><ListEditor title="Mes outils de communication" items={draft.tools} onChange={() => {}} readOnly /></section>
+      <section className="bo-card"><ListEditor title="Ce qui facilite ma communication et la relation" items={draft.facilitators} onChange={() => {}} readOnly /></section>
+</>, <>
       <section className="bo-card"><ListEditor title="Mes centres d’intérêt" items={draft.interests} onChange={() => {}} readOnly /></section>
       <section className="bo-card"><ListEditor title="Mes peurs / Ce que je n’aime pas" items={draft.dislikes} onChange={() => {}} readOnly /></section>
 </>, <>
@@ -114,13 +119,12 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     <Steps parts={[<>
     <section className="bo-card"><h2>Photo</h2>
       <div className="bo-photo-edit">
-        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={draft.photoAlt || "Photo actuelle"} /> : <div className="photo-placeholder">Pas de photo</div>}
+        {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt="Photo actuelle" /> : <div className="photo-placeholder">Pas de photo</div>}
         <div className="bo-stack">
           <label className="bo-btn bo-btn-outline bo-file"><Upload aria-hidden="true" /> {uploading === "photo" ? "Envoi en cours…" : draft.photoPath ? "Remplacer la photo" : "Choisir une photo"}
             <input type="file" accept="image/*" className="sr-only" onChange={e => handleUpload(e.target.files?.[0], "photo", p => set("photoPath", p), f => f.type.startsWith("image/"))} />
           </label>
           {draft.photoPath && <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("photoPath", null)}>Retirer la photo</button>}
-          <Field label="Description de la photo" hint="Pour les personnes qui ne voient pas l’image."><input className="bo-input" value={draft.photoAlt} onChange={e => set("photoAlt", e.target.value)} /></Field>
         </div>
       </div>
     </section>
@@ -159,6 +163,11 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       </div>
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("dictionary", [...draft.dictionary, { id: crypto.randomUUID(), type: "image", title: "", description: "", path: "", alt: "" }])}><Plus aria-hidden="true" /> Ajouter une entrée</button>
     </section>
+</>, <>
+    <section className="bo-card"><ListEditor title="Je communique" items={draft.communicates} onChange={l => set("communicates", l)} readOnly={false} /></section>
+    <section className="bo-card"><ListEditor title="Ce dont j’ai besoin pour comprendre" items={draft.understandingNeeds} onChange={l => set("understandingNeeds", l)} readOnly={false} /></section>
+    <section className="bo-card"><ListEditor title="Mes outils de communication" items={draft.tools} onChange={l => set("tools", l)} readOnly={false} /></section>
+    <section className="bo-card"><ListEditor title="Ce qui facilite ma communication et la relation" items={draft.facilitators} onChange={l => set("facilitators", l)} readOnly={false} /></section>
 </>, <>
     <section className="bo-card"><ListEditor title="Mes centres d’intérêt" items={draft.interests} onChange={l => set("interests", l)} readOnly={false} /></section>
     <section className="bo-card"><ListEditor title="Mes peurs / Ce que je n’aime pas" items={draft.dislikes} onChange={l => set("dislikes", l)} readOnly={false} /></section>
