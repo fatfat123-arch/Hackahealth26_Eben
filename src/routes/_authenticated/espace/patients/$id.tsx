@@ -3,11 +3,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { BookOpen, Copy, Download, Eye, Pencil, Save, X } from "lucide-react";
+import { BookOpen, Copy, Download, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { signPaths } from "@/lib/session";
 import { draftPaths, draftToRow, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
-import { PatientForm } from "@/components/backoffice/patient-form";
+import { PatientForm, FIELD_DRAFT_KEYS, FIELD_LABELS, type FieldKey } from "@/components/backoffice/patient-form";
+import { askConfirm } from "@/components/backoffice/confirm-dialog";
 import { PreviewPanel } from "@/components/backoffice/preview-panel";
 import { BackLink } from "@/components/backoffice/back-link";
 import { Mascot } from "@/components/mascot";
@@ -60,55 +61,70 @@ function PatientPage() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({ queryKey: ["patient", id], queryFn: () => loadPatient(id) });
-  const [mode, setMode] = useState<"view" | "edit" | "preview">("view");
+  const [preview, setPreview] = useState(false);
   const [draft, setDraft] = useState<PatientDraft | null>(null);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [editing, setEditing] = useState<FieldKey | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(() => consumeJustSaved(id) ? "Profil enregistré" : "");
   const [err, setErr] = useState("");
-  const [from, setFrom] = useState<"view" | "edit">("view");
 
-  useEffect(() => { if (data && mode === "view" && from !== "edit") { setDraft(data.draft); setUrls(data.urls); } }, [data, mode]);
+  useEffect(() => { if (data && !editing) { setDraft(data.draft); setUrls(u => ({ ...u, ...data.urls })); } }, [data]);
 
   if (isLoading || (data && !draft)) return <p>Chargement…</p>;
   if (error) return <p className="bo-error" role="alert">Le profil n’a pas pu être chargé.</p>;
   if (!data || !draft) return <><BackLink to="/espace/patients/liste">Retour à la liste</BackLink><h1 className="bo-title">Profil introuvable</h1></>;
+  const saved = data.draft;
 
-  const editing = mode === "edit";
+  const dirty = (k: FieldKey) => FIELD_DRAFT_KEYS[k].some(key => JSON.stringify(draft[key]) !== JSON.stringify(saved[key]));
+  const revert = (k: FieldKey) => setDraft(d => d && FIELD_DRAFT_KEYS[k].reduce((acc, key) => ({ ...acc, [key]: saved[key] }), d));
 
-  async function save() {
-    if (!draft) return;
-    if (!draft.name.trim()) { setErr("Le nom est obligatoire."); return; }
+  async function saveField(k: FieldKey): Promise<boolean> {
+    if (!draft) return false;
+    if (k === "name" && !draft.name.trim()) { setErr("Le nom est obligatoire."); return false; }
+    const full = draftToRow(draft) as Record<string, unknown>;
+    const cols = Object.fromEntries(FIELD_DRAFT_KEYS[k].map(key => { const c = COLUMN[key]; return [c, full[c]]; }));
     setBusy(true); setErr("");
-    const { error } = await supabase.from("patients").update(draftToRow(draft)).eq("id", id);
+    const { error } = await supabase.from("patients").update(cols).eq("id", id);
     setBusy(false);
-    if (error) { setErr("Désolé, les modifications n’ont pas pu être enregistrées. Merci de réessayer."); return; }
+    if (error) { setErr("Désolé, la modification n’a pas pu être enregistrée. Merci de réessayer."); return false; }
+    setEditing(null);
+    setMsg(`${FIELD_LABELS[k]} enregistré`);
     await qc.invalidateQueries({ queryKey: ["patient", id] });
     await qc.invalidateQueries({ queryKey: ["patients"] });
-    setMode("view"); setMsg("Profil enregistré"); window.scrollTo(0, 0);
+    return true;
   }
+  async function startEdit(k: FieldKey) {
+    setMsg(""); setErr("");
+    if (editing && editing !== k && dirty(editing)) {
+      const ok = await askConfirm(`Vous avez modifié « ${FIELD_LABELS[editing]} » sans enregistrer.`, { kind: "save", title: "Enregistrer les modifications ?", confirmLabel: "Enregistrer", cancelLabel: "Annuler les modifications" });
+      if (ok) { if (!(await saveField(editing))) return; } else revert(editing);
+    } else if (editing) revert(editing);
+    setEditing(k);
+  }
+  function cancel(k: FieldKey) { revert(k); setEditing(null); setErr(""); }
 
-  if (mode === "preview") return <PreviewPanel draft={draft} urls={urls} updatedAt={data.row.updated_at} onClose={() => setMode(from)} />;
+  if (preview) return <PreviewPanel draft={draft} urls={urls} updatedAt={data.row.updated_at} onClose={() => setPreview(false)} />;
 
   return <>
     <BackLink to="/espace/patients/liste">Retour à la liste</BackLink>
     <h1 className="bo-title">{data.row.name}</h1>
     <div className="title-underline" />
     <div className="bo-actions">
-      {editing ? <>
-        <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> {busy ? "Enregistrement…" : "Enregistrer"}</button>
-        <button type="button" className="bo-btn bo-btn-outline" onClick={() => { setErr(""); setMode("view"); setDraft(data.draft); setUrls(data.urls); }}><X aria-hidden="true" /> Annuler</button>
-      </> : <button type="button" className="bo-btn bo-btn-primary" onClick={() => { setMsg(""); setMode("edit"); }}><Pencil aria-hidden="true" /> Modifier</button>}
-      <button type="button" className="bo-btn bo-btn-outline" onClick={() => { setFrom(editing ? "edit" : "view"); setMode("preview"); }}><Eye aria-hidden="true" /> Aperçu</button>
+      <button type="button" className="bo-btn bo-btn-outline" onClick={() => setPreview(true)}><Eye aria-hidden="true" /> Aperçu</button>
       <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
     </div>
-    {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Les changements sont visibles tout de suite sur la page publique.</p></div></div>}
+    <p className="bo-hint">Pour modifier une information, cliquez sur le crayon à côté de celle-ci.</p>
+    {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Le changement est visible tout de suite sur la page publique.</p></div></div>}
     {err && <p className="bo-error" role="alert">{err}</p>}
-    {!editing && <PublicLink id={id} name={data.row.name} />}
-    <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly={!editing} folder={id} updatedAt={data.row.updated_at} />
-    {editing && <div className="bo-actions bo-actions-end">
-      <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> Enregistrer</button>
-      <button type="button" className="bo-btn bo-btn-outline" onClick={() => { setMode("view"); setDraft(data.draft); setUrls(data.urls); }}><X aria-hidden="true" /> Annuler</button>
-    </div>}
+    <PublicLink id={id} name={data.row.name} />
+    <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly folder={id} updatedAt={data.row.updated_at}
+      inline={{ editing, busy, onEdit: startEdit, onSave: k => { void saveField(k); }, onCancel: cancel }} />
   </>;
 }
+
+const COLUMN: Record<keyof PatientDraft, string> = {
+  name: "name", birthDate: "birth_date", phone: "phone", phoneNote: "phone_note", address: "address", about: "about", howTo: "how_to", reminder: "reminder",
+  photoPath: "photo_path", dictionary: "dictionary", communicates: "communicates", understandingNeeds: "understanding_needs", tools: "tools", facilitators: "facilitators",
+  interests: "interests", dislikes: "dislikes", additional: "additional",
+};
