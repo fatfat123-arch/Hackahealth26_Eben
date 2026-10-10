@@ -453,5 +453,16 @@
 @media (max-width: 720px) { .bo-read-edit { grid-template-columns: minmax(0, 1fr) 44px; } .bo-read-edit dd { grid-column: 1 / -1; grid-row: 2; } }
 
 /* Tutorial photos */
-.bo-tutorial-photos { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
-.bo-tutorial-photos img { display: block; width: 100%; max-width: 600px; height: auto; border: 1px solid #d5e0ec; border-radius: 8px; }
+.bo-tutorial-photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 280px)); gap: 16px; margin-top: 20px; }
+.bo-tutorial-photos .bo-tutorial-photo-button { display: block; width: 100%; height: auto; padding: 0; border: 0; border-radius: 8px; background: transparent; white-space: normal; box-shadow: none; transition: none; }
+.bo-tutorial-photo-image { position: relative; display: block; }
+.bo-tutorial-photo-image img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; }
+.bo-tutorial-highlight { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.bo-tutorial-highlight ellipse { fill: none; stroke: var(--accent); stroke-width: 3px; }
+.bo-tutorial-photo-button:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
+.bo-tutorial-photo-overlay { position: fixed; inset: 0; z-index: 80; background: var(--background); animation: none; }
+.bo-tutorial-photo-dialog { position: fixed; inset: 16px; z-index: 81; display: flex; flex-direction: column; align-items: center; gap: 16px; background: var(--background); animation: none; box-shadow: none; outline: none; }
+.bo-tutorial-photo-dialog > .bo-tutorial-photo-image { min-height: 0; height: 100%; aspect-ratio: 886 / 1920; max-width: 100%; flex: 0 1 auto; }
+.bo-tutorial-photo-dialog .bo-tutorial-photo-image img { width: 100%; height: 100%; object-fit: contain; }
+.bo-tutorial-photo-dialog .bo-tutorial-photo-close { align-self: flex-end; flex-shrink: 0; min-height: 44px; box-shadow: none; transition: none; }
+@media (max-width: 520px) { .bo-tutorial-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bo-tutorial-photo-dialog { inset: 12px; } }

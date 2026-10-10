@@ -1,4 +1,5 @@
 # Tasks
+- [x] Resize tutorial photos into a side-by-side grid, add accessible enlargement and verify highlight placement.
 - [x] Add a shared accessible larger dictionary view and verify media navigation and closing.
 - [x] Add handle and arrow reordering in patient forms and verify the saved array order.
 - [x] Build the French public profile with a single fictional data source.

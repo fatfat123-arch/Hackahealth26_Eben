@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Application architecture
+- Keep tutorial screenshot enlargement and percentage-based highlights in TutorialPhotos, using Radix Dialog and unmodified source images. Why: accessible closing and aligned annotations at every size.
 - Keep the public passport’s replaceable fictional profile and media references in `src/data/passport.ts`; the page must consume this single source rather than embed person-specific content throughout the UI.
 - Use Radix multiple accordions for the public sections, with no default open values, to retain keyboard accessibility and independent expansion.
 - Keep dictionary playback in a dedicated browser-safe component with user-controlled audio/video and a pause control for GIFs, so media remains accessible without introducing server dependencies.
