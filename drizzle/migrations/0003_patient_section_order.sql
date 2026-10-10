@@ -1,0 +1,1 @@
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS section_order text[] NOT NULL DEFAULT ARRAY['dictionary','communicates','understandingNeeds','tools','facilitators','interests','dislikes','additional']::text[];
