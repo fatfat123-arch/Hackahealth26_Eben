@@ -27,3 +27,5 @@
 - Public passport links are built by `src/lib/site-url.ts` (`PUBLISHED_ORIGIN`), never from the preview address. Why: QR codes must point to the published site.
 - Mascot images are rendered only through `src/components/mascot.tsx` (decorative, aria-hidden); delete confirmations go through `askConfirm` + the single `ConfirmHost` mounted in the root. Why: one place enforces mascot placement rules and one accessible dialog replaces browser confirms.
 - The patient profile page is read-only with one field in edit mode at a time; each pencil saves only that field's columns (mapping in `FIELD_DRAFT_KEYS` in patient-form), while the create page keeps the full form. Why: small, safe edits that appear immediately on the public passport.
+- Patient accordion order is `patients.section_order` (text[] of section keys), normalized by `src/lib/section-order.ts` and rendered by PassportView. Why: one saved order for profile, preview and public page.
+- Passwords are only set/reset via admin-checked server functions calling the auth admin API; never read or stored by the app. Why: hashes stay in auth only.
