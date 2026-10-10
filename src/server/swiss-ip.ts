@@ -51,7 +51,7 @@ export function requireSwissIp(request: Request) {
   if (process.env["SWISS_IP_ONLY"] !== "true") return null;
   const address = clientIp(request);
   if (address && isSwissIp(address)) return null;
-  return new Response("Ce site est accessible uniquement depuis la Suisse.", {
+  return new Response("", {
     status: 403,
     headers: { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" },
   });
