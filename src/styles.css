@@ -211,10 +211,12 @@
 .bo-cartoonise-choice input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary); }
 .bo-cartoonise-choice span { display: grid; gap: 3px; }
 .bo-cartoonise-choice small { color: var(--muted-foreground); line-height: 1.45; }
-.bo-cartoonise-button { width: 52px; height: 52px; display: inline-grid; place-items: center; border: 2px solid var(--primary); border-radius: 999px; background: white; color: var(--primary); cursor: pointer; touch-action: manipulation; }
+.bo-cartoonise-button { min-height: 52px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border: 2px solid var(--primary); border-radius: 999px; background: white; color: var(--primary); cursor: pointer; touch-action: manipulation; font-weight: 700; }
 .bo-cartoonise-button svg { width: 25px; height: 25px; }
 .bo-cartoonise-button:hover, .bo-cartoonise-button:focus-visible, .bo-cartoonise-button.is-active { background: var(--primary); color: white; }
 .bo-cartoonise-button:disabled { opacity: .55; cursor: wait; }
+.bo-media-progress { display: grid; gap: 6px; color: var(--muted-foreground); }
+.bo-media-progress progress { width: 100%; height: 12px; accent-color: var(--primary); }
 :where(input, textarea, select, label.bo-choice, a.bo-btn, .bo-list-item):focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 .bo-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 32px 0 24px; }
 .bo-actions-end { margin-top: 32px; }

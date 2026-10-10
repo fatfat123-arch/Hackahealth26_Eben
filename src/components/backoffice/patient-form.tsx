@@ -10,6 +10,7 @@ import { SectionOrderEditor } from "@/components/backoffice/section-order-editor
 import { SECTION_TITLES } from "@/lib/section-order";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
+import { mediaFileError } from "@/lib/media-limits";
 
 export type FieldKey = "photo" | "name" | "birthDate" | "phone" | "reminder" | "about" | "howTo" | "dictionary" | "communicates" | "understandingNeeds" | "tools" | "facilitators" | "interests" | "dislikes" | "additional" | "sectionOrder";
 export const FIELD_LABELS: Record<FieldKey, string> = {
@@ -119,6 +120,7 @@ function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode, 
 
 export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt, canCartoonise = false, inline: inlineProp }: Props) {
   const [uploading, setUploading] = useState<string | null>(null);
+  const [cartoonProgress, setCartoonProgress] = useState<{ key: string; value: number; label: string } | null>(null);
   const [error, setError] = useState("");
   const [orderMessage, setOrderMessage] = useState("");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
@@ -133,6 +135,8 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
   async function handleUpload(file: File | undefined, key: string, apply: (path: string) => void, accept?: (f: File) => boolean, useCartooniser = false) {
     if (!file) return;
     if (accept && !accept(file)) { setError("Ce type de fichier n’est pas accepté."); return; }
+    const sizeError = mediaFileError(file);
+    if (sizeError) { setError(sizeError); return; }
     setError(""); setUploading(key);
     try {
       const uploaded = useCartooniser && file.type.startsWith("video/") ? await cartooniseVideo(file) : await imageAsWebp(file);
@@ -147,20 +151,28 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     if (entry.type !== "video" || !entry.path) return;
     if (entry.originalPath) {
       setEntry(index, { path: entry.originalPath, originalPath: undefined });
+      setError("");
+      setCartoonProgress(null);
       return;
     }
     const source = urls[entry.path];
     if (!source) { setError("La vidéo originale n’est pas disponible. Rechargez la page puis réessayez."); return; }
-    setError(""); setUploading(`cartoon-${entry.id}`);
+    const progressKey = `cartoon-${entry.id}`;
+    setError(""); setUploading(progressKey);
+    setCartoonProgress({ key: progressKey, value: 10, label: "Chargement de la vidéo originale…" });
     try {
       const response = await fetch(source);
       if (!response.ok) throw new Error("La vidéo originale n’a pas pu être chargée.");
       const input = new File([await response.blob()], "video-originale.mp4", { type: response.headers.get("content-type") || "video/mp4" });
+      setCartoonProgress({ key: progressKey, value: 40, label: "Application du filtre dessin animé…" });
       const output = await cartooniseVideo(input);
+      setCartoonProgress({ key: progressKey, value: 85, label: "Enregistrement de la vidéo transformée…" });
       const cartoonPath = await uploadFile(output, folder);
       onUrls({ ...urls, [cartoonPath]: URL.createObjectURL(output) });
       setEntry(index, { path: cartoonPath, originalPath: entry.path, posterPath: undefined });
+      setCartoonProgress({ key: progressKey, value: 100, label: "Filtre appliqué. Enregistrez le dictionnaire pour confirmer." });
     } catch (cause) {
+      setCartoonProgress(null);
       setError(cause instanceof Error && cause.message ? cause.message : "La transformation en dessin animé a échoué.");
     } finally { setUploading(null); }
   }
@@ -219,11 +231,15 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
               handleUpload(f, e.id, p => setEntry(i, { path: p, type: t ?? "image", originalPath: undefined, posterPath: undefined }), file => !!mediaTypeFromFile(file));
             }} />
           </label>
+          <p className="bo-hint">Images : 15 Mo · Sons (MP3, M4A, WAV, OGG, Opus, FLAC…) : 30 Mo · Vidéos : 100 Mo. Les fichiers audio et vidéo ne sont pas recompressés lors de l’envoi.</p>
           {canCartoonise && e.type === "video" && e.path && <button type="button" className={`bo-cartoonise-button${e.originalPath ? " is-active" : ""}`} disabled={uploading === `cartoon-${e.id}`} aria-pressed={!!e.originalPath} aria-label={e.originalPath ? "Retirer le filtre dessin animé" : "Appliquer le filtre dessin animé"} title={e.originalPath ? "Retirer le filtre dessin animé" : "Appliquer le filtre dessin animé"} onClick={() => void toggleCartooniser(e, i)}>
             <WandSparkles aria-hidden="true" />
-            <span className="sr-only">{e.originalPath ? "Retirer le filtre dessin animé" : "Appliquer le filtre dessin animé"}</span>
+            <span>{e.originalPath ? "Retirer le filtre" : "Appliquer le filtre"}</span>
           </button>}
-          {uploading === `cartoon-${e.id}` && <p className="bo-hint" role="status">Transformation en cours… Cela peut prendre plusieurs minutes.</p>}
+          {cartoonProgress?.key === `cartoon-${e.id}` && <div className="bo-media-progress" role="status" aria-live="polite">
+            <progress max="100" value={cartoonProgress.value}>{cartoonProgress.value}%</progress>
+            <span>{cartoonProgress.label} ({cartoonProgress.value} %)</span>
+          </div>}
           <Field label="Signification (titre)"><input className="bo-input" value={e.title} onChange={ev => setEntry(i, { title: ev.target.value })} placeholder="Par exemple : J’ai soif" /></Field>
           <Field label="Explication"><input className="bo-input" value={e.description} onChange={ev => setEntry(i, { description: ev.target.value })} /></Field>
           <Field label="Description du média" hint="Pour les personnes qui ne voient pas ou n’entendent pas."><input className="bo-input" value={e.alt} onChange={ev => setEntry(i, { alt: ev.target.value })} /></Field>

@@ -16,7 +16,7 @@ const entries: DictionaryEntry[] = [
 ];
 
 describe("Dictionary enlargement", () => {
-  it("opens an entry, navigates without autoplay, and closes", () => {
+  it("opens an entry, loops videos automatically, and closes", () => {
     render(<DictionaryGrid entries={entries} />);
     fireEvent.click(screen.getByRole("button", { name: "Agrandir : J’ai soif" }));
     let dialog = screen.getByRole("dialog");
@@ -24,8 +24,10 @@ describe("Dictionary enlargement", () => {
     expect(within(dialog).getByRole("button", { name: "Précédent" })).toBeDisabled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Suivant" }));
     dialog = screen.getByRole("dialog");
-    expect(dialog.querySelector("video")).toHaveAttribute("controls");
-    expect(dialog.querySelector("video")).not.toHaveAttribute("autoplay");
+    expect(dialog.querySelector("video")).toHaveAttribute("autoplay");
+    expect(dialog.querySelector("video")).toHaveAttribute("loop");
+    expect(dialog.querySelector("video")).toHaveProperty("muted", true);
+    expect(dialog.querySelector("video")).not.toHaveAttribute("controls");
     fireEvent.click(within(dialog).getByRole("button", { name: "Suivant" }));
     expect(dialog.querySelector("audio")).toHaveAttribute("controls");
     expect(dialog.querySelector("audio")).not.toHaveAttribute("autoplay");

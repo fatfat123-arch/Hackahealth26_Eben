@@ -41,9 +41,14 @@ export function DictionaryMedia({ entry, enlarged = false, suspended = false }: 
         {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
       </Button>
     </>}
-    {entry.type === "video" && <video ref={video} controls playsInline preload="metadata" poster={entry.poster} aria-label={entry.alt}>
+    {entry.type === "video" && <video ref={video} autoPlay loop muted playsInline preload="auto" poster={entry.poster} aria-label={entry.alt} onCanPlay={event => {
+      if (suspended) return;
+      const attempt = event.currentTarget.play();
+      if (attempt) void attempt.catch(() => setError(true));
+    }}>
       <source src={entry.source} />Votre navigateur ne permet pas de lire cette vidéo.
     </video>}
+    {entry.type === "video" && error && <p role="alert">La lecture automatique est indisponible.</p>}
     {entry.type === "audio" && <div className="audio-media">
       <AudioLines size={enlarged ? 96 : 56} strokeWidth={1.3} aria-hidden="true" />
       {enlarged ? <audio controls preload="metadata" src={entry.source} aria-label={entry.alt} /> : <>
