@@ -15,6 +15,13 @@
       "when": 1791617222596,
       "tag": "0001_archive_and_admin_management",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791624033721,
+      "tag": "0002_communication_sections",
+      "breakpoints": true
     }
   ]
 }
