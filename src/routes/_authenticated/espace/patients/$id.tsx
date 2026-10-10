@@ -85,7 +85,7 @@ function PatientPage() {
     const full = draftToRow(draft) as Record<string, unknown>;
     const cols = Object.fromEntries(FIELD_DRAFT_KEYS[k].map(key => { const c = COLUMN[key]; return [c, full[c]]; }));
     setBusy(true); setErr("");
-    const { error } = await supabase.from("patients").update(cols).eq("id", id);
+    const { error } = await supabase.from("patients").update(cols as never).eq("id", id);
     setBusy(false);
     if (error) { setErr("Désolé, la modification n’a pas pu être enregistrée. Merci de réessayer."); return false; }
     setEditing(null);

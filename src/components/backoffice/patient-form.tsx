@@ -56,7 +56,7 @@ async function uploadFile(file: File, folder: string) {
   return path;
 }
 
-function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string | undefined }) {
   return <label className="bo-field"><span>{label}</span>{children}{hint && <small className="bo-hint">{hint}</small>}</label>;
 }
 
