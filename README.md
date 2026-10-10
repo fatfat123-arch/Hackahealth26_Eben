@@ -70,3 +70,13 @@ npm run dev
 
 The image and video processing pipeline is stored in `Cartooniser/`. See
 `Cartooniser/USAGE.txt` for setup and usage instructions.
+
+Dictionary videos can optionally be cartoonized during upload. The protected
+`/api/cartoonise` endpoint invokes the Python pipeline and returns a silent MP4.
+Production requires the packages in `Cartooniser/requirements.txt` and supports:
+
+```text
+CARTOONISER_PYTHON=/absolute/path/to/python
+CARTOONISER_MAX_BYTES=104857600
+CARTOONISER_TIMEOUT_MS=900000
+```

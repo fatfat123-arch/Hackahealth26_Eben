@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ApiCartooniseRouteImport } from './routes/api/cartoonise'
 import { Route as PasseportIdRouteImport } from './routes/passeport.$id'
 import { Route as AuthenticatedEspaceIndexRouteImport } from './routes/_authenticated/espace/index'
 import { Route as AuthenticatedEspaceTutorielRouteImport } from './routes/_authenticated/espace/tutoriel'
@@ -40,6 +41,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCartooniseRoute = ApiCartooniseRouteImport.update({
+  id: '/api/cartoonise',
+  path: '/api/cartoonise',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PasseportIdRoute = PasseportIdRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
   '/demo': typeof DemoRoute
+  '/api/cartoonise': typeof ApiCartooniseRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/espace/': typeof AuthenticatedEspaceIndexRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
   '/demo': typeof DemoRoute
+  '/api/cartoonise': typeof ApiCartooniseRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/espace': typeof AuthenticatedEspaceIndexRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/connexion': typeof ConnexionRoute
   '/demo': typeof DemoRoute
+  '/api/cartoonise': typeof ApiCartooniseRoute
   '/passeport/$id': typeof PasseportIdRoute
   '/_authenticated/espace/tutoriel': typeof AuthenticatedEspaceTutorielRoute
   '/_authenticated/espace/': typeof AuthenticatedEspaceIndexRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/'
     | '/connexion'
     | '/demo'
+    | '/api/cartoonise'
     | '/passeport/$id'
     | '/espace/tutoriel'
     | '/espace/'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/'
     | '/connexion'
     | '/demo'
+    | '/api/cartoonise'
     | '/passeport/$id'
     | '/espace/tutoriel'
     | '/espace'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/connexion'
     | '/demo'
+    | '/api/cartoonise'
     | '/passeport/$id'
     | '/_authenticated/espace/tutoriel'
     | '/_authenticated/espace/'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ConnexionRoute: typeof ConnexionRoute
   DemoRoute: typeof DemoRoute
+  ApiCartooniseRoute: typeof ApiCartooniseRoute
   PasseportIdRoute: typeof PasseportIdRoute
 }
 
@@ -222,6 +235,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cartoonise': {
+      id: '/api/cartoonise'
+      path: '/api/cartoonise'
+      fullPath: '/api/cartoonise'
+      preLoaderRoute: typeof ApiCartooniseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/passeport/$id': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ConnexionRoute: ConnexionRoute,
   DemoRoute: DemoRoute,
+  ApiCartooniseRoute: ApiCartooniseRoute,
   PasseportIdRoute: PasseportIdRoute,
 }
 export const routeTree = rootRouteImport

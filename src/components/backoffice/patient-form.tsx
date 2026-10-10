@@ -58,6 +58,22 @@ async function uploadFile(file: File, folder: string) {
   return path;
 }
 
+async function cartooniseVideo(file: File) {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Session expirée");
+  const body = new FormData();
+  body.append("video", file);
+  const response = await fetch("/api/cartoonise", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body,
+  });
+  if (!response.ok) throw new Error(await response.text());
+  const blob = await response.blob();
+  return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}-cartoon.mp4`, { type: "video/mp4" });
+}
+
 function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string | undefined }) {
   return <label className="bo-field"><span>{label}</span>{children}{hint && <small className="bo-hint">{hint}</small>}</label>;
 }
@@ -96,6 +112,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [orderMessage, setOrderMessage] = useState("");
+  const [cartoonise, setCartoonise] = useState<Record<string, boolean>>({});
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   const set = <K extends keyof PatientDraft>(k: K, v: PatientDraft[K]) => onChange({ ...draft, [k]: v });
   function moveEntry(from: number, to: number) {
@@ -105,15 +122,16 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
     setOrderMessage(`Entrée déplacée à la position ${to + 1} sur ${next.length}.`);
   }
 
-  async function handleUpload(file: File | undefined, key: string, apply: (path: string) => void, accept?: (f: File) => boolean) {
+  async function handleUpload(file: File | undefined, key: string, apply: (path: string) => void, accept?: (f: File) => boolean, useCartooniser = false) {
     if (!file) return;
     if (accept && !accept(file)) { setError("Ce type de fichier n’est pas accepté."); return; }
     setError(""); setUploading(key);
     try {
-      const path = await uploadFile(file, folder);
-      onUrls({ ...urls, [path]: URL.createObjectURL(file) });
+      const uploaded = useCartooniser && file.type.startsWith("video/") ? await cartooniseVideo(file) : file;
+      const path = await uploadFile(uploaded, folder);
+      onUrls({ ...urls, [path]: URL.createObjectURL(uploaded) });
       apply(path);
-    } catch { setError("Le fichier n’a pas pu être envoyé. Réessayez."); }
+    } catch (cause) { setError(cause instanceof Error && cause.message ? cause.message : "Le fichier n’a pas pu être envoyé. Réessayez."); }
     finally { setUploading(null); }
   }
 
@@ -168,8 +186,12 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
             <input type="file" accept="image/*,video/*,audio/*" className="sr-only" onChange={ev => {
               const f = ev.target.files?.[0];
               const t = f ? mediaTypeFromFile(f) : null;
-              handleUpload(f, e.id, p => setEntry(i, { path: p, type: t ?? "image", posterPath: undefined }), file => !!mediaTypeFromFile(file));
+              handleUpload(f, e.id, p => setEntry(i, { path: p, type: t ?? "image", posterPath: undefined }), file => !!mediaTypeFromFile(file), !!cartoonise[e.id]);
             }} />
+          </label>
+          <label className="bo-cartoonise-choice">
+            <input type="checkbox" checked={!!cartoonise[e.id]} onChange={ev => setCartoonise(current => ({ ...current, [e.id]: ev.target.checked }))} />
+            <span><strong>Transformer les vidéos en dessin animé</strong><small>Optionnel. Le traitement peut prendre plusieurs minutes et la vidéo obtenue est sans son.</small></span>
           </label>
           <Field label="Signification (titre)"><input className="bo-input" value={e.title} onChange={ev => setEntry(i, { title: ev.target.value })} placeholder="Par exemple : J’ai soif" /></Field>
           <Field label="Explication"><input className="bo-input" value={e.description} onChange={ev => setEntry(i, { description: ev.target.value })} /></Field>

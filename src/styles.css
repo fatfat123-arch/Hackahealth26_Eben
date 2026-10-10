@@ -207,6 +207,10 @@
 .bo-icon-btn { padding: 10px; min-width: 48px; }
 .bo-file { cursor: pointer; }
 .bo-file:focus-within { outline: 3px solid var(--primary); outline-offset: 3px; }
+.bo-cartoonise-choice { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--tint-blue); cursor: pointer; }
+.bo-cartoonise-choice input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary); }
+.bo-cartoonise-choice span { display: grid; gap: 3px; }
+.bo-cartoonise-choice small { color: var(--muted-foreground); line-height: 1.45; }
 :where(input, textarea, select, label.bo-choice, a.bo-btn, .bo-list-item):focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 .bo-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 32px 0 24px; }
 .bo-actions-end { margin-top: 32px; }
