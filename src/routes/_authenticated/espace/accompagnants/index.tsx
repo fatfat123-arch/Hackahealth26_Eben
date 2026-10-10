@@ -9,6 +9,8 @@ import { RowMenu, CONFIRM_DELETE, type RowAction } from "@/components/backoffice
 import { requireAdmin } from "@/lib/caregivers";
 import { formatDateFr } from "@/lib/patients";
 import { BackLink } from "@/components/backoffice/back-link";
+import { askConfirm } from "@/components/backoffice/confirm-dialog";
+import { EmptyState } from "@/components/mascot";
 
 export const Route = createFileRoute("/_authenticated/espace/accompagnants/")({
   beforeLoad: ({ context }) => requireAdmin(context.me),
@@ -69,7 +71,7 @@ function Caregivers() {
     a.push(c.archived_at
       ? { label: "Restaurer", onSelect: () => run(() => archive({ data: { id: c.id, archived: false } }), `Le compte de ${name} est restauré.`) }
       : { label: "Archiver", onSelect: () => run(() => archive({ data: { id: c.id, archived: true } }), `Le compte de ${name} est archivé.`) });
-    a.push({ label: "Supprimer", danger: true, onSelect: () => { if (window.confirm(CONFIRM_DELETE)) run(() => del({ data: { id: c.id } }), `Le compte de ${name} est supprimé.`); } });
+    a.push({ label: "Supprimer", danger: true, onSelect: async () => { if (await askConfirm(CONFIRM_DELETE)) run(() => del({ data: { id: c.id } }), `Le compte de ${name} est supprimé.`); } });
     return a;
   }
 
@@ -100,7 +102,7 @@ function Caregivers() {
       <button type="button" className="bo-tab" aria-pressed={archivedView} onClick={() => setArchivedView(true)}>Profils archivés</button>
     </div>
     {isLoading && <p>Chargement…</p>}
-    {data && shown.length === 0 && <p>Aucun profil dans cette liste.</p>}
+    {data && shown.length === 0 && <EmptyState text={archivedView ? "Aucun compte archivé pour le moment." : "Aucun accompagnant pour le moment. Ajoutez le premier !"} />}
     <ul className="bo-list">
       {shown.map(c => <li key={c.id} className="bo-row-wrap">
         <Link to="/espace/accompagnants/$id" params={{ id: c.id }} className="bo-list-item">

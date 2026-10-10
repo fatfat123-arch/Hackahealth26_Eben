@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import * as Tabs from "@radix-ui/react-tabs";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
 import { MEDIA_BUCKET, mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 
@@ -47,6 +48,17 @@ function ListEditor({ title, items, onChange, readOnly }: { title: string; items
   </fieldset>;
 }
 
+const STEPS = [["identite", "Identité"], ["dictionnaire", "Dictionnaire"], ["gouts", "Centres d’intérêt et peurs"], ["autres", "Autres informations"]] as const;
+
+function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode] }) {
+  return <Tabs.Root defaultValue="identite" className="bo-steps-tabs">
+    <Tabs.List className="bo-tablist" aria-label="Étapes du profil">
+      {STEPS.map(([v, l], i) => <Tabs.Trigger key={v} value={v} className="bo-steptab"><span className="bo-step-num" aria-hidden="true">{i + 1}</span>{l}</Tabs.Trigger>)}
+    </Tabs.List>
+    {STEPS.map(([v], i) => <Tabs.Content key={v} value={v} className="bo-readonly bo-tabpanel">{parts[i]}</Tabs.Content>)}
+  </Tabs.Root>;
+}
+
 export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, updatedAt }: Props) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -67,7 +79,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
   const setEntry = (i: number, patch: Partial<DictItem>) => set("dictionary", draft.dictionary.map((e, j) => j === i ? { ...e, ...patch } : e));
 
   if (readOnly) {
-    return <div className="bo-readonly">
+    return <Steps parts={[<>
       <section className="bo-card"><h2>Photo</h2>
         {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={draft.photoAlt || `Photo de ${draft.name}`} /> : <p>Aucune photo.</p>}
       </section>
@@ -83,19 +95,23 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
           <ReadValue label="Dernière mise à jour" value={formatDateFr(updatedAt)} />
         </dl>
       </section>
+</>, <>
       <section className="bo-card"><h2>Mon dictionnaire</h2>
         {draft.dictionary.length === 0 ? <p>Aucune entrée.</p> : <div className="dictionary-grid">
           {draft.dictionary.map(e => <DictionaryCard key={e.id} entry={{ ...e, alt: e.alt || e.title, source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined }} />)}
         </div>}
       </section>
+</>, <>
       <section className="bo-card"><ListEditor title="Mes centres d’intérêt" items={draft.interests} onChange={() => {}} readOnly /></section>
       <section className="bo-card"><ListEditor title="Mes peurs / Ce que je n’aime pas" items={draft.dislikes} onChange={() => {}} readOnly /></section>
+</>, <>
       <section className="bo-card"><ListEditor title="Autres informations" items={draft.additional} onChange={() => {}} readOnly /></section>
-    </div>;
+</>]} />;
   }
 
-  return <div className="bo-readonly">
+  return <>
     {error && <p className="bo-error" role="alert">{error}</p>}
+    <Steps parts={[<>
     <section className="bo-card"><h2>Photo</h2>
       <div className="bo-photo-edit">
         {draft.photoPath && urls[draft.photoPath] ? <img className="bo-photo" src={urls[draft.photoPath]} alt={draft.photoAlt || "Photo actuelle"} /> : <div className="photo-placeholder">Pas de photo</div>}
@@ -121,6 +137,7 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       </div>
       <p className="bo-hint">Dernière mise à jour : {updatedAt ? formatDateFr(updatedAt) : "pas encore enregistré"} (mise à jour automatique à chaque enregistrement).</p>
     </section>
+</>, <>
     <section className="bo-card"><h2>Mon dictionnaire</h2>
       <div className="bo-dict-edit">
         {draft.dictionary.map((e, i) => <fieldset key={e.id} className="bo-fieldset bo-dict-item">
@@ -142,8 +159,11 @@ export function PatientForm({ draft, onChange, urls, onUrls, readOnly, folder, u
       </div>
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => set("dictionary", [...draft.dictionary, { id: crypto.randomUUID(), type: "image", title: "", description: "", path: "", alt: "" }])}><Plus aria-hidden="true" /> Ajouter une entrée</button>
     </section>
+</>, <>
     <section className="bo-card"><ListEditor title="Mes centres d’intérêt" items={draft.interests} onChange={l => set("interests", l)} readOnly={false} /></section>
     <section className="bo-card"><ListEditor title="Mes peurs / Ce que je n’aime pas" items={draft.dislikes} onChange={l => set("dislikes", l)} readOnly={false} /></section>
+</>, <>
     <section className="bo-card"><ListEditor title="Autres informations" items={draft.additional} onChange={l => set("additional", l)} readOnly={false} /></section>
-  </div>;
+</>]} />
+  </>;
 }

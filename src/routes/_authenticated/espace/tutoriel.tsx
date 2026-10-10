@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { BackLink } from "@/components/backoffice/back-link";
+import { Mascot } from "@/components/mascot";
 
 export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
   validateSearch: (s) => z.object({ id: z.string().optional() }).parse(s),
@@ -20,6 +21,7 @@ function Tutorial() {
     {id ? <BackLink to="/espace/patients/$id" params={{ id }}>Retour au profil</BackLink> : <BackLink to="/espace/patients">Retour aux profils des patients</BackLink>}
     <h1 className="bo-title">Tutoriel : relier le passeport à un code QR ou une puce NFC</h1>
     <div className="title-underline" />
+    <div className="bo-intro"><Mascot pose="qr" size={120} /><p>Suivez ces quatre étapes simples. Vous n’avez besoin que d’un téléphone et de quelques minutes.</p></div>
     <section className="bo-card">
       <h2>1. Trouver le lien du passeport</h2>
       <p>Chaque patient a sa propre page publique. C’est elle qui s’affiche lorsque quelqu’un scanne le code.</p>

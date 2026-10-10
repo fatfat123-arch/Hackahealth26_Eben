@@ -15,4 +15,4 @@ export function RowMenu({ label, actions }: { label: string; actions: RowAction[
   </DropdownMenu.Root>;
 }
 
-export const CONFIRM_DELETE = "Êtes-vous sûr ? Cette action est définitive.";
+export const CONFIRM_DELETE = "Cette action est définitive : elle ne pourra pas être annulée.";

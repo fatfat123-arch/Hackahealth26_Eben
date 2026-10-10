@@ -14,12 +14,15 @@ import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Button } from "@/components/ui/button";
+import { Mascot } from "@/components/mascot";
+import { ConfirmHost } from "@/components/backoffice/confirm-dialog";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
+      <div className="max-w-md text-center status-page">
+        <Mascot pose="inquiete" size={140} />
+        <h1 className="text-5xl font-semibold text-primary">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page introuvable</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           La page que vous recherchez n’existe pas ou a été déplacée.
@@ -131,6 +134,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <main id="contenu"><Outlet /></main>
+      <ConfirmHost />
     </QueryClientProvider>
   );
 }
