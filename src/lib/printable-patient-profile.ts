@@ -1,29 +1,72 @@
-import type { PatientDraft } from "./patients";
+import type { PassportViewData } from "@/components/passport/passport-view";
+import { DEFAULT_HOW_TO } from "./patients";
 import { normalizeSectionOrder, SECTION_TITLES } from "./section-order";
 
-export const PRINTABLE_SECTION_KEYS = ["interests", "dislikes", "additional"] as const;
+export const PRINTABLE_SECTION_KEYS = [
+  "communicates",
+  "understandingNeeds",
+  "tools",
+  "facilitators",
+  "interests",
+  "dislikes",
+  "additional",
+] as const;
 export type PrintableSectionKey = (typeof PRINTABLE_SECTION_KEYS)[number];
+export type PrintableProfileBlock = {
+  key?: PrintableSectionKey;
+  title: string;
+  items: string[];
+  bulleted: boolean;
+};
 export type PrintablePatientProfile = {
   name: string;
-  sections: { key: PrintableSectionKey; title: string; items: string[] }[];
+  age: string;
+  updatedAt: string;
+  portrait: { url: string; position: string } | null;
+  information: PrintableProfileBlock[];
+  sections: PrintableProfileBlock[];
+  introduction: string;
 };
 
-/** Explicit allowlist: dictionary, contact and account data never enter the PDF renderer. */
-export function printablePatientProfile(
-  draft: Pick<PatientDraft, "name" | "sectionOrder" | PrintableSectionKey>,
-): PrintablePatientProfile {
-  const keys = normalizeSectionOrder(draft.sectionOrder).filter((key): key is PrintableSectionKey =>
+/** Project the displayed passport, excluding dictionary, account data and internal identifiers. */
+export function printablePatientProfile(data: PassportViewData): PrintablePatientProfile {
+  const clean = (items: string[]) => items.map((item) => item.trim()).filter(Boolean);
+  const information = [
+    {
+      title: "Ma personne de contact",
+      items: clean([data.contactName, data.contactRelationship, data.contactPhone, data.phoneNote]),
+      bulleted: false,
+    },
+    { title: "À propos de moi", items: clean([data.about]), bulleted: false },
+    { title: "Important pour ma communication", items: clean([data.reminder]), bulleted: false },
+  ].filter((block) => block.items.length > 0);
+  const keys = normalizeSectionOrder(data.sectionOrder).filter((key): key is PrintableSectionKey =>
     (PRINTABLE_SECTION_KEYS as readonly string[]).includes(key),
   );
   return {
-    name: draft.name.trim(),
+    name: data.name.trim(),
+    age: data.age && data.age !== "—" ? data.age.trim() : "",
+    updatedAt: data.updatedAtISO ? data.updatedAt : "",
+    portrait: data.portrait
+      ? { url: data.portrait, position: data.portraitPosition ?? "50%" }
+      : null,
+    information,
     sections: keys
       .map((key) => ({
         key,
         title: SECTION_TITLES[key],
-        items: draft[key].map((item) => item.trim()).filter(Boolean),
+        items: clean(data[key] ?? []),
+        bulleted: true,
       }))
       .filter((section) => section.items.length > 0),
+    // Keep the saved explanation; adapt only the shared default's dictionary-specific sentence.
+    introduction:
+      data.howTo.trim() === DEFAULT_HOW_TO
+        ? DEFAULT_HOW_TO.replace(
+            "Découvrez mes gestes dans mon dictionnaire et ce qui est important pour moi dans les rubriques ci-dessous.",
+            "Les rubriques ci-dessous présentent ce qui est important pour moi.",
+          )
+        : data.howTo.trim(),
   };
 }
 

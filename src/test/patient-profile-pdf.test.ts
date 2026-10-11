@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRawStream, decodePDFRawStream } from "pdf-lib";
-import { emptyDraft } from "@/lib/patients";
+import { emptyDraft, toViewData, type PatientDraft } from "@/lib/patients";
 import { printablePatientProfile, patientProfileFilename } from "@/lib/printable-patient-profile";
 import { createPatientProfilePdf } from "@/lib/patient-profile-pdf";
 
@@ -16,6 +16,8 @@ const assets = {
     additional: file("icone-notes.png"),
   },
 };
+const printableDraft = (draft: PatientDraft) =>
+  printablePatientProfile(toViewData({ ...draft, howTo: "" }, {}, null));
 
 /** Read the actual PDF text using its embedded Unicode maps, without adding a PDF viewer dependency. */
 async function inspectPdf(bytes: Uint8Array) {
@@ -64,7 +66,126 @@ async function inspectPdf(bytes: Uint8Array) {
 }
 
 describe("Printable patient profile", () => {
-  it("exports just the three nonempty selected sections in the saved order", async () => {
+  it("prints the complete Fabrice reference passport, including general free text, communication and portrait", async () => {
+    // Reference fixture, not a copy of the production patient record or its actual contact number.
+    const draft = {
+      ...emptyDraft(),
+      name: "Fabrice",
+      phone: "+41 00 000 00 00",
+      phoneNote: "Appelez de préférence le matin.",
+      about: "J’aime rencontrer les gens.\nLaissez-moi le temps de répondre.",
+      reminder: "Adressez-vous directement à moi.",
+      communicates: ["Avec des gestes et des mots.", "Je montre ce que je souhaite."],
+      understandingNeeds: ["Des phrases courtes et des gestes."],
+      tools: ["Des pictogrammes et des photos."],
+      facilitators: ["Me poser des questions."],
+      interests: ["Le ping-pong", "La pétanque"],
+      dislikes: ["Aller chez le médecin."],
+      additional: ["Une autre information personnelle enregistrée."],
+      photoPath: "private/portrait.png",
+      photoPositionY: 25,
+      sectionOrder: [
+        "facilitators",
+        "additional",
+        "understandingNeeds",
+        "dictionary",
+        "interests",
+        "communicates",
+        "dislikes",
+        "tools",
+      ] as PatientDraft["sectionOrder"],
+      dictionary: [
+        {
+          id: "INTERNAL_ID",
+          type: "video" as const,
+          path: "private/movie.mp4",
+          title: "DICTIONARY_SECRET",
+          description: "SECRET_DESCRIPTION",
+          alt: "SECRET_ALT",
+          transcript: "SECRET_TRANSCRIPT",
+        },
+      ],
+    };
+    const view = toViewData(
+      draft,
+      { "private/portrait.png": "/api/media?signed=PRIVATE_URL" },
+      "2026-10-11T10:00:00Z",
+      "26 ans",
+    );
+    view.contactName = "Personne de confiance";
+    view.contactRelationship = "Proche";
+    const profile = printablePatientProfile(view);
+    expect(profile.sections.map((block) => block.key)).toEqual(
+      draft.sectionOrder.filter((key) => key !== "dictionary"),
+    );
+    expect(profile.portrait).toEqual({ url: view.portrait, position: "25%" });
+    const result = await inspectPdf(
+      await createPatientProfilePdf(profile, {
+        ...assets,
+        portrait: file("passport-interets.png"),
+      }),
+    );
+    const joined = result.text.replace(/\s+/g, " ");
+    for (const value of [
+      view.name,
+      view.age,
+      view.updatedAt,
+      view.contactName,
+      view.contactRelationship,
+      view.contactPhone,
+      view.phoneNote,
+      view.about,
+      view.reminder,
+      ...draft.communicates,
+      ...draft.understandingNeeds,
+      ...draft.tools,
+      ...draft.facilitators,
+      ...draft.interests,
+      ...draft.dislikes,
+      ...draft.additional,
+    ])
+      expect(joined).toContain(value.replace(/\s+/g, " "));
+    for (const value of [
+      "Ma personne de contact",
+      "À propos de moi",
+      "Je communique",
+      "Mes outils de communication",
+      "Comment utiliser cette page",
+      "Merci de prendre le temps de me comprendre.",
+    ])
+      expect(joined).toContain(value);
+    expect(result.pages[0]!.images).toBeGreaterThan(0);
+    for (const forbidden of [
+      "Mon dictionnaire",
+      "mon dictionnaire",
+      "DICTIONARY_SECRET",
+      "SECRET_DESCRIPTION",
+      "SECRET_ALT",
+      "SECRET_TRANSCRIPT",
+      "INTERNAL_ID",
+      "PRIVATE_URL",
+      "private/movie.mp4",
+    ])
+      expect(result.text).not.toContain(forbidden);
+    expect(result.pdf.catalog.has(PDFName.of("Names"))).toBe(false);
+  });
+
+  it("preserves a customized introductory explanation and suppresses empty general fields", () => {
+    const view = toViewData(
+      { ...emptyDraft(), name: "Test", howTo: "Parlez lentement.\nUtilisez des phrases courtes." },
+      {},
+      null,
+    );
+    const profile = printablePatientProfile(view);
+    expect(profile.introduction).toBe(view.howTo);
+    expect(profile.information).toEqual([]);
+    expect(profile.sections).toEqual([]);
+    expect(profile.age).toBe("");
+    expect(profile.updatedAt).toBe("");
+    expect(profile.portrait).toBeNull();
+  });
+
+  it("exports nonempty selected sections in the saved order and excludes technical and dictionary data", async () => {
     const draft = {
       ...emptyDraft(),
       name: "Élodie Cœur Exemple",
@@ -85,20 +206,21 @@ describe("Printable patient profile", () => {
       ],
       sectionOrder: ["additional", "dictionary", "dislikes", "interests"] as const,
     };
-    const profile = printablePatientProfile({ ...draft, sectionOrder: [...draft.sectionOrder] });
+    const profile = printableDraft({ ...draft, sectionOrder: [...draft.sectionOrder] });
     expect(profile.sections.map((section) => section.key)).toEqual([
       "additional",
       "dislikes",
       "interests",
     ]);
-    expect(Object.keys(profile)).toEqual(["name", "sections"]);
     const result = await inspectPdf(await createPatientProfilePdf(profile, assets));
-    expect(result.pages).toHaveLength(1);
-    expect(result.pages[0]!.images).toBe(3);
+    expect(result.pages.flatMap((page) => page.images).reduce((sum, count) => sum + count, 0)).toBe(
+      3,
+    );
     expect(result.pages[0]!.size.width).toBeCloseTo(595.28, 1);
     expect(result.pages[0]!.size.height).toBeCloseTo(841.89, 1);
     for (const content of [
       draft.name,
+      draft.phone,
       ...draft.interests.filter(Boolean).map((value) => value.trim()),
       ...draft.dislikes,
       ...draft.additional,
@@ -113,7 +235,6 @@ describe("Printable patient profile", () => {
       "DICTIONARY_SECRET",
       "SECRET_DESCRIPTION",
       "private/audio.mp3",
-      "PRIVATE_PHONE",
       "PRIVATE_ADDRESS",
       "Modifier",
       "Télécharger",
@@ -130,9 +251,7 @@ describe("Printable patient profile", () => {
       dislikes: [],
       additional: [],
     };
-    const result = await inspectPdf(
-      await createPatientProfilePdf(printablePatientProfile(draft), assets),
-    );
+    const result = await inspectPdf(await createPatientProfilePdf(printableDraft(draft), assets));
     expect(result.pages).toHaveLength(1);
     expect(result.text).toContain(draft.name);
     expect(result.text).not.toMatch(/Mes centres|Mes peurs|Autres informations|Mon dictionnaire/);
@@ -151,9 +270,7 @@ describe("Printable patient profile", () => {
       interests,
       additional: ["FIN_DU_PROFIL"],
     };
-    const result = await inspectPdf(
-      await createPatientProfilePdf(printablePatientProfile(draft), assets),
-    );
+    const result = await inspectPdf(await createPatientProfilePdf(printableDraft(draft), assets));
     expect(result.pages.length).toBeGreaterThan(1);
     expect(result.pages.length).toBeLessThan(8);
     const joined = result.text.replace(/\s+/g, " ");
@@ -167,9 +284,7 @@ describe("Printable patient profile", () => {
     const paragraph = `${"Phrase longue avec des accents : été, cœur et forêt. ".repeat(180)}FIN_PARAGRAPHE`;
     const word = "https://exemple.ch/" + "abcdefghijk".repeat(80);
     const draft = { ...emptyDraft(), name: "Zoé Exemple", additional: [paragraph, word] };
-    const result = await inspectPdf(
-      await createPatientProfilePdf(printablePatientProfile(draft), assets),
-    );
+    const result = await inspectPdf(await createPatientProfilePdf(printableDraft(draft), assets));
     expect(result.pages.length).toBeGreaterThan(1);
     expect(result.text).toContain("FIN_PARAGRAPHE");
     expect(result.text.replace(/\s+/g, "")).toContain(word);
@@ -183,7 +298,7 @@ describe("Printable patient profile", () => {
     );
     const result = await inspectPdf(
       await createPatientProfilePdf(
-        printablePatientProfile({ ...emptyDraft(), name: "Julien Exemple", interests }),
+        printableDraft({ ...emptyDraft(), name: "Julien Exemple", interests }),
         assets,
       ),
     );

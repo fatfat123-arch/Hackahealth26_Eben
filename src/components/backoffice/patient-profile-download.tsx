@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, LoaderCircle } from "lucide-react";
 import { getPatient } from "@/lib/patients.functions";
-import { rowToDraft, type PatientRow } from "@/lib/patients";
+import { rowToDraft, toViewData, type PatientRow } from "@/lib/patients";
+import { signPaths } from "@/lib/session";
 import { printablePatientProfile } from "@/lib/printable-patient-profile";
 
 export function PatientProfileDownload({ patientId }: { patientId: string }) {
@@ -38,7 +39,12 @@ export function PatientProfileDownload({ patientId }: { patientId: string }) {
       ]);
       if (!saved) throw new Error("Profil introuvable.");
       if (current !== generation.current) return;
-      const profile = printablePatientProfile(rowToDraft(saved as unknown as PatientRow));
+      const draft = rowToDraft(saved as unknown as PatientRow);
+      // Only the portrait is needed: dictionary media must never be fetched for this export.
+      const urls = await signPaths(draft.photoPath ? [draft.photoPath] : []);
+      if (current !== generation.current) return;
+      if (draft.photoPath && !urls[draft.photoPath]) throw new Error("Photo indisponible.");
+      const profile = printablePatientProfile(toViewData(draft, urls, saved.updated_at));
       const result = await renderer.preparePatientProfilePdf(profile);
       if (current !== generation.current) return;
       renderer.savePatientProfilePdf(result);

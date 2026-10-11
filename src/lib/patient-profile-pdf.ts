@@ -1,11 +1,16 @@
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, PageSizes, PrintScaling, rgb, type PDFFont, type PDFPage } from "pdf-lib";
-import type { PrintablePatientProfile, PrintableSectionKey } from "./printable-patient-profile";
+import type {
+  PrintablePatientProfile,
+  PrintableSectionKey,
+  PrintableProfileBlock,
+} from "./printable-patient-profile";
 
 export type PatientProfilePdfAssets = {
   regular: Uint8Array;
   bold: Uint8Array;
   icons: Partial<Record<PrintableSectionKey, Uint8Array>>;
+  portrait?: Uint8Array | undefined;
 };
 
 const [PAGE_WIDTH, PAGE_HEIGHT] = PageSizes.A4;
@@ -73,11 +78,12 @@ export async function createPatientProfilePdf(
   const icons = new Map(
     await Promise.all(
       profile.sections.map(async (section) => {
-        const bytes = assets.icons[section.key];
+        const bytes = section.key ? assets.icons[section.key] : undefined;
         return [section.key, bytes ? await pdf.embedPng(bytes) : null] as const;
       }),
     ),
   );
+  const portrait = assets.portrait ? await pdf.embedPng(assets.portrait) : null;
   let page: PDFPage;
   let top = MARGIN;
   const text = (
@@ -94,12 +100,33 @@ export async function createPatientProfilePdf(
     page = pdf.addPage(PageSizes.A4);
     top = MARGIN;
     if (first) {
-      text("Profil", MARGIN, top, 10, regular, BLUE);
+      const start = top;
+      const photoSize = 100;
+      const identityX = MARGIN + (portrait ? photoSize + 20 : 0);
+      const identityWidth = WIDTH - (identityX - MARGIN);
+      if (portrait)
+        page.drawImage(portrait, {
+          x: MARGIN,
+          y: PAGE_HEIGHT - start - photoSize,
+          width: photoSize,
+          height: photoSize,
+        });
+      text("Passeport de communication", identityX, top, 10, regular, BLUE);
       top += 23;
-      for (const line of wrapPdfText(profile.name, bold, 26, WIDTH)) {
-        text(line, MARGIN, top, 26, bold, BLUE);
+      for (const line of wrapPdfText(profile.name, bold, 26, identityWidth)) {
+        text(line, identityX, top, 26, bold, BLUE);
         top += 32;
       }
+      const details = [
+        profile.age ? `Âge : ${profile.age}` : "",
+        profile.updatedAt ? `Dernière mise à jour : ${profile.updatedAt}` : "",
+      ].filter(Boolean);
+      for (const detail of details)
+        for (const line of wrapPdfText(detail, regular, 11, identityWidth)) {
+          text(line, identityX, top + 4, 11);
+          top += 16;
+        }
+      top = Math.max(top, start + (portrait ? photoSize : 0));
       page.drawLine({
         start: { x: MARGIN, y: PAGE_HEIGHT - top - 7 },
         end: { x: MARGIN + 46, y: PAGE_HEIGHT - top - 7 },
@@ -121,9 +148,10 @@ export async function createPatientProfilePdf(
       top += 23;
     }
   }
-  function heading(section: PrintablePatientProfile["sections"][number], continued = false) {
+  function heading(section: PrintableProfileBlock, continued = false) {
     const label = continued ? `${section.title} (suite)` : section.title;
-    const lines = wrapPdfText(label, bold, HEADING_SIZE, WIDTH - 56);
+    const indent = section.key ? 52 : 14;
+    const lines = wrapPdfText(label, bold, HEADING_SIZE, WIDTH - indent - 4);
     const height = Math.max(46, lines.length * 22 + 20);
     page.drawRectangle({
       x: MARGIN,
@@ -133,7 +161,7 @@ export async function createPatientProfilePdf(
       color: rgb(0.95, 0.97, 0.98),
     });
     page.drawRectangle({ x: MARGIN, y: PAGE_HEIGHT - top - height, width: 3, height, color: BLUE });
-    const icon = icons.get(section.key);
+    const icon = section.key ? icons.get(section.key) : null;
     if (icon) {
       const fitted = icon.scaleToFit(30, 30);
       page.drawImage(icon, {
@@ -143,16 +171,26 @@ export async function createPatientProfilePdf(
       });
     }
     lines.forEach((line, index) =>
-      text(line, MARGIN + 52, top + 10 + index * 22, HEADING_SIZE, bold, BLUE),
+      text(line, MARGIN + indent, top + 10 + index * 22, HEADING_SIZE, bold, BLUE),
     );
     top += height + 13;
   }
   newPage(true);
-  const bodyWidth = WIDTH - 29;
-  for (const section of profile.sections) {
+  const blocks: PrintableProfileBlock[] = [...profile.information, ...profile.sections];
+  if (profile.introduction)
+    blocks.push({
+      title: "Comment utiliser cette page",
+      items: [profile.introduction],
+      bulleted: false,
+    });
+  for (const section of blocks) {
+    const lastBlock = section === blocks[blocks.length - 1];
+    const bodyIndent = section.bulleted ? 26 : 14;
+    const bodyWidth = WIDTH - bodyIndent - 3;
+    const headingWidth = WIDTH - (section.key ? 56 : 18);
     const items = section.items.map((item) => wrapPdfText(item, regular, BODY_SIZE, bodyWidth));
     const headingHeight =
-      Math.max(46, wrapPdfText(section.title, bold, HEADING_SIZE, WIDTH - 56).length * 22 + 20) +
+      Math.max(46, wrapPdfText(section.title, bold, HEADING_SIZE, headingWidth).length * 22 + 20) +
       13;
     const height =
       headingHeight + items.reduce((sum, lines) => sum + lines.length * LINE_HEIGHT + ITEM_GAP, 0);
@@ -165,18 +203,21 @@ export async function createPatientProfilePdf(
       (firstItemHeight <= fullPageSpace * 0.4
         ? firstItemHeight
         : Math.min(2, items[0]!.length) * LINE_HEIGHT);
-    if ((height <= fullPageSpace * 0.5 && top + height > BOTTOM) || top + minimum > BOTTOM)
+    const keepHeight = height + (lastBlock ? 32 : 0);
+    if ((keepHeight <= fullPageSpace * 0.5 && top + keepHeight > BOTTOM) || top + minimum > BOTTOM)
       newPage();
     heading(section);
-    for (const lines of items) {
+    for (const [itemIndex, lines] of items.entries()) {
+      const closingReserve = lastBlock && itemIndex === items.length - 1 ? 32 : 0;
       const itemHeight = lines.length * LINE_HEIGHT;
       const continuedHeadingHeight =
         Math.max(
           46,
-          wrapPdfText(`${section.title} (suite)`, bold, HEADING_SIZE, WIDTH - 56).length * 22 + 20,
+          wrapPdfText(`${section.title} (suite)`, bold, HEADING_SIZE, headingWidth).length * 22 +
+            20,
         ) + 13;
       if (
-        top + itemHeight > BOTTOM &&
+        top + itemHeight + closingReserve > BOTTOM &&
         itemHeight <= Math.min(fullPageSpace * 0.4, fullPageSpace - continuedHeadingHeight)
       ) {
         newPage();
@@ -185,19 +226,19 @@ export async function createPatientProfilePdf(
       let index = 0;
       let firstChunk = true;
       while (index < lines.length) {
-        let capacity = Math.floor((BOTTOM - top) / LINE_HEIGHT);
+        let capacity = Math.floor((BOTTOM - top - closingReserve) / LINE_HEIGHT);
         if (capacity < Math.min(2, lines.length - index)) {
           newPage();
           heading(section, true);
-          capacity = Math.floor((BOTTOM - top) / LINE_HEIGHT);
+          capacity = Math.floor((BOTTOM - top - closingReserve) / LINE_HEIGHT);
         }
         let count = Math.min(capacity, lines.length - index);
         // Do not leave a lone final line of a long item on the next page.
         if (lines.length - index - count === 1 && count > 2) count--;
-        if (firstChunk)
+        if (firstChunk && section.bulleted)
           page!.drawCircle({ x: MARGIN + 11, y: PAGE_HEIGHT - top - 9, size: 2.3, color: INK });
         for (let offset = 0; offset < count; offset++)
-          text(lines[index + offset]!, MARGIN + 26, top + offset * LINE_HEIGHT);
+          text(lines[index + offset]!, MARGIN + bodyIndent, top + offset * LINE_HEIGHT);
         top += count * LINE_HEIGHT;
         index += count;
         firstChunk = false;
@@ -210,7 +251,10 @@ export async function createPatientProfilePdf(
     }
     top += 13;
   }
-  // An empty profile still has its name; no invented/empty sections are printed.
+  const closing = "Merci de prendre le temps de me comprendre.";
+  if (top + 32 > BOTTOM) newPage();
+  text(closing, MARGIN, top + 8, 13, bold, BLUE);
+  // No invented/empty patient sections are printed.
   const pages = pdf.getPages();
   if (pages.length > 1)
     pages.forEach((p, index) => {

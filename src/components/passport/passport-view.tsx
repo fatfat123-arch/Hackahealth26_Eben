@@ -8,10 +8,6 @@ import type { ReactNode } from "react";
 import type { DictionaryEntry } from "@/lib/dictionary-entry";
 import { Button } from "@/components/ui/button";
 import dictionaryIcon from "@/assets/icone-dictionnaire.png";
-import communicatesIcon from "@/assets/icone-communique.png";
-import understandingIcon from "@/assets/icone-comprendre.png";
-import toolsIcon from "@/assets/icone-outils.png";
-import facilitatorsIcon from "@/assets/icone-faciliter.png";
 import { PRINTABLE_SECTION_ICONS } from "@/lib/printable-section-icons";
 
 export type PassportViewData = {
@@ -92,10 +88,6 @@ function BulletList({ items }: { items: string[] }) {
 
 const ICONS: Record<SectionKey, string> = {
   dictionary: dictionaryIcon,
-  communicates: communicatesIcon,
-  understandingNeeds: understandingIcon,
-  tools: toolsIcon,
-  facilitators: facilitatorsIcon,
   ...PRINTABLE_SECTION_ICONS,
 };
 

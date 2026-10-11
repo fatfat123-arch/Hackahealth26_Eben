@@ -3,8 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PatientProfileDownload } from "@/components/backoffice/patient-profile-download";
 import { getPatient, type PatientResult } from "@/lib/patients.functions";
 import { preparePatientProfilePdf, savePatientProfilePdf } from "@/lib/patient-profile-download";
+import { signPaths } from "@/lib/session";
 
 vi.mock("@/lib/patients.functions", () => ({ getPatient: vi.fn() }));
+vi.mock("@/lib/session", () => ({ signPaths: vi.fn() }));
 vi.mock("@/lib/patient-profile-download", () => ({
   preparePatientProfilePdf: vi.fn(),
   savePatientProfilePdf: vi.fn(),
@@ -41,6 +43,7 @@ const saved: PatientResult = {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(getPatient).mockResolvedValue(saved);
+  vi.mocked(signPaths).mockResolvedValue({});
   vi.mocked(preparePatientProfilePdf).mockResolvedValue({
     bytes: new Uint8Array([1]),
     filename: "Profil_Dernier_nom_enregistré.pdf",
@@ -59,7 +62,19 @@ describe("Download saved patient profile", () => {
     expect(getPatient).toHaveBeenCalledWith({ data: "patient-id", fetch: expect.any(Function) });
     expect(preparePatientProfilePdf).toHaveBeenCalledWith({
       name: saved.name,
-      sections: [{ key: "interests", title: "Mes centres d’intérêt", items: saved.interests }],
+      age: "",
+      updatedAt: "",
+      portrait: null,
+      information: [],
+      introduction: "",
+      sections: [
+        {
+          key: "interests",
+          title: "Mes centres d’intérêt",
+          items: saved.interests,
+          bulleted: true,
+        },
+      ],
     });
     vi.mocked(getPatient).mockResolvedValue({
       ...saved,
@@ -75,6 +90,43 @@ describe("Download saved patient profile", () => {
     vi.stubGlobal("fetch", fetchSpy);
     await vi.mocked(getPatient).mock.calls[0]![0]!.fetch!("/latest-profile", { method: "GET" });
     expect(fetchSpy).toHaveBeenCalledWith("/latest-profile", { method: "GET", cache: "no-store" });
+  });
+
+  it("uses the same saved general profile data and signs only the portrait, never dictionary media", async () => {
+    vi.mocked(getPatient).mockResolvedValue({
+      ...saved,
+      name: "Fabrice",
+      birth_date: "2000-01-01",
+      updated_at: "2026-10-11T10:00:00Z",
+      photo_path: "private/photo.webp",
+      phone: "+41 00 000 00 00",
+      about: "Texte personnel enregistré",
+      understanding_needs: ["Phrases courtes et gestes"],
+      dictionary: [{ path: "private/movie.mp4", title: "SECRET" }],
+    });
+    vi.mocked(signPaths).mockResolvedValue({ "private/photo.webp": "/api/media?signed=photo" });
+    render(<PatientProfileDownload patientId="patient-id" />);
+    fireEvent.click(screen.getByRole("button"));
+    await screen.findByRole("status");
+    expect(signPaths).toHaveBeenCalledWith(["private/photo.webp"]);
+    const profile = vi.mocked(preparePatientProfilePdf).mock.calls[0]![0];
+    expect(profile.portrait?.url).toBe("/api/media?signed=photo");
+    expect(profile.information).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ items: ["Texte personnel enregistré"] }),
+        expect.objectContaining({ items: ["+41 00 000 00 00"] }),
+      ]),
+    );
+    expect(profile.sections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "understandingNeeds",
+          items: ["Phrases courtes et gestes"],
+        }),
+      ]),
+    );
+    expect(JSON.stringify(profile)).not.toContain("SECRET");
+    expect(JSON.stringify(profile)).not.toContain("private/movie.mp4");
   });
 
   it("does not generate or download after access is refused", async () => {
