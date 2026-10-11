@@ -12,6 +12,22 @@ Accessible instantanément par **QR code** ou **badge NFC**, sur téléphone com
 
 ---
 
+## Cadre du projet
+
+EH Passport répond à un **challenge proposé par Eben-Hézer Lausanne à l’occasion de HackaHealth 2026**. L’objectif est de faciliter la communication entre les résidents et les personnes qui les accompagnent, notamment lorsqu’un professionnel ne connaît pas encore leurs habitudes ou leurs modes d’expression.
+
+La solution a été imaginée à partir des besoins du terrain avec une priorité : rendre chaque passeport personnel, accessible et simple à consulter dans une situation réelle.
+
+<p align="center">
+  <a href="https://www.eben-hezer.ch/accueil-eben-hezer-lausanne.html">
+    <img src="docs/assets/eben-hezer-lausanne.svg" alt="Logo Eben-Hézer Lausanne" width="280">
+  </a>
+  <br>
+  <sub>Challenge porté par Eben-Hézer Lausanne.</sub>
+</p>
+
+L’identité EH Passport prolonge celle d’Eben-Hézer : notre mascotte s’inspire de l’oiseau dessiné au cœur de leur logo. Elle apporte au passeport un repère accueillant, humain et immédiatement reconnaissable.
+
 ## L’idée
 
 Certaines personnes communiquent autrement que par la parole. Lorsqu’elles rencontrent un nouveau professionnel, un remplaçant ou un intervenant extérieur, leurs habitudes, leurs besoins et leurs moyens d’expression ne sont pas toujours connus.
@@ -57,9 +73,9 @@ La date de naissance reste dans l’espace de gestion ; le passeport public affi
 - archivage des profils et renouvellement des liens publics ;
 - médias privés distribués par des liens signés temporaires.
 
-## Identité du projet
+## HackaHealth 2026
 
-EH Passport a été conçu pour la **Fondation Eben-Hézer** dans le cadre de **HackaHealth 2026**. Le projet reprend une approche de co-conception : partir des usages réels, réduire les obstacles et laisser aux équipes de terrain la liberté d’adapter chaque passeport.
+Le projet a été réalisé pendant **HackaHealth 2026**, dans un esprit de co-conception : partir des usages réels, réduire les obstacles et laisser aux équipes de terrain la liberté d’adapter chaque passeport.
 
 <p align="center">
   <a href="https://www.hackahealth.ch/">
