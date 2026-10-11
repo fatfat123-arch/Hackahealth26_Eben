@@ -40,9 +40,7 @@ export function printablePatientProfile(data: PassportViewData): PrintablePatien
     { title: "À propos de moi", items: clean([data.about]), bulleted: false },
     { title: "Important pour ma communication", items: clean([data.reminder]), bulleted: false },
   ].filter((block) => block.items.length > 0);
-  const keys = normalizeSectionOrder(data.sectionOrder).filter((key): key is PrintableSectionKey =>
-    (PRINTABLE_SECTION_KEYS as readonly string[]).includes(key),
-  );
+  const order = normalizeSectionOrder(data.sectionOrder);
   return {
     name: data.name.trim(),
     age: data.age && data.age !== "—" ? data.age.trim() : "",
@@ -51,13 +49,31 @@ export function printablePatientProfile(data: PassportViewData): PrintablePatien
       ? { url: data.portrait, position: data.portraitPosition ?? "50%" }
       : null,
     information,
-    sections: keys
-      .map((key) => ({
-        key,
-        title: SECTION_TITLES[key],
-        items: clean(data[key] ?? []),
-        bulleted: true,
-      }))
+    sections: order
+      .flatMap((id): PrintableProfileBlock[] => {
+        if (id.startsWith("custom:")) {
+          const section = (data.customSections ?? []).find((item) => item.id === id);
+          return section
+            ? [
+                {
+                  title: section.title.trim(),
+                  items: clean(section.items),
+                  bulleted: section.display === "bullets",
+                },
+              ]
+            : [];
+        }
+        if (!(PRINTABLE_SECTION_KEYS as readonly string[]).includes(id)) return [];
+        const key = id as PrintableSectionKey;
+        return [
+          {
+            key,
+            title: SECTION_TITLES[key],
+            items: clean(data[key] ?? []),
+            bulleted: true,
+          },
+        ];
+      })
       .filter((section) => section.items.length > 0),
     // Keep the saved explanation; adapt only the shared default's dictionary-specific sentence.
     introduction:

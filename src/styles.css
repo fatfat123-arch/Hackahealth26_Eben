@@ -817,6 +817,59 @@
 .bo-choice:hover .navigation-icon {
   transform: scale(1.04);
 }
+.navigation-icon-small {
+  width: 58px;
+  height: 55px;
+}
+.navigation-icon-section {
+  width: 54px;
+  height: 51px;
+  margin: -2px;
+}
+.bo-section-manager {
+  display: grid;
+  gap: 20px;
+}
+.bo-section-config-item {
+  align-items: flex-start;
+}
+.bo-custom-section-fields {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.8fr);
+  gap: 16px;
+  flex: 1;
+}
+.bo-custom-section-content {
+  grid-column: 1 / -1;
+}
+.bo-icon-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bo-icon-picker-row .bo-input {
+  flex: 1;
+}
+.bo-hidden-sections {
+  padding: 18px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.bo-hidden-sections h3 {
+  margin: 0;
+  color: var(--primary);
+}
+.bo-hidden-sections .bo-actions {
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .bo-custom-section-fields {
+    grid-template-columns: 1fr;
+  }
+  .bo-custom-section-content {
+    grid-column: auto;
+  }
+}
 .bo-btn {
   display: inline-flex;
   align-items: center;
@@ -2347,6 +2400,34 @@
   gap: 6px;
   flex: none;
 }
+.bo-section-order-item.bo-section-config-item {
+  align-items: flex-start;
+}
+.bo-section-config-item .bo-section-order-num,
+.bo-section-config-item .bo-section-order-ctl {
+  margin-top: 22px;
+}
+.bo-btn.bo-danger {
+  color: #a52626;
+  border-color: #d9a7a7;
+}
+.bo-btn.bo-danger:hover {
+  background: #fff3f3;
+  border-color: #a52626;
+}
+@media (max-width: 640px) {
+  .bo-section-config-item {
+    flex-wrap: wrap;
+  }
+  .bo-section-config-item .bo-custom-section-fields {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .bo-section-config-item .bo-section-order-ctl {
+    margin-top: 0;
+    margin-left: auto;
+  }
+}
 
 /* Consistency pass */
 .bo-step-num {
@@ -2379,7 +2460,23 @@
 }
 
 /* Tutorial: step references, app icon and photos under each step */
-.step-ref { color: var(--muted-foreground); font-size: 0.875em; white-space: nowrap; }
-.app-icon { display: inline-block; vertical-align: middle; border-radius: 22%; margin: 0 0.15em; }
-.bo-steps .bo-tutorial-photos { grid-template-columns: 1fr; gap: 0; margin-top: 12px; }
-.bo-steps .bo-tutorial-photo-step { width: 100%; max-width: 320px; }
+.step-ref {
+  color: var(--muted-foreground);
+  font-size: 0.875em;
+  white-space: nowrap;
+}
+.app-icon {
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 22%;
+  margin: 0 0.15em;
+}
+.bo-steps .bo-tutorial-photos {
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: 12px;
+}
+.bo-steps .bo-tutorial-photo-step {
+  width: 100%;
+  max-width: 320px;
+}

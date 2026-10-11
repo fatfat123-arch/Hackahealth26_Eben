@@ -25,7 +25,7 @@ Cartooniser/                isolated Python video-processing pipeline
 
 MariaDB stores users, sessions and passports. Uploaded media is stored below `MEDIA_ROOT`, outside the public web root. Database records contain relative media paths only. `/api/media` verifies the URL signature and supports HTTP byte ranges for phone video playback.
 
-The `dictionary` and the profile’s list sections are currently JSON columns. When editing their structure, update the types and mappings in `src/lib/patients.ts` and `src/lib/patients.functions.ts` together.
+The `dictionary` and the profile’s list sections are currently JSON columns. `section_order` also stores the visible order and custom sections configured from the back office. When editing their structure, update the types and mappings in `src/lib/patients.ts` and `src/lib/patients.functions.ts` together.
 
 ## Media flow
 

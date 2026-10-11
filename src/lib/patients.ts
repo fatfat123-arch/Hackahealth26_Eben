@@ -1,5 +1,11 @@
 import type { DictionaryEntry } from "@/lib/dictionary-entry";
-import { defaultSectionOrder, normalizeSectionOrder, type SectionKey } from "@/lib/section-order";
+import {
+  defaultSectionOrder,
+  normalizeSectionConfiguration,
+  serializeSectionConfiguration,
+  type CustomSection,
+  type SectionId,
+} from "@/lib/section-order";
 import type { PassportViewData } from "@/components/passport/passport-view";
 import { formatSwissPhone, swissPhoneError } from "@/lib/swiss-phone";
 
@@ -34,7 +40,8 @@ export type PatientDraft = {
   interests: string[];
   dislikes: string[];
   additional: string[];
-  sectionOrder: SectionKey[];
+  sectionOrder: SectionId[];
+  customSections: CustomSection[];
 };
 
 export type PatientRow = {
@@ -59,7 +66,7 @@ export type PatientRow = {
   interests: string[];
   dislikes: string[];
   additional: string[];
-  section_order?: string[];
+  section_order?: unknown;
   updated_at: string;
   created_by?: string | null;
 };
@@ -87,9 +94,11 @@ export const emptyDraft = (): PatientDraft => ({
   dislikes: [],
   additional: [],
   sectionOrder: defaultSectionOrder(),
+  customSections: [],
 });
 
 export function rowToDraft(r: PatientRow): PatientDraft {
+  const sectionConfiguration = normalizeSectionConfiguration(r.section_order);
   return {
     name: r.name,
     birthDate: r.birth_date ?? "",
@@ -109,7 +118,8 @@ export function rowToDraft(r: PatientRow): PatientDraft {
     interests: r.interests ?? [],
     dislikes: r.dislikes ?? [],
     additional: r.additional ?? [],
-    sectionOrder: normalizeSectionOrder(r.section_order),
+    sectionOrder: sectionConfiguration.order,
+    customSections: sectionConfiguration.customSections,
   };
 }
 
@@ -134,7 +144,7 @@ export function draftToRow(d: PatientDraft) {
     interests: clean(d.interests),
     dislikes: clean(d.dislikes),
     additional: clean(d.additional),
-    section_order: normalizeSectionOrder(d.sectionOrder),
+    section_order: serializeSectionConfiguration(d.sectionOrder, d.customSections),
   };
 }
 
@@ -228,6 +238,7 @@ export function toViewData(
     dislikes: d.dislikes.filter(Boolean),
     additional: d.additional.filter(Boolean),
     sectionOrder: d.sectionOrder,
+    customSections: d.customSections,
   };
 }
 

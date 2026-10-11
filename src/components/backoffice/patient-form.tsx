@@ -18,7 +18,7 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SectionOrderEditor } from "@/components/backoffice/section-order-editor";
-import { SECTION_TITLES } from "@/lib/section-order";
+import { sectionTitle } from "@/lib/section-order";
 import { moveDictionaryEntry } from "@/lib/dictionary-order";
 import { mediaTypeFromFile, formatDateFr, type DictItem, type PatientDraft } from "@/lib/patients";
 import { mediaFileError } from "@/lib/media-limits";
@@ -56,7 +56,7 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
   interests: "Mes centres d’intérêt",
   dislikes: "Mes peurs / Ce que je n’aime pas",
   additional: "Autres informations",
-  sectionOrder: "Ordre des sections",
+  sectionOrder: "Gestion des sections",
 };
 /** Draft keys saved together with each editable field. */
 export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
@@ -75,7 +75,7 @@ export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
   interests: ["interests"],
   dislikes: ["dislikes"],
   additional: ["additional"],
-  sectionOrder: ["sectionOrder"],
+  sectionOrder: ["sectionOrder", "customSections"],
 };
 export type InlineCtl = {
   editing: FieldKey | null;
@@ -927,12 +927,15 @@ export function PatientForm({
           "sectionOrder",
           <ol className="bo-section-order-read">
             {draft.sectionOrder.map((k) => (
-              <li key={k}>{SECTION_TITLES[k]}</li>
+              <li key={k}>{sectionTitle(k, draft.customSections)}</li>
             ))}
           </ol>,
           <SectionOrderEditor
             order={draft.sectionOrder}
-            onChange={(o) => set("sectionOrder", o)}
+            customSections={draft.customSections}
+            onChange={(order, customSections) =>
+              onChange({ ...draft, sectionOrder: order, customSections })
+            }
           />,
         )}
       </div>

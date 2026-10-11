@@ -10,6 +10,7 @@ L’interface est en français. Elle est conçue pour les téléphones, l’acce
 - accès par QR code et badge NFC ;
 - comptes administrateurs et accompagnants ;
 - dictionnaire avec images, GIF, fichiers audio et vidéos en boucle ;
+- sections configurables depuis l’interface, avec ajout, masquage, ordre et choix d’icône ;
 - filtre de cartoonisation vidéo facultatif pour les administrateurs ;
 - téléchargement des profils et badges au format PDF ;
 - archivage des profils et des comptes ;

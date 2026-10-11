@@ -210,7 +210,7 @@ function PatientPage() {
             );
           }}
         >
-          <ListOrdered aria-hidden="true" /> Réorganiser les sections
+          <ListOrdered aria-hidden="true" /> Gérer les sections
         </button>
       </div>
       <p className="bo-hint">
@@ -280,4 +280,5 @@ const COLUMN: Record<keyof PatientDraft, string> = {
   dislikes: "dislikes",
   additional: "additional",
   sectionOrder: "section_order",
+  customSections: "section_order",
 };

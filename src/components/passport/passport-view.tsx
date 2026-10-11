@@ -9,6 +9,8 @@ import type { DictionaryEntry } from "@/lib/dictionary-entry";
 import { Button } from "@/components/ui/button";
 import dictionaryIcon from "@/assets/icone-dictionnaire.png";
 import { PRINTABLE_SECTION_ICONS } from "@/lib/printable-section-icons";
+import { NavigationIcon, type NavigationIconName } from "@/components/backoffice/navigation-icon";
+import type { CustomSection, SectionId } from "@/lib/section-order";
 
 export type PassportViewData = {
   name: string;
@@ -35,23 +37,36 @@ export type PassportViewData = {
   interests: string[];
   dislikes: string[];
   additional: string[];
-  sectionOrder?: SectionKey[];
+  sectionOrder?: SectionId[];
+  customSections?: CustomSection[];
 };
 
-function SectionHeader({ title, icon }: { title: string; icon: string }) {
+function SectionHeader({
+  title,
+  icon,
+  iconName,
+}: {
+  title: string;
+  icon?: string;
+  iconName?: NavigationIconName;
+}) {
   return (
     <AccordionPrimitive.Header asChild>
       <h2>
         <AccordionPrimitive.Trigger className="passport-trigger">
           <span className="section-title">
-            <img
-              className="section-icon"
-              src={icon}
-              alt=""
-              aria-hidden="true"
-              width={48}
-              height={48}
-            />
+            {iconName ? (
+              <NavigationIcon name={iconName} className="navigation-icon-section" />
+            ) : (
+              <img
+                className="section-icon"
+                src={icon}
+                alt=""
+                aria-hidden="true"
+                width={48}
+                height={48}
+              />
+            )}
             <span>{title}</span>
           </span>
           <span className="section-toggle" aria-hidden="true">
@@ -110,6 +125,19 @@ function renderSection(k: SectionKey, data: PassportViewData) {
     <AccordionItem key={k} value={k} className="passport-section">
       <SectionHeader title={SECTION_TITLES[k]} icon={ICONS[k]} />
       <AccordionContent className="section-content">{body}</AccordionContent>
+    </AccordionItem>
+  );
+}
+
+function renderCustomSection(section: CustomSection) {
+  const items = section.items.map((item) => item.trim()).filter(Boolean);
+  if (!items.length || !section.title.trim()) return null;
+  return (
+    <AccordionItem key={section.id} value={section.id} className="passport-section">
+      <SectionHeader title={section.title.trim()} iconName={section.icon as NavigationIconName} />
+      <AccordionContent className="section-content">
+        {section.display === "keywords" ? <TagList items={items} /> : <BulletList items={items} />}
+      </AccordionContent>
     </AccordionItem>
   );
 }
@@ -211,7 +239,19 @@ export function PassportView({ data }: { data: PassportViewData }) {
         className="passport-sections"
         aria-label="Les rubriques de mon passeport"
       >
-        {normalizeSectionOrder(data.sectionOrder).map((k) => renderSection(k, data))}
+        {normalizeSectionOrder(data.sectionOrder).map((id) => {
+          if (id.startsWith("custom:"))
+            return renderCustomSection(
+              (data.customSections ?? []).find((section) => section.id === id) ?? {
+                id: id as CustomSection["id"],
+                title: "",
+                icon: "info",
+                items: [],
+                display: "bullets",
+              },
+            );
+          return renderSection(id as SectionKey, data);
+        })}
       </Accordion>
       <footer className="passport-footer">
         <p>Merci de prendre le temps de me comprendre.</p>

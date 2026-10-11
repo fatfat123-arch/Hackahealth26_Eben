@@ -63,7 +63,7 @@ export type PatientResult = {
   interests: string[];
   dislikes: string[];
   additional: string[];
-  section_order: string[];
+  section_order: JsonValue;
 };
 
 const idSchema = z.string().uuid();
@@ -127,7 +127,7 @@ function patient(row: PatientRecord): PatientResult {
     interests: json(row.interests, []),
     dislikes: json(row.dislikes, []),
     additional: json(row.additional, []),
-    section_order: json(row.section_order, []),
+    section_order: json<JsonValue>(row.section_order, []),
     created_at: iso(row.created_at),
     updated_at: iso(row.updated_at),
     archived_at: iso(row.archived_at),
