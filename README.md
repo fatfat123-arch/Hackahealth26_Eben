@@ -3,11 +3,15 @@
 
 # EH Passport
 
+[![CI](https://github.com/fatfat123-arch/Hackahealth26_Eben/actions/workflows/ci.yml/badge.svg)](https://github.com/fatfat123-arch/Hackahealth26_Eben/actions/workflows/ci.yml)
+[![Security](https://github.com/fatfat123-arch/Hackahealth26_Eben/actions/workflows/security.yml/badge.svg)](https://github.com/fatfat123-arch/Hackahealth26_Eben/actions/workflows/security.yml)
+[![CodeQL](https://github.com/fatfat123-arch/Hackahealth26_Eben/actions/workflows/codeql.yml/badge.svg)](https://github.com/fatfat123-arch/Hackahealth26_Eben/actions/workflows/codeql.yml)
+
 **Le passeport de communication numérique qui aide chacun à être compris.**
 
 Accessible instantanément par **QR code** ou **badge NFC**, sur téléphone comme sur ordinateur.
 
-[Découvrir le site](https://eh-passport.ch) · [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOIEMENT.md) · [Sécurité](docs/AUDIT_SECURITE.md)
+[Découvrir le site](https://eh-passport.ch) · [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOIEMENT.md) · [Audit de sécurité](docs/AUDIT_SECURITE.md) · [Signaler une vulnérabilité](SECURITY.md)
 </div>
 
 ---

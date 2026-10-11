@@ -82,7 +82,20 @@ export function applySecurityHeaders(request: Request, response: Response) {
     response.headers.has("set-cookie")
   )
     headers.set("cache-control", "no-store");
-  if (new URL(request.url).protocol === "https:")
+  const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  let publishedProtocol: string | null = null;
+  try {
+    publishedProtocol = process.env["PUBLISHED_ORIGIN"]
+      ? new URL(process.env["PUBLISHED_ORIGIN"]).protocol
+      : null;
+  } catch {
+    publishedProtocol = null;
+  }
+  if (
+    new URL(request.url).protocol === "https:" ||
+    forwardedProtocol === "https" ||
+    publishedProtocol === "https:"
+  )
     headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
   return new Response(response.body, {
     status: response.status,

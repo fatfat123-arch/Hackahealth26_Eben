@@ -35,9 +35,25 @@ npm audit
 npm run check
 ```
 
-La suite actuelle valide le lint, le typage, 82 tests automatisés et le build de
-production. Les 14 tests d’intégration MariaDB sont volontairement ignorés sans
+La suite actuelle valide le lint, le typage, 83 tests automatisés et le build de
+production. Les 13 tests d’intégration MariaDB sont volontairement ignorés sans
 la base jetable décrite dans [GESTION_ROLES.md](GESTION_ROLES.md).
+
+## Contrôles continus sur GitHub
+
+Trois workflows indépendants protègent la branche principale :
+
+- `CI` exécute séparément lint et typage, tests automatisés et build de
+  production sur chaque pull request et chaque push vers `main` ;
+- `Security` contrôle les dépendances de production et de développement,
+  recherche les secrets dans tout l’historique Git et refuse les dépendances
+  vulnérables introduites par une pull request ;
+- `CodeQL` analyse le JavaScript et TypeScript avec les requêtes de sécurité et
+  de qualité étendues.
+
+Les audits de dépendances et CodeQL sont aussi planifiés chaque semaine. Les
+actions utilisées sont épinglées à un commit complet, les permissions GitHub
+sont minimales et Dependabot propose les mises à jour par groupes contrôlés.
 
 ## Vérification après déploiement
 
