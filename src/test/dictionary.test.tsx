@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DictionaryMedia } from "@/components/passport/dictionary-media";
 import { DictionaryGrid } from "@/components/passport/dictionary-grid";
 import { PatientForm } from "@/components/backoffice/patient-form";
 import {
@@ -129,5 +130,32 @@ describe("Dictionary order", () => {
     if (!last) throw new Error("Nouvelle entrée manquante");
     expect(within(last).getByLabelText("Signification (titre)")).toHaveValue("");
     expect(screen.getByRole("button", { name: "Descendre l’entrée 4" })).toBeDisabled();
+  });
+});
+
+describe("Dictionary file replacement", () => {
+  it("replaces the video player in both the card and the open enlargement", () => {
+    const entry = entries[1]!;
+    const { container, rerender } = render(<DictionaryGrid entries={[entry]} />);
+    const oldPreview = container.querySelector("video");
+    fireEvent.click(screen.getByRole("button", { name: "Agrandir : Je suis fatigué" }));
+    const oldEnlargement = screen.getByRole("dialog").querySelector("video");
+    rerender(<DictionaryGrid entries={[{ ...entry, source: "/replacement.mp4" }]} />);
+    const preview = container.querySelector("video");
+    const enlargement = screen.getByRole("dialog").querySelector("video");
+    expect(preview).not.toBe(oldPreview);
+    expect(enlargement).not.toBe(oldEnlargement);
+    expect(preview).toHaveAttribute("src", "/replacement.mp4");
+    expect(enlargement).toHaveAttribute("src", "/replacement.mp4");
+  });
+
+  it("resets audio playback state when its file changes", () => {
+    const entry = entries[2]!;
+    const { container, rerender } = render(<DictionaryMedia entry={entry} />);
+    fireEvent.play(container.querySelector("audio")!);
+    expect(screen.getByRole("button", { name: "Mettre le son en pause" })).toBeInTheDocument();
+    rerender(<DictionaryMedia entry={{ ...entry, source: "/replacement.mp3" }} />);
+    expect(screen.getByRole("button", { name: "Écouter le son" })).toBeInTheDocument();
+    expect(container.querySelector("audio")).toHaveAttribute("src", "/replacement.mp3");
   });
 });
