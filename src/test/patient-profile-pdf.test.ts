@@ -126,6 +126,7 @@ describe("Printable patient profile", () => {
       }),
     );
     const joined = result.text.replace(/\s+/g, " ");
+    expect(result.pages).toHaveLength(1);
     for (const value of [
       view.name,
       view.age,
@@ -256,6 +257,53 @@ describe("Printable patient profile", () => {
     expect(result.text).toContain(draft.name);
     expect(result.text).not.toMatch(/Mes centres|Mes peurs|Autres informations|Mon dictionnaire/);
     expect(result.pages[0]!.images).toBe(0);
+  });
+
+  it("keeps custom cards, long headings and explicit paragraphs in their configured sequence", async () => {
+    const customTitle =
+      "Mes habitudes personnelles et les choses importantes à connaître pour m’accompagner";
+    const profile = printableDraft({
+      ...emptyDraft(),
+      name: "Anne Sophie Marie Exemple",
+      about: "Une première ligne.\nUne deuxième ligne.",
+      customSections: [
+        {
+          id: "custom:habits",
+          title: customTitle,
+          icon: "info",
+          display: "keywords",
+          items: ["Ne changez pas ce texte.\nGardez aussi cette ligne."],
+        },
+      ],
+      interests: ["La lecture."],
+      dislikes: ["Les bruits soudains."],
+      sectionOrder: ["dislikes", "custom:habits", "interests"],
+    });
+    const result = await inspectPdf(await createPatientProfilePdf(profile, assets));
+    const joined = result.text.replace(/\s+/g, " ");
+    expect(result.pages).toHaveLength(1);
+    expect(joined).toContain(customTitle);
+    expect(joined).toContain("Une première ligne. Une deuxième ligne.");
+    expect(joined).toContain("Ne changez pas ce texte. Gardez aussi cette ligne.");
+    expect(joined.indexOf("Mes peurs")).toBeLessThan(joined.indexOf(customTitle));
+    expect(joined.indexOf(customTitle)).toBeLessThan(joined.indexOf("Mes centres"));
+    expect(result.pages[0]!.images).toBe(2);
+  });
+
+  it("paginates unusually long contact information without omitting it", async () => {
+    const phoneNote = `${"Une information de contact à conserver. ".repeat(80)}FIN_CONTACT`;
+    const profile = printableDraft({
+      ...emptyDraft(),
+      name: "Test",
+      phone: "+41 00 000 00 00",
+      phoneNote,
+      about: "FIN_PERSONNEL",
+    });
+    const result = await inspectPdf(await createPatientProfilePdf(profile, assets));
+    expect(result.pages.length).toBeGreaterThan(1);
+    expect(result.text).toContain("FIN_CONTACT");
+    expect(result.text).toContain("FIN_PERSONNEL");
+    expect(result.text.replace(/\s+/g, " ").match(/information de contact/g)).toHaveLength(80);
   });
 
   it("paginates long profiles without losing text or making blank pages", async () => {
