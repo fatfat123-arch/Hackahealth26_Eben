@@ -508,3 +508,7 @@
 .bo-url, .bo-url a { overflow-wrap: anywhere; }
 .bo-read-edit .bo-pencil { align-self: start; margin: -10px -8px 0 0; }
 .bo-edit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+/* Tutorial: step references and app icon */
+.step-ref { color: var(--muted-foreground); font-size: 0.875em; white-space: nowrap; }
+.app-icon { display: inline-block; vertical-align: middle; border-radius: 22%; margin: 0 0.15em; }
