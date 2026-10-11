@@ -10,7 +10,7 @@ L’interface est en français. Elle est conçue pour les téléphones, l’acce
 - accès par QR code et badge NFC ;
 - comptes administrateurs et accompagnants ;
 - dictionnaire avec images, GIF, fichiers audio et vidéos en boucle ;
-- sections configurables depuis l’interface, avec ajout, masquage, ordre et choix d’icône ;
+- création modulaire des profils depuis l’interface, avec ajout, masquage, ordre, contenu et choix d’icône pour les sections ;
 - filtre de cartoonisation vidéo facultatif pour les administrateurs ;
 - téléchargement des profils et badges au format PDF ;
 - archivage des profils et des comptes ;
@@ -52,20 +52,20 @@ Ne publiez jamais `.env`, les accès à la base de données, les médias des ré
 
 ## Où effectuer les modifications
 
-| Partie                                      | Emplacement                  |
-| ------------------------------------------- | ---------------------------- |
-| Pages et URL                                | `src/routes/`                |
-| Composants de l’espace privé                | `src/components/backoffice/` |
-| Passeport public et lecteurs multimédias    | `src/components/passport/`   |
-| Règles métier partagées                     | `src/lib/`                   |
-| Authentification, base et services médias   | `src/server/`                |
-| Schéma de la base de données                | `database/schema.sql`        |
-| Mises à jour sûres du schéma                | `scripts/init-db.mjs`        |
-| Styles globaux                              | `src/styles.css`             |
-| Images, mascottes, polices et tutoriels     | `src/assets/`                |
-| Tests automatisés                           | `src/test/`                  |
-| Cartoonisation Python                       | `Cartooniser/`               |
-| Modèle de configuration de production       | `.env.example`               |
+| Partie                                    | Emplacement                  |
+| ----------------------------------------- | ---------------------------- |
+| Pages et URL                              | `src/routes/`                |
+| Composants de l’espace privé              | `src/components/backoffice/` |
+| Passeport public et lecteurs multimédias  | `src/components/passport/`   |
+| Règles métier partagées                   | `src/lib/`                   |
+| Authentification, base et services médias | `src/server/`                |
+| Schéma de la base de données              | `database/schema.sql`        |
+| Mises à jour sûres du schéma              | `scripts/init-db.mjs`        |
+| Styles globaux                            | `src/styles.css`             |
+| Images, mascottes, polices et tutoriels   | `src/assets/`                |
+| Tests automatisés                         | `src/test/`                  |
+| Cartoonisation Python                     | `Cartooniser/`               |
+| Modèle de configuration de production     | `.env.example`               |
 
 TanStack Start utilise un routage basé sur les fichiers. `src/routeTree.gen.ts` est généré automatiquement et ne doit pas être modifié manuellement. Consultez `src/routes/README.md` pour les conventions de nommage.
 
@@ -90,15 +90,15 @@ Exécutez `npm run check` avant chaque envoi ou déploiement.
 
 Copiez `.env.example` vers `.env`. Les réglages principaux sont :
 
-| Variable                                                  | Rôle                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------ |
-| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | connexion MariaDB                                            |
-| `MEDIA_ROOT`                                              | dossier privé contenant les fichiers envoyés                 |
-| `MEDIA_SIGNING_SECRET`                                    | secret des URL temporaires, 24 caractères minimum            |
-| `PUBLISHED_ORIGIN`                                        | domaine public utilisé dans les liens QR et NFC               |
-| `SWISS_IP_ONLY`                                           | `true` pour limiter l’accès aux plages IP suisses             |
-| `LOGIN_RATE_LIMIT_*`                                      | protection contre les tentatives répétées de connexion       |
-| `CARTOONISER_*`                                           | exécutable Python, taille maximale et délai de traitement     |
+| Variable                                                  | Rôle                                                      |
+| --------------------------------------------------------- | --------------------------------------------------------- |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | connexion MariaDB                                         |
+| `MEDIA_ROOT`                                              | dossier privé contenant les fichiers envoyés              |
+| `MEDIA_SIGNING_SECRET`                                    | secret des URL temporaires, 24 caractères minimum         |
+| `PUBLISHED_ORIGIN`                                        | domaine public utilisé dans les liens QR et NFC           |
+| `SWISS_IP_ONLY`                                           | `true` pour limiter l’accès aux plages IP suisses         |
+| `LOGIN_RATE_LIMIT_*`                                      | protection contre les tentatives répétées de connexion    |
+| `CARTOONISER_*`                                           | exécutable Python, taille maximale et délai de traitement |
 
 Plus de détails sont disponibles dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

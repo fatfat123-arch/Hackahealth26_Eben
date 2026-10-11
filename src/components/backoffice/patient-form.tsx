@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from "react";
+import { Fragment, useId, useState, type ReactNode } from "react";
 import { Pencil, Plus, Save, Trash2, Upload, WandSparkles, X } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { DictionaryCard } from "@/components/passport/dictionary-card";
@@ -270,30 +270,24 @@ function ListEditor({
   );
 }
 
-const STEPS = [
-  ["identite", "Identité"],
-  ["dictionnaire", "Dictionnaire"],
-  ["communication", "Communication"],
-  ["gouts", "Centres d’intérêt et peurs"],
-  ["autres", "Autres informations"],
-] as const;
+type ProfileStep = { id: string; label: string; content: ReactNode };
 
-function Steps({ parts }: { parts: [ReactNode, ReactNode, ReactNode, ReactNode, ReactNode] }) {
+function Steps({ steps }: { steps: ProfileStep[] }) {
   return (
-    <Tabs.Root defaultValue="identite" className="bo-steps-tabs">
+    <Tabs.Root defaultValue={steps[0]!.id} className="bo-steps-tabs">
       <Tabs.List className="bo-tablist" aria-label="Étapes du profil">
-        {STEPS.map(([v, l], i) => (
-          <Tabs.Trigger key={v} value={v} className="bo-steptab">
+        {steps.map((step, index) => (
+          <Tabs.Trigger key={step.id} value={step.id} className="bo-steptab">
             <span className="bo-step-num" aria-hidden="true">
-              {i + 1}
+              {index + 1}
             </span>
-            {l}
+            {step.label}
           </Tabs.Trigger>
         ))}
       </Tabs.List>
-      {STEPS.map(([v], i) => (
-        <Tabs.Content key={v} value={v} className="bo-readonly bo-tabpanel">
-          {parts[i]}
+      {steps.map((step) => (
+        <Tabs.Content key={step.id} value={step.id} className="bo-readonly bo-tabpanel">
+          {step.content}
         </Tabs.Content>
       ))}
     </Tabs.Root>
@@ -893,6 +887,79 @@ export function PatientForm({
     </section>
   );
 
+  const visible = (key: PatientDraft["sectionOrder"][number]) => draft.sectionOrder.includes(key);
+  const sectionManager = Card(
+    "sectionOrder",
+    <ol className="bo-section-order-read">
+      {draft.sectionOrder.map((key) => (
+        <li key={key}>{sectionTitle(key, draft.customSections)}</li>
+      ))}
+    </ol>,
+    <SectionOrderEditor
+      order={draft.sectionOrder}
+      customSections={draft.customSections}
+      onChange={(sectionOrder, customSections) =>
+        onChange({ ...draft, sectionOrder, customSections })
+      }
+    />,
+    <h2>Structure du passeport</h2>,
+  );
+
+  const steps: ProfileStep[] = [
+    {
+      id: "identite",
+      label: "Identité",
+      content: (
+        <>
+          {Card("photo", photoRead, photoEdit)}
+          {Card("howTo", <p className="bo-pre">{draft.howTo || "—"}</p>, text("howTo"))}
+          {Card("about", <p className="bo-pre">{draft.about || "—"}</p>, text("about"))}
+          {info}
+        </>
+      ),
+    },
+  ];
+  if (visible("dictionary"))
+    steps.push({
+      id: "dictionnaire",
+      label: "Dictionnaire",
+      content: Card("dictionary", dictRead, dictEdit),
+    });
+  const communication = (
+    ["communicates", "understandingNeeds", "tools", "facilitators"] as const
+  ).filter(visible);
+  if (communication.length)
+    steps.push({
+      id: "communication",
+      label: "Communication",
+      content: (
+        <>
+          {communication.map((key) => (
+            <Fragment key={key}>{list(key)}</Fragment>
+          ))}
+        </>
+      ),
+    });
+  const preferences = (["interests", "dislikes"] as const).filter(visible);
+  if (preferences.length)
+    steps.push({
+      id: "preferences",
+      label: "Préférences",
+      content: (
+        <>
+          {preferences.map((key) => (
+            <Fragment key={key}>{list(key)}</Fragment>
+          ))}
+        </>
+      ),
+    });
+  if (visible("additional"))
+    steps.push({
+      id: "autres",
+      label: FIELD_LABELS.additional,
+      content: list("additional"),
+    });
+
   return (
     <>
       {error && (
@@ -900,45 +967,13 @@ export function PatientForm({
           {error}
         </p>
       )}
-      <Steps
-        parts={[
-          <>
-            {Card("photo", photoRead, photoEdit)}
-            {Card("howTo", <p className="bo-pre">{draft.howTo || "—"}</p>, text("howTo"))}
-            {Card("about", <p className="bo-pre">{draft.about || "—"}</p>, text("about"))}
-            {info}
-          </>,
-          <>{Card("dictionary", dictRead, dictEdit)}</>,
-          <>
-            {list("communicates")}
-            {list("understandingNeeds")}
-            {list("tools")}
-            {list("facilitators")}
-          </>,
-          <>
-            {list("interests")}
-            {list("dislikes")}
-          </>,
-          <>{list("additional")}</>,
-        ]}
-      />
-      <div id="section-order">
-        {Card(
-          "sectionOrder",
-          <ol className="bo-section-order-read">
-            {draft.sectionOrder.map((k) => (
-              <li key={k}>{sectionTitle(k, draft.customSections)}</li>
-            ))}
-          </ol>,
-          <SectionOrderEditor
-            order={draft.sectionOrder}
-            customSections={draft.customSections}
-            onChange={(order, customSections) =>
-              onChange({ ...draft, sectionOrder: order, customSections })
-            }
-          />,
-        )}
-      </div>
+      {!inline && (
+        <div id="section-order" className="bo-builder-first">
+          {sectionManager}
+        </div>
+      )}
+      <Steps steps={steps} />
+      {inline && <div id="section-order">{sectionManager}</div>}
     </>
   );
 }

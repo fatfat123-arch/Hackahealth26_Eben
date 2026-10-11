@@ -830,6 +830,12 @@
   display: grid;
   gap: 20px;
 }
+.bo-builder-first {
+  margin: 28px 0 36px;
+}
+.bo-builder-first > .bo-card {
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+}
 .bo-section-config-item {
   align-items: flex-start;
 }
