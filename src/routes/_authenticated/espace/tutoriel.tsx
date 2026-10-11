@@ -55,7 +55,7 @@ function Tutorial() {
     <section className="bo-card">
       <h2>2. Préparer et tester le code QR</h2>
       <ol className="bo-steps">
-        <li>Sur le profil, touchez <strong>Télécharger le code QR</strong> pour obtenir l’image seule, ou <strong>Télécharger la carte (PDF)</strong> pour une carte avec la mascotte.</li><li>Pour la carte de 9 × 7 cm, imprimez le PDF sur une page A4 à <strong>100 % (taille réelle)</strong>, puis découpez aux repères. Pour le code QR seul, imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.</li><li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li><li>Visez-le avec l’appareil photo d’un autre téléphone.</li><li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
+        <li>Sur le profil, touchez <strong>Télécharger le code QR</strong> pour obtenir l’image seule, ou <strong>Télécharger la carte (PDF)</strong> pour une planche de cinq badges avec la mascotte.</li><li>Pour les badges, imprimez le PDF sur une page A4 à <strong>100 % (taille réelle)</strong>, puis découpez le long du bord jaune. Pour le code QR seul, imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.</li><li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li><li>Visez-le avec l’appareil photo d’un autre téléphone.</li><li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
       </ol>
     </section>
     <section className="bo-card">

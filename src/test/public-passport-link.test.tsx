@@ -25,7 +25,14 @@ afterEach(cleanup);
 
 describe("Profile passport downloads", () => {
   it("keeps the standalone PNG and downloads a card for the same public profile", async () => {
-    render(<PublicPassportLink publicId="resident-demo" name="Élodie Exemple" onReset={vi.fn()} />);
+    render(
+      <PublicPassportLink
+        patientId="patient-1"
+        publicId="resident-demo"
+        name="Élodie Exemple"
+        onReset={vi.fn()}
+      />,
+    );
     const qrLink = await screen.findByRole("link", { name: "Télécharger le code QR" });
     expect(qrLink).toHaveAttribute("download", expect.stringMatching(/\.png$/));
     expect(qrLink).toHaveAttribute("href", "data:image/png;base64,cXI=");
@@ -34,11 +41,7 @@ describe("Profile passport downloads", () => {
     const publicLink = screen.getByRole("link", {
       name: "https://eh-passport.ch/passeport/resident-demo",
     });
-    expect(downloadPassportCard).toHaveBeenCalledWith({
-      url: publicLink.getAttribute("href"),
-      name: "Élodie Exemple",
-      artwork: expect.stringContaining("mascotte-carte.png"),
-    });
+    expect(downloadPassportCard).toHaveBeenCalledWith({ patientId: "patient-1" });
     expect(QRCode.toDataURL).toHaveBeenCalledWith(
       publicLink.getAttribute("href"),
       expect.any(Object),
@@ -52,7 +55,14 @@ describe("Profile passport downloads", () => {
         rejectDownload = reject;
       }),
     );
-    render(<PublicPassportLink publicId="resident-demo" name="Élodie Exemple" onReset={vi.fn()} />);
+    render(
+      <PublicPassportLink
+        patientId="patient-1"
+        publicId="resident-demo"
+        name="Élodie Exemple"
+        onReset={vi.fn()}
+      />,
+    );
     const button = await screen.findByRole("button", { name: "Télécharger la carte (PDF)" });
     await waitFor(() => expect(button).toBeEnabled());
     fireEvent.click(button);
@@ -78,9 +88,21 @@ describe("Profile passport downloads", () => {
       }),
     );
     const { rerender } = render(
-      <PublicPassportLink publicId="first" name="Premier" onReset={vi.fn()} />,
+      <PublicPassportLink
+        patientId="patient-1"
+        publicId="first"
+        name="Premier"
+        onReset={vi.fn()}
+      />,
     );
-    rerender(<PublicPassportLink publicId="second" name="Deuxième" onReset={vi.fn()} />);
+    rerender(
+      <PublicPassportLink
+        patientId="patient-2"
+        publicId="second"
+        name="Deuxième"
+        onReset={vi.fn()}
+      />,
+    );
     await screen.findByRole("img", { name: "Code QR menant au passeport de Deuxième" });
     await act(async () => {
       finishFirst("data:image/png;base64,b2xk");
@@ -93,9 +115,7 @@ describe("Profile passport downloads", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Télécharger la carte (PDF)" }));
     await screen.findByRole("status");
-    expect(downloadPassportCard).toHaveBeenCalledWith(
-      expect.objectContaining({ url: "https://eh-passport.ch/passeport/second", name: "Deuxième" }),
-    );
+    expect(downloadPassportCard).toHaveBeenCalledWith({ patientId: "patient-2" });
   });
 
   it("warns before resetting and regenerates the displayed public link", async () => {
@@ -103,6 +123,7 @@ describe("Profile passport downloads", () => {
       const [publicId, setPublicId] = useState("old-tag");
       return (
         <PublicPassportLink
+          patientId="patient-1"
           publicId={publicId}
           name="Élodie Exemple"
           onReset={async () => setPublicId("new-tag")}

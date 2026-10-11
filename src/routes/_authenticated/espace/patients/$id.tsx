@@ -232,6 +232,7 @@ function PatientPage() {
       )}
       <PublicPassportLink
         key={id}
+        patientId={id}
         publicId={publicId || data.row.public_id}
         name={data.row.name}
         onReset={resetPublicUrl}

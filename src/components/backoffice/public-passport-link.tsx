@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Copy, Download, RotateCcw } from "lucide-react";
 import { publicPassportUrl, linkUsesPreview } from "@/lib/site-url";
-import { mascotArtwork } from "@/components/mascot";
 import { askConfirm } from "@/components/backoffice/confirm-dialog";
 
 export function PublicPassportLink({
+  patientId,
   publicId,
   name,
   onReset,
 }: {
+  patientId: string;
   publicId: string;
   name: string;
   onReset: () => Promise<void>;
@@ -56,10 +57,11 @@ export function PublicPassportLink({
     setCardMessage("");
     try {
       const { downloadPassportCard } = await import("@/lib/passport-card-download");
-      await downloadPassportCard({ url, name, artwork: mascotArtwork.carte });
+      await downloadPassportCard({ patientId });
       setCardMessage("Carte prête : le téléchargement du PDF a été lancé.");
-    } catch {
-      setCardError("La carte n’a pas pu être téléchargée. Merci de réessayer.");
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "Merci de réessayer.";
+      setCardError(`La carte n’a pas pu être téléchargée. ${detail}`);
     } finally {
       setCardBusy(false);
     }
@@ -140,9 +142,9 @@ export function PublicPassportLink({
           </button>
         </div>
         <p className="bo-hint">
-          Carte avec la mascotte et le code QR, 9 × 7 cm sur une page A4. Imprimez à 100 % (taille
-          réelle), puis découpez aux repères. Si vous réinitialisez le lien, remplacez les anciens
-          codes QR et puces NFC : ils seront invalides.
+          Planche de cinq badges sur une page A4. Imprimez à 100 % (taille réelle), puis découpez le
+          long du bord jaune. Si vous réinitialisez le lien, remplacez les anciens codes QR et puces
+          NFC : ils seront invalides.
         </p>
         {copied && (
           <p role="status" className="bo-hint">

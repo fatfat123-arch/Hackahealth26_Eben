@@ -1,4 +1,9 @@
-import { createPassportCardPdf, PASSPORT_CARD } from "./passport-card-pdf";
+import templateUrl from "@/assets/badges-reference.pdf?url&inline";
+import nameFontUrl from "@/assets/fonts/Grandstander-ExtraBold.ttf?url";
+import { getPatient } from "./patients.functions";
+import { signPaths } from "./session";
+import { publicPassportUrl } from "./site-url";
+import { createPassportCardPdf, BADGE_TEMPLATE, patientFirstName } from "./passport-card-pdf";
 
 export function passportDownloadName(name: string, prefix: string, extension: string) {
   const slug =
@@ -11,81 +16,107 @@ export function passportDownloadName(name: string, prefix: string, extension: st
   return `${prefix}-${slug}.${extension}`;
 }
 
-function loadArtwork(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("La mascotte n’a pas pu être chargée."));
-    image.src = src;
-  });
+async function loadBytes(url: string, photo = false) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 20_000);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      ...(photo ? { cache: "no-store" as const } : {}),
+    });
+    if (!response.ok) throw new Error();
+    return new Uint8Array(await response.arrayBuffer());
+  } catch {
+    throw new Error(
+      photo
+        ? "La photo du patient n’a pas pu être chargée. Réessayez."
+        : "Le modèle des badges n’a pas pu être chargé. Réessayez.",
+    );
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
-export async function downloadPassportCard({
-  url,
-  name,
-  artwork,
-}: {
-  url: string;
-  name: string;
-  artwork: string;
-}) {
-  const image = await loadArtwork(artwork);
-  const canvas = document.createElement("canvas");
-  // About 305 dpi; native browser fonts preserve accents and non-Latin names.
-  const scale = 12;
-  canvas.width = PASSPORT_CARD.width * scale;
-  canvas.height = PASSPORT_CARD.height * scale;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("La carte n’a pas pu être préparée.");
-  ctx.scale(scale, scale);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, PASSPORT_CARD.width, PASSPORT_CARD.height);
-  const imageWidth = PASSPORT_CARD.width - 4;
-  const imageHeight = (imageWidth * image.naturalHeight) / image.naturalWidth;
-  ctx.drawImage(image, 2, 8, imageWidth, imageHeight);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(2, 2, 86, 12);
-  ctx.fillRect(2, 65.5, 86, 3.5);
-  ctx.fillStyle = "#004d95";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "bold 3.8px Arial, sans-serif";
-  ctx.fillText("Mon passeport de communication", 45, 6);
-  let size = 4.4;
-  const label = name.replace(/\s+/g, " ").trim();
-  ctx.font = `bold ${size}px Arial, sans-serif`;
-  while (size > 3 && ctx.measureText(label).width > 80) {
-    size = Math.max(3, size - 0.1);
-    ctx.font = `bold ${size}px Arial, sans-serif`;
+async function loadPhoto(path: string) {
+  const urls = await signPaths([path]);
+  if (!urls[path]) throw new Error("La photo du patient n’a pas pu être chargée. Réessayez.");
+  const bytes = await loadBytes(urls[path], true);
+  let image: ImageBitmap;
+  try {
+    image = await createImageBitmap(new Blob([new Uint8Array(bytes)]));
+  } catch {
+    throw new Error("La photo du patient n’a pas pu être chargée. Réessayez.");
   }
-  let fitted = label;
-  if (ctx.measureText(fitted).width > 80) {
-    const characters = Array.from(label);
-    while (characters.length && ctx.measureText(`${characters.join("")}…`).width > 80)
-      characters.pop();
-    fitted = `${characters.join("")}…`;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = Math.round(
+      (canvas.width * BADGE_TEMPLATE.photo.height) / BADGE_TEMPLATE.photo.width,
+    );
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("La photo du patient n’a pas pu être préparée.");
+    const scale = Math.max(canvas.width / image.width, canvas.height / image.height);
+    const width = canvas.width / scale,
+      height = canvas.height / scale;
+    context.drawImage(
+      image,
+      (image.width - width) / 2,
+      (image.height - height) / 2,
+      width,
+      height,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+    const png = await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(
+        (blob) =>
+          blob ? resolve(blob) : reject(new Error("La photo du patient n’a pas pu être préparée.")),
+        "image/png",
+      ),
+    );
+    return new Uint8Array(await png.arrayBuffer());
+  } finally {
+    image.close();
   }
-  ctx.fillText(fitted, 45, 11.5);
-  ctx.font = "bold 3.2px Arial, sans-serif";
-  ctx.fillText("Scannez-moi", PASSPORT_CARD.qrX + PASSPORT_CARD.qrSize / 2, 24.5);
-  ctx.font = "2.8px Arial, sans-serif";
-  ctx.fillText("Pour mieux me connaître", 45, 67.4);
-  ctx.strokeStyle = "#ffbf19";
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  ctx.roundRect(1, 1, 88, 68, 4);
-  ctx.stroke();
+}
 
-  const bytes = await createPassportCardPdf(url, canvas.toDataURL("image/png"));
+/** Fresh authenticated profile and expiring media access, then a local PDF with embedded image bytes. */
+export async function preparePassportCard(patientId: string) {
+  const [patient, template, nameFont] = await Promise.all([
+    getPatient({
+      data: patientId,
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    }),
+    loadBytes(templateUrl),
+    loadBytes(nameFontUrl),
+  ]);
+  if (!patient) throw new Error("Le profil du patient est introuvable.");
+  const photo = patient.photo_path ? await loadPhoto(patient.photo_path) : undefined;
+  return {
+    bytes: await createPassportCardPdf(publicPassportUrl(patient.public_id), patient.name, {
+      template,
+      nameFont,
+      photo,
+    }),
+    filename: passportDownloadName(patientFirstName(patient.name), "carte", "pdf"),
+  };
+}
+
+export async function downloadPassportCard({ patientId }: { patientId: string }) {
+  const { bytes, filename } = await preparePassportCard(patientId);
   const objectUrl = URL.createObjectURL(
     new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
   );
   const link = document.createElement("a");
-  link.href = objectUrl;
-  link.download = passportDownloadName(name, "carte-passeport", "pdf");
-  document.body.append(link);
-  link.click();
-  link.remove();
-  // Give browsers time to start the download before releasing the blob.
-  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  try {
+    link.href = objectUrl;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+  } finally {
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  }
 }
