@@ -21,6 +21,21 @@ export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
   component: Tutorial,
 });
 
+const nfcPhotos = [
+  { src: nfc01, title: "Image 1 — Ouvrir « Écrire »", explanation: "Sélectionnez l’onglet Écrire en haut de l’écran.", alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré", highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 } },
+  { src: nfc02, title: "Image 2 — Ajouter un enregistrement", explanation: "Choisissez le contenu à placer dans le badge.", alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
+  { src: nfc03, title: "Image 3 — Choisir URL / URI", explanation: "Cette option permet d’ouvrir directement le passeport.", alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
+  { src: nfc04, title: "Image 4 — Coller le lien", explanation: "Collez le lien public copié depuis le profil du résident.", alt: "Champ URL vide de NFC Tools", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
+  { src: nfc05, title: "Image 5 — Valider le lien", explanation: "Vérifiez qu’il commence par https://eh-passport.ch/passeport/, puis validez.", alt: "Champ URL rempli avec le lien du passeport, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
+  { src: nfc06, title: "Image 6 — Lancer l’écriture", explanation: "Lorsque l’URL apparaît dans la liste, touchez Écrire.", alt: "Enregistrement URL ajouté, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
+  { src: nfc07, title: "Image 7 — Approcher le badge", explanation: "Gardez le badge immobile contre le téléphone.", alt: "Demande d’approcher un badge NFC" },
+  { src: nfc08, title: "Image 8 — Vérifier la confirmation", explanation: "Écriture terminée confirme que le lien est enregistré.", alt: "Confirmation « Écriture terminée »" },
+];
+
+function StepPhoto({ n }: { n: number }) {
+  return <TutorialPhotos photos={[nfcPhotos[n - 1]]} />;
+}
+
 function Tutorial() {
   const { id, publicId } = Route.useSearch();
   const [url, setUrl] = useState("");
@@ -55,26 +70,16 @@ function Tutorial() {
       </ul>
       <h3>Écrire le lien sur le badge</h3>
       <ol className="bo-steps">
-        <li>Ouvrez <strong>NFC Tools</strong> <img src={nfcToolsIcon} alt="Icône de NFC Tools" className="app-icon" width={28} height={28} />, puis touchez <strong>Écrire</strong>. <span className="step-ref">(image 1)</span></li>
-        <li>Touchez <strong>Ajouter un enregistrement</strong>. <span className="step-ref">(image 2)</span></li>
-        <li>Choisissez <strong>URL / URI</strong>. <span className="step-ref">(image 3)</span></li>
-        <li>Collez le lien : <strong>{link}</strong>. Depuis votre téléphone, c’est le lien de la page du résident que vous obtenez quand vous scannez le code QR, et qui apparaît en haut de la page. <span className="step-ref">(image 4)</span></li>
-        <li>Vérifiez le lien, puis touchez <strong>Valider</strong>. <span className="step-ref">(image 5)</span></li>
-        <li>Touchez <strong>Écrire</strong>. <span className="step-ref">(image 6)</span></li>
-        <li>Maintenez le badge sans bouger contre le haut d’un iPhone ou le centre du dos d’un Android. <span className="step-ref">(image 7)</span></li>
-        <li>Attendez le message <strong>Écriture terminée</strong>. <span className="step-ref">(image 8)</span></li>
+        <li>Ouvrez <strong>NFC Tools</strong> <img src={nfcToolsIcon} alt="Icône de NFC Tools" className="app-icon" width={28} height={28} />, puis touchez <strong>Écrire</strong>. <span className="step-ref">(image 1)</span><StepPhoto n={1} /></li>
+        <li>Touchez <strong>Ajouter un enregistrement</strong>. <span className="step-ref">(image 2)</span><StepPhoto n={2} /></li>
+        <li>Choisissez <strong>URL / URI</strong>. <span className="step-ref">(image 3)</span><StepPhoto n={3} /></li>
+        <li>Collez le lien : <strong>{link}</strong>. Depuis votre téléphone, c’est le lien de la page du résident que vous obtenez quand vous scannez le code QR, et qui apparaît en haut de la page. <span className="step-ref">(image 4)</span><StepPhoto n={4} /></li>
+        <li>Vérifiez le lien, puis touchez <strong>Valider</strong>. <span className="step-ref">(image 5)</span><StepPhoto n={5} /></li>
+        <li>Touchez <strong>Écrire</strong>. <span className="step-ref">(image 6)</span><StepPhoto n={6} /></li>
+        <li>Maintenez le badge sans bouger contre le haut d’un iPhone ou le centre du dos d’un Android. <span className="step-ref">(image 7)</span><StepPhoto n={7} /></li>
+        <li>Attendez le message <strong>Écriture terminée</strong>. <span className="step-ref">(image 8)</span><StepPhoto n={8} /></li>
       </ol>
       <p><strong>Important :</strong> ne verrouillez pas encore le badge. Testez-le d’abord : le verrouillage est définitif.</p>
-      <TutorialPhotos photos={[
-        { src: nfc01, title: "Image 1 — Ouvrir « Écrire »", explanation: "Sélectionnez l’onglet Écrire en haut de l’écran.", alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré", highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 } },
-        { src: nfc02, title: "Image 2 — Ajouter un enregistrement", explanation: "Choisissez le contenu à placer dans le badge.", alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
-        { src: nfc03, title: "Image 3 — Choisir URL / URI", explanation: "Cette option permet d’ouvrir directement le passeport.", alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
-        { src: nfc04, title: "Image 4 — Coller le lien", explanation: "Collez le lien public copié depuis le profil du résident.", alt: "Champ URL vide de NFC Tools", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
-        { src: nfc05, title: "Image 5 — Valider le lien", explanation: "Vérifiez qu’il commence par https://eh-passport.ch/passeport/, puis validez.", alt: "Champ URL rempli avec le lien du passeport, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
-        { src: nfc06, title: "Image 6 — Lancer l’écriture", explanation: "Lorsque l’URL apparaît dans la liste, touchez Écrire.", alt: "Enregistrement URL ajouté, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
-        { src: nfc07, title: "Image 7 — Approcher le badge", explanation: "Gardez le badge immobile contre le téléphone.", alt: "Demande d’approcher un badge NFC" },
-        { src: nfc08, title: "Image 8 — Vérifier la confirmation", explanation: "Écriture terminée confirme que le lien est enregistré.", alt: "Confirmation « Écriture terminée »" },
-      ]} />
       <h3>Tester le badge avant de le distribuer</h3>
       <ol className="bo-steps"><li>Fermez NFC Tools ou prenez un deuxième téléphone.</li><li>Déverrouillez le téléphone et approchez-le du badge.</li><li>Touchez la notification.</li><li>Vérifiez le nom du résident et la lecture des vidéos.</li><li>Inscrivez le nom du résident sur le badge ou son emballage.</li></ol>
       <h3>Si le badge ne réagit pas</h3>
