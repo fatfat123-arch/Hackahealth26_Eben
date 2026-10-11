@@ -3,7 +3,9 @@ import { blockBotRequest, isBotUserAgent, ROBOTS_TAG, withNoIndex } from "@/serv
 
 describe("bot access policy", () => {
   it("blocks common crawler user agents", () => {
-    const response = blockBotRequest(new Request("https://eh-passport.ch", { headers: { "user-agent": "Googlebot/2.1" } }));
+    const response = blockBotRequest(
+      new Request("https://eh-passport.ch", { headers: { "user-agent": "Googlebot/2.1" } }),
+    );
 
     expect(response?.status).toBe(403);
     expect(response?.headers.get("x-robots-tag")).toBe(ROBOTS_TAG);
@@ -14,7 +16,9 @@ describe("bot access policy", () => {
   });
 
   it("adds noindex headers to normal responses", () => {
-    const response = withNoIndex(new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }));
+    const response = withNoIndex(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("text/plain");

@@ -21,6 +21,7 @@ export function mediaFileError(file: Pick<File, "size" | "type">) {
   const kind = mediaKind(file.type);
   if (!kind) return "Ce type de fichier n’est pas accepté.";
   if (file.size === 0) return "Le fichier est vide.";
-  if (file.size > MEDIA_LIMITS[kind]) return `Fichier trop volumineux : maximum ${mediaLimitLabel(kind)} pour ${kind === "image" ? "une image" : kind === "audio" ? "un son" : "une vidéo"}.`;
+  if (file.size > MEDIA_LIMITS[kind])
+    return `Fichier trop volumineux : maximum ${mediaLimitLabel(kind)} pour ${kind === "image" ? "une image" : kind === "audio" ? "un son" : "une vidéo"}.`;
   return null;
 }

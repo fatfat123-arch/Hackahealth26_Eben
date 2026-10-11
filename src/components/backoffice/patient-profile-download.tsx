@@ -11,19 +11,29 @@ export function PatientProfileDownload({ patientId }: { patientId: string }) {
   const locked = useRef(false);
   const generation = useRef(0);
   useEffect(() => {
-    locked.current = false; setBusy(false); setError(""); setMessage("");
-    return () => { generation.current++; };
+    locked.current = false;
+    setBusy(false);
+    setError("");
+    setMessage("");
+    return () => {
+      generation.current++;
+    };
   }, [patientId]);
 
   async function download() {
     if (locked.current) return;
     locked.current = true;
     const current = ++generation.current;
-    setBusy(true); setError(""); setMessage("");
+    setBusy(true);
+    setError("");
+    setMessage("");
     try {
       // Re-read through the same authenticated access path as the profile, never a cached draft.
       const [saved, renderer] = await Promise.all([
-        getPatient({ data: patientId, fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) }),
+        getPatient({
+          data: patientId,
+          fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+        }),
         import("@/lib/patient-profile-download"),
       ]);
       if (!saved) throw new Error("Profil introuvable.");
@@ -34,17 +44,41 @@ export function PatientProfileDownload({ patientId }: { patientId: string }) {
       renderer.savePatientProfilePdf(result);
       setMessage("Le téléchargement du profil PDF a été lancé.");
     } catch {
-      if (current === generation.current) setError("Le profil n’a pas pu être téléchargé. Réessayez ou reconnectez-vous.");
+      if (current === generation.current)
+        setError("Le profil n’a pas pu être téléchargé. Réessayez ou reconnectez-vous.");
     } finally {
-      if (current === generation.current) { locked.current = false; setBusy(false); }
+      if (current === generation.current) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   }
-  return <>
-    <button type="button" className="bo-btn bo-btn-outline" onClick={download} disabled={busy} aria-busy={busy}>
-      {busy ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <Download aria-hidden="true" />}
-      {busy ? "Préparation du profil…" : "Télécharger le profil (PDF)"}
-    </button>
-    {message && <span className="sr-only" role="status">{message}</span>}
-    {error && <p className="bo-error bo-profile-pdf-error" role="alert">{error}</p>}
-  </>;
+  return (
+    <>
+      <button
+        type="button"
+        className="bo-btn bo-btn-outline"
+        onClick={download}
+        disabled={busy}
+        aria-busy={busy}
+      >
+        {busy ? (
+          <LoaderCircle className="animate-spin" aria-hidden="true" />
+        ) : (
+          <Download aria-hidden="true" />
+        )}
+        {busy ? "Préparation du profil…" : "Télécharger le profil (PDF)"}
+      </button>
+      {message && (
+        <span className="sr-only" role="status">
+          {message}
+        </span>
+      )}
+      {error && (
+        <p className="bo-error bo-profile-pdf-error" role="alert">
+          {error}
+        </p>
+      )}
+    </>
+  );
 }

@@ -8,7 +8,13 @@ const DAYS = 14;
 const digest = (token: string) => createHash("sha256").update(token).digest("hex");
 
 export function setSessionCookie(token: string) {
-  setCookie(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env["NODE_ENV"] === "production", path: "/", maxAge: DAYS * 86400 });
+  setCookie(COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env["NODE_ENV"] === "production",
+    path: "/",
+    maxAge: DAYS * 86400,
+  });
 }
 
 export function clearSessionCookie() {
@@ -17,7 +23,10 @@ export function clearSessionCookie() {
 
 export async function createSession(userId: string) {
   const token = randomBytes(32).toString("base64url");
-  await db().execute<ResultSetHeader>("INSERT INTO sessions (token_hash,user_id,expires_at) VALUES (?,?,DATE_ADD(NOW(), INTERVAL ? DAY))", [digest(token), userId, DAYS]);
+  await db().execute<ResultSetHeader>(
+    "INSERT INTO sessions (token_hash,user_id,expires_at) VALUES (?,?,DATE_ADD(NOW(), INTERVAL ? DAY))",
+    [digest(token), userId, DAYS],
+  );
   setSessionCookie(token);
 }
 
@@ -30,7 +39,9 @@ export async function sessionUserFromToken(token?: string | null): Promise<DbUse
   return rows[0] ?? null;
 }
 
-export async function currentUser() { return sessionUserFromToken(getCookie(COOKIE)); }
+export async function currentUser() {
+  return sessionUserFromToken(getCookie(COOKIE));
+}
 
 export async function destroySession() {
   const token = getCookie(COOKIE);
@@ -39,5 +50,12 @@ export async function destroySession() {
 }
 
 export function publicUser(user: DbUser) {
-  return { id: user.id, email: user.email, name: user.full_name, isAdmin: user.role === "admin", isStaff: !user.archived_at, created_at: iso(user.created_at) };
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.full_name,
+    isAdmin: user.role === "admin",
+    isStaff: !user.archived_at,
+    created_at: iso(user.created_at),
+  };
 }

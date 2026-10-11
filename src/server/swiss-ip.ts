@@ -18,7 +18,10 @@ function ipv6Number(address: string) {
   const leftParts = left ? left.split(":") : [];
   const rightParts = right ? right.split(":") : [];
   const fill = Array(Math.max(0, 8 - leftParts.length - rightParts.length)).fill("0");
-  return [...leftParts, ...fill, ...rightParts].reduce((value, part) => (value << 16n) + BigInt(`0x${part || "0"}`), 0n);
+  return [...leftParts, ...fill, ...rightParts].reduce(
+    (value, part) => (value << 16n) + BigInt(`0x${part || "0"}`),
+    0n,
+  );
 }
 
 function inRange(address: string, range: Range) {
@@ -31,7 +34,7 @@ function inRange(address: string, range: Range) {
   if (isIP(address) !== 6) return false;
   const prefix = BigInt(range.value);
   const shift = 128n - prefix;
-  return (ipv6Number(address) >> shift) === (ipv6Number(range.start) >> shift);
+  return ipv6Number(address) >> shift === ipv6Number(range.start) >> shift;
 }
 
 export function clientIp(request: Request) {

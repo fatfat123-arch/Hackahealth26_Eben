@@ -2,7 +2,7 @@
 
 - Use npm and keep `package-lock.json` as the only dependency lockfile.
 - Keep production compatible with Node.js 22.12+ and Infomaniak Node.js Builder.
-- Store application data in MariaDB through `src/server/db.ts`; schema setup belongs in `database/schema.sql` and `scripts/init-db.mjs`.
+- Store application data in MariaDB through `src/server/db.server.ts`; schema setup belongs in `database/schema.sql` and `scripts/init-db.mjs`.
 - Never commit `.env`, credentials, uploaded patient media, generated builds, or experiment output.
 - Keep public passport data access server-side and issue expiring signed URLs for private media.
 - Keep the fictional demonstration profile in `src/data/passport.ts`; real profiles come from MariaDB.

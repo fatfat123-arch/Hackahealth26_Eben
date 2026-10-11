@@ -26,8 +26,18 @@ const password = await hiddenQuestion("Temporary password (hidden, 8+ characters
 const confirmation = await hiddenQuestion("Confirm password: ");
 rl.close();
 if (password !== confirmation) throw new Error("Passwords do not match.");
-if (!email || !name || password.length < 8) throw new Error("Email, name and an 8-character password are required.");
-const connection = await mysql.createConnection({ host: process.env.DB_HOST, port: Number(process.env.DB_PORT || 3306), database: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD });
-await connection.execute("INSERT INTO users (id,email,full_name,password_hash,role) VALUES (?,?,?,?, 'admin') ON DUPLICATE KEY UPDATE full_name=VALUES(full_name), password_hash=VALUES(password_hash), role='admin', archived_at=NULL", [randomUUID(), email, name, await hash(password, 12)]);
+if (!email || !name || password.length < 8)
+  throw new Error("Email, name and an 8-character password are required.");
+const connection = await mysql.createConnection({
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT || 3306),
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+});
+await connection.execute(
+  "INSERT INTO users (id,email,full_name,password_hash,role) VALUES (?,?,?,?, 'admin') ON DUPLICATE KEY UPDATE full_name=VALUES(full_name), password_hash=VALUES(password_hash), role='admin', archived_at=NULL",
+  [randomUUID(), email, name, await hash(password, 12)],
+);
 await connection.end();
 console.log("Admin account ready.");

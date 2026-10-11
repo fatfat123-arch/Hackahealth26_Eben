@@ -16,7 +16,8 @@ async function requireStaff(request: Request) {
   const { sessionUserFromToken } = await import("@/server/auth.server");
   const user = await sessionUserFromToken(cookie ? decodeURIComponent(cookie) : null);
   if (!user || user.archived_at) throw new Response("Non autorisé", { status: 401 });
-  if (user.role !== "admin") throw new Response("Option réservée aux administrateurs", { status: 403 });
+  if (user.role !== "admin")
+    throw new Response("Option réservée aux administrateurs", { status: 403 });
 }
 
 function runCartooniser(input: string, runsDir: string) {

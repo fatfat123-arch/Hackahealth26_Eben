@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { assertLoginRateLimit, clearLoginRateLimits, LOGIN_RATE_LIMIT_MESSAGE, recordFailedLogin, resetLoginRateLimit } from "@/server/login-rate-limit.server";
+import {
+  assertLoginRateLimit,
+  clearLoginRateLimits,
+  LOGIN_RATE_LIMIT_MESSAGE,
+  recordFailedLogin,
+  resetLoginRateLimit,
+} from "@/server/login-rate-limit.server";
 
 afterEach(() => {
   delete process.env["LOGIN_RATE_LIMIT_MAX_ATTEMPTS"];

@@ -41,7 +41,9 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => { console.error(error); }, [error]);
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
@@ -82,7 +84,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Passeport de communication" },
       { name: "description", content: "Un passeport pour mieux se comprendre et communiquer." },
       { property: "og:title", content: "Passeport de communication" },
-      { property: "og:description", content: "Un passeport pour mieux se comprendre et communiquer." },
+      {
+        property: "og:description",
+        content: "Un passeport pour mieux se comprendre et communiquer.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -121,7 +126,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <main id="contenu"><Outlet /></main>
+      <main id="contenu">
+        <Outlet />
+      </main>
       <ConfirmHost />
     </QueryClientProvider>
   );

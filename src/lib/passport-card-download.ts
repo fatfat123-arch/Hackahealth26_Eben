@@ -1,7 +1,13 @@
 import { createPassportCardPdf, PASSPORT_CARD } from "./passport-card-pdf";
 
 export function passportDownloadName(name: string, prefix: string, extension: string) {
-  const slug = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "profil";
+  const slug =
+    name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "profil";
   return `${prefix}-${slug}.${extension}`;
 }
 
@@ -14,7 +20,15 @@ function loadArtwork(src: string): Promise<HTMLImageElement> {
   });
 }
 
-export async function downloadPassportCard({ url, name, artwork }: { url: string; name: string; artwork: string }) {
+export async function downloadPassportCard({
+  url,
+  name,
+  artwork,
+}: {
+  url: string;
+  name: string;
+  artwork: string;
+}) {
   const image = await loadArtwork(artwork);
   const canvas = document.createElement("canvas");
   // About 305 dpi; native browser fonts preserve accents and non-Latin names.
@@ -27,7 +41,7 @@ export async function downloadPassportCard({ url, name, artwork }: { url: string
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, PASSPORT_CARD.width, PASSPORT_CARD.height);
   const imageWidth = PASSPORT_CARD.width - 4;
-  const imageHeight = imageWidth * image.naturalHeight / image.naturalWidth;
+  const imageHeight = (imageWidth * image.naturalHeight) / image.naturalWidth;
   ctx.drawImage(image, 2, 8, imageWidth, imageHeight);
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(2, 2, 86, 12);
@@ -47,7 +61,8 @@ export async function downloadPassportCard({ url, name, artwork }: { url: string
   let fitted = label;
   if (ctx.measureText(fitted).width > 80) {
     const characters = Array.from(label);
-    while (characters.length && ctx.measureText(`${characters.join("")}…`).width > 80) characters.pop();
+    while (characters.length && ctx.measureText(`${characters.join("")}…`).width > 80)
+      characters.pop();
     fitted = `${characters.join("")}…`;
   }
   ctx.fillText(fitted, 45, 11.5);
@@ -62,7 +77,9 @@ export async function downloadPassportCard({ url, name, artwork }: { url: string
   ctx.stroke();
 
   const bytes = await createPassportCardPdf(url, canvas.toDataURL("image/png"));
-  const objectUrl = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: "application/pdf" }));
+  const objectUrl = URL.createObjectURL(
+    new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
+  );
   const link = document.createElement("a");
   link.href = objectUrl;
   link.download = passportDownloadName(name, "carte-passeport", "pdf");

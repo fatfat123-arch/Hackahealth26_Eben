@@ -6,7 +6,9 @@ export function isPreviewOrigin(origin: string) {
 
 /** True when the link would point to a preview address because the published one is not known yet. */
 export function linkUsesPreview(): boolean {
-  return !PUBLISHED_ORIGIN && typeof window !== "undefined" && isPreviewOrigin(window.location.origin);
+  return (
+    !PUBLISHED_ORIGIN && typeof window !== "undefined" && isPreviewOrigin(window.location.origin)
+  );
 }
 
 export function publicPassportUrl(id: string) {

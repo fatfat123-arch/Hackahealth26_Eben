@@ -19,26 +19,45 @@ describe("ageFromBirthDate", () => {
 
 describe("patientValidationError", () => {
   it("rejects a future birth date before saving", () => {
-    expect(patientValidationError({ name: "Lina", birthDate: "2027-01-01", phone: "" }, new Date(2026, 9, 10))).toContain("futur");
+    expect(
+      patientValidationError(
+        { name: "Lina", birthDate: "2027-01-01", phone: "" },
+        new Date(2026, 9, 10),
+      ),
+    ).toContain("futur");
   });
 
   it("rejects letters in a phone number", () => {
-    expect(patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "+41 ABC 123" })).toContain("lettres");
+    expect(
+      patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "+41 ABC 123" }),
+    ).toContain("lettres");
   });
 
   it("accepts common Swiss phone formatting", () => {
-    expect(patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "+41 (0)79 123 45 67" })).toBeNull();
+    expect(
+      patientValidationError({
+        name: "Lina",
+        birthDate: "2000-01-01",
+        phone: "+41 (0)79 123 45 67",
+      }),
+    ).toBeNull();
   });
 
   it("accepts a Swiss fixed-line number", () => {
-    expect(patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "021 123 45 67" })).toBeNull();
+    expect(
+      patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "021 123 45 67" }),
+    ).toBeNull();
   });
 
   it("rejects a number with an invalid Swiss indicator", () => {
-    expect(patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "+41 12 123 45 67" })).toContain("suisse");
+    expect(
+      patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "+41 12 123 45 67" }),
+    ).toContain("suisse");
   });
 
   it("rejects a number with too few digits", () => {
-    expect(patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "079 123" })).toContain("suisse");
+    expect(
+      patientValidationError({ name: "Lina", birthDate: "2000-01-01", phone: "079 123" }),
+    ).toContain("suisse");
   });
 });

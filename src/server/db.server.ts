@@ -22,8 +22,13 @@ export function db() {
 }
 
 export type DbUser = {
-  id: string; email: string; full_name: string; password_hash: string;
-  role: "admin" | "caregiver"; archived_at: Date | null; created_at: Date;
+  id: string;
+  email: string;
+  full_name: string;
+  password_hash: string;
+  role: "admin" | "caregiver";
+  archived_at: Date | null;
+  created_at: Date;
 };
 
 export function iso(value: Date | string | null | undefined) {
@@ -47,7 +52,11 @@ export function dateOnly(value: Date | string | null | undefined) {
 export function json<T>(value: unknown, fallback: T): T {
   if (value == null) return fallback;
   if (typeof value === "string") {
-    try { return JSON.parse(value) as T; } catch { return fallback; }
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
   }
   return value as T;
 }

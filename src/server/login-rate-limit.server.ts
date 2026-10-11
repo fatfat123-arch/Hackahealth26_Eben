@@ -1,7 +1,8 @@
 const DEFAULT_LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 5;
 const DEFAULT_LOGIN_RATE_LIMIT_WINDOW_SECONDS = 15 * 60;
 
-export const LOGIN_RATE_LIMIT_MESSAGE = "Trop de tentatives de connexion. Réessayez dans quelques minutes.";
+export const LOGIN_RATE_LIMIT_MESSAGE =
+  "Trop de tentatives de connexion. Réessayez dans quelques minutes.";
 
 type LoginAttempt = {
   count: number;
@@ -23,8 +24,15 @@ function nonNegativeInteger(value: string | undefined, fallback: number) {
 
 function config(): LoginRateLimitConfig {
   return {
-    maxAttempts: nonNegativeInteger(process.env["LOGIN_RATE_LIMIT_MAX_ATTEMPTS"], DEFAULT_LOGIN_RATE_LIMIT_MAX_ATTEMPTS),
-    windowMs: nonNegativeInteger(process.env["LOGIN_RATE_LIMIT_WINDOW_SECONDS"], DEFAULT_LOGIN_RATE_LIMIT_WINDOW_SECONDS) * 1000,
+    maxAttempts: nonNegativeInteger(
+      process.env["LOGIN_RATE_LIMIT_MAX_ATTEMPTS"],
+      DEFAULT_LOGIN_RATE_LIMIT_MAX_ATTEMPTS,
+    ),
+    windowMs:
+      nonNegativeInteger(
+        process.env["LOGIN_RATE_LIMIT_WINDOW_SECONDS"],
+        DEFAULT_LOGIN_RATE_LIMIT_WINDOW_SECONDS,
+      ) * 1000,
   };
 }
 
@@ -54,7 +62,10 @@ export function recordFailedLogin(identifier: string, now = Date.now()) {
   if (maxAttempts === 0 || windowMs === 0) return;
   const attempt = activeAttempt(identifier, now);
   const normalized = key(identifier);
-  attempts.set(normalized, { count: (attempt?.count ?? 0) + 1, resetAt: attempt?.resetAt ?? now + windowMs });
+  attempts.set(normalized, {
+    count: (attempt?.count ?? 0) + 1,
+    resetAt: attempt?.resetAt ?? now + windowMs,
+  });
 }
 
 export function resetLoginRateLimit(identifier: string) {

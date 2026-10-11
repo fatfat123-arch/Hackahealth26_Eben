@@ -4,7 +4,25 @@ import { extname } from "node:path";
 import { Readable } from "node:stream";
 import { createFileRoute } from "@tanstack/react-router";
 
-const TYPES: Record<string, string> = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp", ".mp4": "video/mp4", ".mov": "video/quicktime", ".webm": "video/webm", ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".aac": "audio/aac", ".wav": "audio/wav", ".ogg": "audio/ogg", ".oga": "audio/ogg", ".opus": "audio/ogg", ".weba": "audio/webm", ".flac": "audio/flac" };
+const TYPES: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".mp4": "video/mp4",
+  ".mov": "video/quicktime",
+  ".webm": "video/webm",
+  ".mp3": "audio/mpeg",
+  ".m4a": "audio/mp4",
+  ".aac": "audio/aac",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
+  ".oga": "audio/ogg",
+  ".opus": "audio/ogg",
+  ".weba": "audio/webm",
+  ".flac": "audio/flac",
+};
 
 function byteRange(header: string, size: number) {
   const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
@@ -26,9 +44,13 @@ function byteRange(header: string, size: number) {
 }
 
 async function serve(request: Request, head = false) {
-  const url = new URL(request.url); const path = url.searchParams.get("path") || ""; const expires = Number(url.searchParams.get("expires")); const sig = url.searchParams.get("signature") || "";
+  const url = new URL(request.url);
+  const path = url.searchParams.get("path") || "";
+  const expires = Number(url.searchParams.get("expires"));
+  const sig = url.searchParams.get("signature") || "";
   const { mediaFile, verifyMediaSignature } = await import("@/server/media.server");
-  if (!verifyMediaSignature(path, expires, sig)) return new Response("Lien invalide ou expiré", { status: 403 });
+  if (!verifyMediaSignature(path, expires, sig))
+    return new Response("Lien invalide ou expiré", { status: 403 });
   try {
     const file = mediaFile(path);
     const size = (await stat(file)).size;
@@ -42,15 +64,16 @@ async function serve(request: Request, head = false) {
     const requested = request.headers.get("range");
     if (requested) {
       const range = byteRange(requested, size);
-      if (!range) return new Response(null, { status: 416, headers: { "content-range": `bytes */${size}` } });
+      if (!range)
+        return new Response(null, { status: 416, headers: { "content-range": `bytes */${size}` } });
       const length = range.end - range.start + 1;
       headers.set("content-length", String(length));
       headers.set("content-range", `bytes ${range.start}-${range.end}/${size}`);
-      const body = head ? null : Readable.toWeb(createReadStream(file, range)) as ReadableStream;
+      const body = head ? null : (Readable.toWeb(createReadStream(file, range)) as ReadableStream);
       return new Response(body, { status: 206, headers });
     }
     headers.set("content-length", String(size));
-    const body = head ? null : Readable.toWeb(createReadStream(file)) as ReadableStream;
+    const body = head ? null : (Readable.toWeb(createReadStream(file)) as ReadableStream);
     return new Response(body, { headers });
   } catch {
     return new Response("Fichier introuvable", { status: 404 });
@@ -58,8 +81,10 @@ async function serve(request: Request, head = false) {
 }
 
 export const Route = createFileRoute("/api/media")({
-  server: { handlers: {
-    GET: ({ request }) => serve(request),
-    HEAD: ({ request }) => serve(request, true),
-  } },
+  server: {
+    handlers: {
+      GET: ({ request }) => serve(request),
+      HEAD: ({ request }) => serve(request, true),
+    },
+  },
 });

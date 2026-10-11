@@ -1,4 +1,5 @@
-const BOT_USER_AGENT_PATTERN = /bot|crawler|spider|slurp|duckduckgo|baiduspider|yandex|sogou|exabot|facebot|facebookexternalhit|twitterbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkshare|whatsapp|telegrambot|discordbot|applebot|ia_archiver|semrush|ahrefs|mj12bot|dotbot|petalbot/i;
+const BOT_USER_AGENT_PATTERN =
+  /bot|crawler|spider|slurp|duckduckgo|baiduspider|yandex|sogou|exabot|facebot|facebookexternalhit|twitterbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkshare|whatsapp|telegrambot|discordbot|applebot|ia_archiver|semrush|ahrefs|mj12bot|dotbot|petalbot/i;
 
 export const ROBOTS_TAG = "noindex, nofollow, noarchive, nosnippet, noimageindex";
 
@@ -21,5 +22,9 @@ export function blockBotRequest(request: Request) {
 export function withNoIndex(response: Response) {
   const headers = new Headers(response.headers);
   headers.set("x-robots-tag", ROBOTS_TAG);
-  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }

@@ -1,6 +1,32 @@
 const SWISS_PREFIXES = new Set([
-  "21", "22", "24", "26", "27", "31", "32", "33", "34", "41", "43", "44",
-  "51", "52", "55", "56", "58", "61", "62", "71", "74", "75", "76", "77", "78", "79", "81", "91",
+  "21",
+  "22",
+  "24",
+  "26",
+  "27",
+  "31",
+  "32",
+  "33",
+  "34",
+  "41",
+  "43",
+  "44",
+  "51",
+  "52",
+  "55",
+  "56",
+  "58",
+  "61",
+  "62",
+  "71",
+  "74",
+  "75",
+  "76",
+  "77",
+  "78",
+  "79",
+  "81",
+  "91",
 ]);
 
 function nationalDigits(value: string) {
@@ -21,7 +47,8 @@ function nationalDigits(value: string) {
 
 export function swissPhoneError(value: string): string | null {
   if (!value.trim()) return null;
-  if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(value)) return "Le numéro de téléphone ne peut pas contenir de lettres.";
+  if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(value))
+    return "Le numéro de téléphone ne peut pas contenir de lettres.";
   const digits = nationalDigits(value);
   if (!digits || digits.length !== 9 || !SWISS_PREFIXES.has(digits.slice(0, 2))) {
     return "Saisissez un numéro suisse mobile ou fixe valide, par exemple +41 79 123 45 67 ou 021 123 45 67.";
@@ -31,6 +58,7 @@ export function swissPhoneError(value: string): string | null {
 
 export function formatSwissPhone(value: string) {
   const digits = nationalDigits(value);
-  if (!digits || digits.length !== 9 || !SWISS_PREFIXES.has(digits.slice(0, 2))) return value.trim();
+  if (!digits || digits.length !== 9 || !SWISS_PREFIXES.has(digits.slice(0, 2)))
+    return value.trim();
   return `+41 ${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
 }

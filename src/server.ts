@@ -60,7 +60,10 @@ export default {
       console.error(error);
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
+        },
       });
     }
   },
