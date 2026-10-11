@@ -2356,15 +2356,8 @@
   gap: 12px;
 }
 
-/* Tutorial: step references and app icon */
-.step-ref {
-  color: var(--muted-foreground);
-  font-size: 0.875em;
-  white-space: nowrap;
-}
-.app-icon {
-  display: inline-block;
-  vertical-align: middle;
-  border-radius: 22%;
-  margin: 0 0.15em;
-}
+/* Tutorial: step references, app icon and photos under each step */
+.step-ref { color: var(--muted-foreground); font-size: 0.875em; white-space: nowrap; }
+.app-icon { display: inline-block; vertical-align: middle; border-radius: 22%; margin: 0 0.15em; }
+.bo-steps .bo-tutorial-photos { grid-template-columns: 1fr; gap: 0; margin-top: 12px; }
+.bo-steps .bo-tutorial-photo-step { width: 100%; max-width: 320px; }
