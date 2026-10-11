@@ -16,7 +16,12 @@ export function LoginForm() {
     setBusy(true); setError("");
     let me;
     try { me = await login({ data: { email: email.trim(), password } }); }
-    catch { setBusy(false); setError("Adresse e-mail ou mot de passe incorrect."); return; }
+    catch (e) {
+      const rateLimitMessage = "Trop de tentatives de connexion. Réessayez dans quelques minutes.";
+      setBusy(false);
+      setError(e instanceof Error && e.message === rateLimitMessage ? rateLimitMessage : "Adresse e-mail ou mot de passe incorrect.");
+      return;
+    }
     queryClient.removeQueries({ queryKey: ["me"] });
     queryClient.setQueryData(["me"], me);
     setBusy(false);

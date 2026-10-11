@@ -1,7 +1,10 @@
 import { compare } from "bcryptjs";
 import { createMiddleware, createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { createSession, currentUser, destroySession, publicUser } from "@/server/auth.server";
+import { assertLoginRateLimit, recordFailedLogin, resetLoginRateLimit } from "@/server/login-rate-limit";
+import { clientIp } from "@/server/swiss-ip";
 import { db } from "@/server/db.server";
 import type { DbUser } from "@/server/db.server";
 import type { RowDataPacket } from "mysql2";
@@ -15,9 +18,18 @@ export const requireAuth = createMiddleware({ type: "function" }).server(async (
 export const login = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ email: z.string().email(), password: z.string().min(1).max(128) }).parse(v))
   .handler(async ({ data }) => {
-    const [rows] = await db().execute<(DbUser & RowDataPacket)[]>("SELECT * FROM users WHERE email=? LIMIT 1", [data.email.trim().toLowerCase()]);
+    const email = data.email.trim().toLowerCase();
+    const address = clientIp(getRequest());
+    const limitKeys = address ? [`email:${email}`, `ip:${address}`] : [`email:${email}`];
+    limitKeys.forEach((limitKey) => assertLoginRateLimit(limitKey));
+    const [rows] = await db().execute<(DbUser & RowDataPacket)[]>("SELECT * FROM users WHERE email=? LIMIT 1", [email]);
     const user = rows[0];
-    if (!user || user.archived_at || !(await compare(data.password, user.password_hash))) throw new Error("Adresse e-mail ou mot de passe incorrect.");
+    if (!user || user.archived_at || !(await compare(data.password, user.password_hash))) {
+      limitKeys.forEach((limitKey) => recordFailedLogin(limitKey));
+      console.warn("Failed login attempt", { email, address });
+      throw new Error("Adresse e-mail ou mot de passe incorrect.");
+    }
+    resetLoginRateLimit(`email:${email}`);
     await createSession(user.id);
     return publicUser(user);
   });
