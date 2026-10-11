@@ -3,7 +3,7 @@ import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { createSession, currentUser, destroySession, publicUser } from "@/server/auth.server";
-import { assertLoginRateLimit, recordFailedLogin, resetLoginRateLimit } from "@/server/login-rate-limit";
+import { assertLoginRateLimit, recordFailedLogin, resetLoginRateLimit } from "@/server/login-rate-limit.server";
 import { clientIp } from "@/server/swiss-ip";
 import { db } from "@/server/db.server";
 import type { DbUser } from "@/server/db.server";
