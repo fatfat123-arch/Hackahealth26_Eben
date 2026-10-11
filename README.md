@@ -157,9 +157,3 @@ Le fichier `src/routeTree.gen.ts` est généré automatiquement par TanStack Sta
 Le fichier `.env.example` documente les paramètres requis : accès MariaDB, répertoire privé des médias, secret de signature, domaine public et configuration facultative du cartooniser.
 
 La procédure complète pour Infomaniak — commande de build, démarrage, initialisation et retour arrière — se trouve dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
-
-## Protection des données
-
-Les données des résidents, les médias, les mots de passe et le fichier `.env` ne doivent jamais être ajoutés à Git. En production, les médias sont conservés hors du dossier public et ne sont transmis qu’après validation d’une URL signée à durée limitée.
-
-Avant toute démonstration, utilisez exclusivement des profils fictifs et vérifiez qu’aucune donnée personnelle ni aucun identifiant technique n’apparaît à l’écran.

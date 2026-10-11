@@ -95,12 +95,3 @@ La commande de compilation récupère elle-même `main`. Il n’est donc pas né
 En cas de problème, utilisez Git pour sélectionner le dernier commit fonctionnel, relancez la compilation depuis le gestionnaire Node.js, puis redémarrez l’application.
 
 Les mises à jour de la base doivent rester rétrocompatibles, car `npm run db:init` est volontairement non destructif et ne supprime jamais les données existantes.
-
-## Règles de sécurité
-
-- ne placez jamais `.env` dans Git ;
-- ne copiez aucun mot de passe dans la documentation ou dans une commande conservée par l’historique du terminal ;
-- n’enregistrez pas les médias des résidents dans le dépôt ;
-- utilisez un compte MariaDB réservé à l’application ;
-- renouvelez immédiatement un secret qui aurait été partagé accidentellement ;
-- réalisez les démonstrations uniquement avec des données fictives.
