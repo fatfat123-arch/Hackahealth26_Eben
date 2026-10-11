@@ -100,7 +100,7 @@ Copiez `.env.example` vers `.env`. Les réglages principaux sont :
 | `LOGIN_RATE_LIMIT_*`                                      | protection contre les tentatives répétées de connexion       |
 | `CARTOONISER_*`                                           | exécutable Python, taille maximale et délai de traitement     |
 
-Plus de détails sont disponibles dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) et [CONTRIBUTING.md](CONTRIBUTING.md).
+Plus de détails sont disponibles dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Données et confidentialité
 
