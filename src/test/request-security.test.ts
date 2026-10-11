@@ -55,4 +55,15 @@ describe("sécurité des requêtes", () => {
     );
     expect(secured.headers.get("cache-control")).toBe("no-store");
   });
+
+  it("active HSTS derrière le proxy HTTPS d’Infomaniak", () => {
+    process.env["PUBLISHED_ORIGIN"] = "https://eh-passport.ch";
+    const secured = applySecurityHeaders(
+      new Request("http://application-interne/", {
+        headers: { "x-forwarded-proto": "https" },
+      }),
+      new Response("ok"),
+    );
+    expect(secured.headers.get("strict-transport-security")).toContain("includeSubDomains");
+  });
 });

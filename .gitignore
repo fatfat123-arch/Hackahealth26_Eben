@@ -1,4 +1,5 @@
 *.mp4
+*.mov
 *.m4a
 /videos/
 __pycache__/
