@@ -281,4 +281,5 @@ const COLUMN: Record<keyof PatientDraft, string> = {
   additional: "additional",
   sectionOrder: "section_order",
   customSections: "section_order",
+  sectionIcons: "section_order",
 };

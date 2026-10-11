@@ -3,7 +3,12 @@ import { Mascot } from "@/components/mascot";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { DictionaryGrid } from "@/components/passport/dictionary-grid";
-import { normalizeSectionOrder, SECTION_TITLES, type SectionKey } from "@/lib/section-order";
+import {
+  normalizeSectionOrder,
+  SECTION_TITLES,
+  type SectionIcons,
+  type SectionKey,
+} from "@/lib/section-order";
 import type { ReactNode } from "react";
 import type { DictionaryEntry } from "@/lib/dictionary-entry";
 import { Button } from "@/components/ui/button";
@@ -39,6 +44,8 @@ export type PassportViewData = {
   additional: string[];
   sectionOrder?: SectionId[];
   customSections?: CustomSection[];
+  sectionIcons?: SectionIcons;
+  customSectionIcons?: Record<string, string>;
 };
 
 function SectionHeader({
@@ -123,18 +130,21 @@ function renderSection(k: SectionKey, data: PassportViewData) {
   }
   return (
     <AccordionItem key={k} value={k} className="passport-section">
-      <SectionHeader title={SECTION_TITLES[k]} icon={ICONS[k]} />
+      <SectionHeader title={SECTION_TITLES[k]} icon={data.sectionIcons?.[k] || ICONS[k]} />
       <AccordionContent className="section-content">{body}</AccordionContent>
     </AccordionItem>
   );
 }
 
-function renderCustomSection(section: CustomSection) {
+function renderCustomSection(section: CustomSection, customIcon?: string) {
   const items = section.items.map((item) => item.trim()).filter(Boolean);
   if (!items.length || !section.title.trim()) return null;
   return (
     <AccordionItem key={section.id} value={section.id} className="passport-section">
-      <SectionHeader title={section.title.trim()} iconName={section.icon as NavigationIconName} />
+      <SectionHeader
+        title={section.title.trim()}
+        {...(customIcon ? { icon: customIcon } : { iconName: section.icon as NavigationIconName })}
+      />
       <AccordionContent className="section-content">
         {section.display === "keywords" ? <TagList items={items} /> : <BulletList items={items} />}
       </AccordionContent>
@@ -249,6 +259,7 @@ export function PassportView({ data }: { data: PassportViewData }) {
                 items: [],
                 display: "bullets",
               },
+              data.customSectionIcons?.[id],
             );
           return renderSection(id as SectionKey, data);
         })}

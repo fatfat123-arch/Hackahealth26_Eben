@@ -75,7 +75,7 @@ export const FIELD_DRAFT_KEYS: Record<FieldKey, (keyof PatientDraft)[]> = {
   interests: ["interests"],
   dislikes: ["dislikes"],
   additional: ["additional"],
-  sectionOrder: ["sectionOrder", "customSections"],
+  sectionOrder: ["sectionOrder", "customSections", "sectionIcons"],
 };
 export type InlineCtl = {
   editing: FieldKey | null;
@@ -898,8 +898,12 @@ export function PatientForm({
     <SectionOrderEditor
       order={draft.sectionOrder}
       customSections={draft.customSections}
-      onChange={(sectionOrder, customSections) =>
-        onChange({ ...draft, sectionOrder, customSections })
+      sectionIcons={draft.sectionIcons}
+      folder={folder}
+      urls={urls}
+      onUrls={onUrls}
+      onChange={(sectionOrder, customSections, sectionIcons) =>
+        onChange({ ...draft, sectionOrder, customSections, sectionIcons })
       }
     />,
     <h2>Structure du passeport</h2>,

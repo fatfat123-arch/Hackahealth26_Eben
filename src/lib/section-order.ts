@@ -45,9 +45,11 @@ export type CustomSection = {
   id: `custom:${string}`;
   title: string;
   icon: CustomSectionIcon;
+  iconPath?: string | undefined;
   items: string[];
   display: "bullets" | "keywords";
 };
+export type SectionIcons = Partial<Record<SectionKey, string>>;
 
 export const SECTION_TITLES: Record<SectionKey, string> = {
   dictionary: "Mon dictionnaire",
@@ -83,6 +85,7 @@ export function normalizeCustomSections(value: unknown): CustomSection[] {
         id: item.id as CustomSection["id"],
         title: typeof item.title === "string" ? item.title.slice(0, 100) : "Nouvelle section",
         icon,
+        ...(typeof item.iconPath === "string" && item.iconPath ? { iconPath: item.iconPath } : {}),
         items: Array.isArray(item.items)
           ? item.items.filter((entry): entry is string => typeof entry === "string").slice(0, 100)
           : [],
@@ -96,11 +99,21 @@ export function normalizeCustomSections(value: unknown): CustomSection[] {
 export function normalizeSectionConfiguration(value: unknown): {
   order: SectionId[];
   customSections: CustomSection[];
+  sectionIcons: SectionIcons;
 } {
   const legacy = Array.isArray(value);
   const source =
     !legacy && value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const customSections = normalizeCustomSections(source["customSections"]);
+  const rawIcons =
+    source["sectionIcons"] && typeof source["sectionIcons"] === "object"
+      ? (source["sectionIcons"] as Record<string, unknown>)
+      : {};
+  const sectionIcons: SectionIcons = Object.fromEntries(
+    SECTION_KEYS.flatMap((key) =>
+      typeof rawIcons[key] === "string" && rawIcons[key] ? [[key, rawIcons[key]]] : [],
+    ),
+  );
   const validCustomIds = new Set(customSections.map((section) => section.id));
   const list = legacy ? value : Array.isArray(source["order"]) ? source["order"] : [];
   const seen = new Set<SectionId>();
@@ -113,7 +126,7 @@ export function normalizeSectionConfiguration(value: unknown): {
       seen.add(key);
   if (legacy || !value) for (const key of SECTION_KEYS) seen.add(key);
   for (const section of customSections) if (!seen.has(section.id)) seen.add(section.id);
-  return { order: [...seen], customSections };
+  return { order: [...seen], customSections, sectionIcons };
 }
 
 export function normalizeSectionOrder(order: unknown): SectionId[] {
@@ -130,7 +143,11 @@ export function sectionTitle(id: SectionId, customSections: CustomSection[]): st
   return customSections.find((section) => section.id === id)?.title || "Section personnalisée";
 }
 
-export function serializeSectionConfiguration(order: SectionId[], customSections: CustomSection[]) {
+export function serializeSectionConfiguration(
+  order: SectionId[],
+  customSections: CustomSection[],
+  sectionIcons: SectionIcons = {},
+) {
   const custom = normalizeCustomSections(customSections);
   const customIds = new Set(custom.map((section) => section.id));
   const seen = new Set<SectionId>();
@@ -141,5 +158,5 @@ export function serializeSectionConfiguration(order: SectionId[], customSections
       !seen.has(key)
     )
       seen.add(key);
-  return { order: [...seen], customSections: custom };
+  return { order: [...seen], customSections: custom, sectionIcons };
 }

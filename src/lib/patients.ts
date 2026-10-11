@@ -5,6 +5,7 @@ import {
   serializeSectionConfiguration,
   type CustomSection,
   type SectionId,
+  type SectionIcons,
 } from "@/lib/section-order";
 import type { PassportViewData } from "@/components/passport/passport-view";
 import { formatSwissPhone, swissPhoneError } from "@/lib/swiss-phone";
@@ -42,6 +43,7 @@ export type PatientDraft = {
   additional: string[];
   sectionOrder: SectionId[];
   customSections: CustomSection[];
+  sectionIcons: SectionIcons;
 };
 
 export type PatientRow = {
@@ -95,6 +97,7 @@ export const emptyDraft = (): PatientDraft => ({
   additional: [],
   sectionOrder: defaultSectionOrder(),
   customSections: [],
+  sectionIcons: {},
 });
 
 export function rowToDraft(r: PatientRow): PatientDraft {
@@ -120,6 +123,7 @@ export function rowToDraft(r: PatientRow): PatientDraft {
     additional: r.additional ?? [],
     sectionOrder: sectionConfiguration.order,
     customSections: sectionConfiguration.customSections,
+    sectionIcons: sectionConfiguration.sectionIcons,
   };
 }
 
@@ -144,7 +148,7 @@ export function draftToRow(d: PatientDraft) {
     interests: clean(d.interests),
     dislikes: clean(d.dislikes),
     additional: clean(d.additional),
-    section_order: serializeSectionConfiguration(d.sectionOrder, d.customSections),
+    section_order: serializeSectionConfiguration(d.sectionOrder, d.customSections, d.sectionIcons),
   };
 }
 
@@ -156,6 +160,8 @@ export function draftPaths(d: PatientDraft): string[] {
     if (e.originalPath) p.push(e.originalPath);
     if (e.posterPath) p.push(e.posterPath);
   }
+  for (const path of Object.values(d.sectionIcons)) if (path) p.push(path);
+  for (const section of d.customSections) if (section.iconPath) p.push(section.iconPath);
   return p;
 }
 
@@ -239,6 +245,18 @@ export function toViewData(
     additional: d.additional.filter(Boolean),
     sectionOrder: d.sectionOrder,
     customSections: d.customSections,
+    sectionIcons: Object.fromEntries(
+      Object.entries(d.sectionIcons).flatMap(([key, path]) =>
+        path && urls[path] ? [[key, urls[path]]] : [],
+      ),
+    ),
+    customSectionIcons: d.customSections.reduce<Record<string, string>>((icons, section) => {
+      if (section.iconPath) {
+        const url = urls[section.iconPath];
+        if (url) icons[section.id] = url;
+      }
+      return icons;
+    }, {}),
   };
 }
 

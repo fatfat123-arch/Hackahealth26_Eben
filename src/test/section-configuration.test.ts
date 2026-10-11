@@ -30,6 +30,26 @@ describe("configuration des sections", () => {
     expect(normalizeSectionConfiguration(saved)).toEqual({
       order: ["dictionary", custom.id],
       customSections: [custom],
+      sectionIcons: {},
+    });
+  });
+
+  it("conserve les icônes importées des sections standards et personnalisées", () => {
+    const custom: CustomSection = {
+      id: "custom:icon",
+      title: "Mon quotidien",
+      icon: "maison",
+      iconPath: "patients/test/quotidien.webp",
+      items: ["Une habitude"],
+      display: "bullets",
+    };
+    const saved = serializeSectionConfiguration(["interests", custom.id], [custom], {
+      interests: "patients/test/interets.webp",
+    });
+    expect(normalizeSectionConfiguration(saved)).toEqual({
+      order: ["interests", custom.id],
+      customSections: [custom],
+      sectionIcons: { interests: "patients/test/interets.webp" },
     });
   });
 });
