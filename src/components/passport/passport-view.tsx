@@ -12,9 +12,7 @@ import communicatesIcon from "@/assets/icone-communique.png";
 import understandingIcon from "@/assets/icone-comprendre.png";
 import toolsIcon from "@/assets/icone-outils.png";
 import facilitatorsIcon from "@/assets/icone-faciliter.png";
-import notesIcon from "@/assets/icone-notes.png";
-import interestsIcon from "@/assets/passport-interets.png";
-import dislikesIcon from "@/assets/passport-peurs.png";
+import { PRINTABLE_SECTION_ICONS } from "@/lib/printable-section-icons";
 
 export type PassportViewData = {
   name: string;
@@ -67,7 +65,7 @@ function BulletList({ items }: { items: string[] }) {
 
 const ICONS: Record<SectionKey, string> = {
   dictionary: dictionaryIcon, communicates: communicatesIcon, understandingNeeds: understandingIcon, tools: toolsIcon,
-  facilitators: facilitatorsIcon, interests: interestsIcon, dislikes: dislikesIcon, additional: notesIcon,
+  facilitators: facilitatorsIcon, ...PRINTABLE_SECTION_ICONS,
 };
 
 function renderSection(k: SectionKey, data: PassportViewData) {

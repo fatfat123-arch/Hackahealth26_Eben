@@ -12,6 +12,7 @@ import { BackLink } from "@/components/backoffice/back-link";
 import { Mascot } from "@/components/mascot";
 import { consumeJustSaved } from "@/lib/saved-flag";
 import { PublicPassportLink } from "@/components/backoffice/public-passport-link";
+import { PatientProfileDownload } from "@/components/backoffice/patient-profile-download";
 
 export const Route = createFileRoute("/_authenticated/espace/patients/$id")({
   head: () => ({ meta: [{ title: "Profil du patient — Espace professionnel" }, { name: "description", content: "Consulter et modifier un passeport de communication." }, { property: "og:title", content: "Profil du patient" }, { property: "og:description", content: "Consulter et modifier un passeport de communication." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -83,7 +84,7 @@ function PatientPage() {
   }
 
   // The preview always shows the latest saved record, never unsaved edits or a cached copy.
-  if (preview) return <PreviewPanel draft={data.draft} urls={{ ...urls, ...data.urls }} updatedAt={data.row.updated_at} onClose={() => setPreview(false)} />;
+  if (preview) return <PreviewPanel patientId={id} draft={data.draft} urls={{ ...urls, ...data.urls }} updatedAt={data.row.updated_at} onClose={() => setPreview(false)} />;
 
   return <>
     <BackLink to="/espace/patients/liste">Retour à la liste</BackLink>
@@ -91,6 +92,7 @@ function PatientPage() {
     <div className="title-underline" />
     <div className="bo-actions">
       <button type="button" className="bo-btn bo-btn-outline" onClick={openPreview}><Eye aria-hidden="true" /> Aperçu</button>
+      <PatientProfileDownload key={id} patientId={id} />
       <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
       <button type="button" className="bo-btn bo-btn-outline" onClick={async () => { await startEdit("sectionOrder"); requestAnimationFrame(() => document.getElementById("section-order")?.scrollIntoView({ block: "start" })); }}><ListOrdered aria-hidden="true" /> Réorganiser les sections</button>
     </div>

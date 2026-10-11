@@ -279,6 +279,8 @@
 .bo-steps li::marker { color: var(--primary); font-weight: 600; }
 .bo-preview-bar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 20px; background: var(--tint-yellow); border: 1px solid var(--line); border-radius: 8px; }
 .bo-preview-bar p { margin: 0; color: var(--primary); }
+.bo-preview-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.bo-profile-pdf-error { flex-basis: 100%; margin: 0; }
 .bo-preview-frame { border: 1px dashed var(--line); border-radius: 8px; margin-top: 20px; padding: 0 24px; }
 @media (max-width: 1199px) { .bo-header-inner, .bo-page { margin: 0 40px; } }
 @media (max-width: 900px) { .bo-header-inner, .bo-page { margin: 0 28px; } .bo-dict-edit { grid-template-columns: 1fr; } }
