@@ -29,9 +29,9 @@ import { PatientProfileDownload } from "@/components/backoffice/patient-profile-
 export const Route = createFileRoute("/_authenticated/espace/patients/$id")({
   head: () => ({
     meta: [
-      { title: "Profil du patient — Espace professionnel" },
+      { title: "Profil du résident — Espace professionnel" },
       { name: "description", content: "Consulter et modifier un passeport de communication." },
-      { property: "og:title", content: "Profil du patient" },
+      { property: "og:title", content: "Profil du résident" },
       {
         property: "og:description",
         content: "Consulter et modifier un passeport de communication.",

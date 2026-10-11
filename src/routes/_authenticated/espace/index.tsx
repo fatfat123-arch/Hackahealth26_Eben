@@ -35,7 +35,7 @@ function AdminHome() {
       <div className="bo-choices">
         <Link to="/espace/patients" className="bo-choice">
           <NavigationIcon name="patient" />
-          <span>Profils des patients</span>
+          <span>Profils des résidents</span>
         </Link>
         <Link to="/espace/accompagnants" className="bo-choice">
           <NavigationIcon name="accompagnants" />

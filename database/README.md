@@ -1,6 +1,6 @@
 # Infomaniak MariaDB setup
 
-The application now uses MariaDB for accounts, sessions, roles and patient passports. Uploaded media is stored outside the public web root and served through expiring signed URLs.
+L’application utilise MariaDB pour les comptes, les sessions, les rôles et les passeports des résidents. Les médias téléversés sont stockés hors de la racine web publique et servis au moyen d’URL signées à durée limitée.
 
 Required environment variables are documented in `.env.example`. Use Node.js 22.12 or newer in Infomaniak Node Builder.
 

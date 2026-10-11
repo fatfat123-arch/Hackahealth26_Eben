@@ -29,7 +29,7 @@ type PublicRow = RowDataPacket & {
   archived_at: Date | string | null;
 };
 
-// Public read of ONE patient by public URL id (the QR/NFC target). Only this patient's media gets signed URLs.
+// Public read of one resident by public URL id (the QR/NFC target). Only this resident's media gets signed URLs.
 export const getPublicPassport = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z.object({ id: z.string().regex(/^[A-Za-z0-9_-]{22,64}$/) }).parse(d),

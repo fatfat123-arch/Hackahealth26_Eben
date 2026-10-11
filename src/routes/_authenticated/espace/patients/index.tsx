@@ -6,10 +6,10 @@ import { Mascot } from "@/components/mascot";
 export const Route = createFileRoute("/_authenticated/espace/patients/")({
   head: () => ({
     meta: [
-      { title: "Profils des patients — Espace professionnel" },
-      { name: "description", content: "Consulter ou créer un profil de patient." },
-      { property: "og:title", content: "Profils des patients" },
-      { property: "og:description", content: "Consulter ou créer un profil de patient." },
+      { title: "Profils des résidents — Espace professionnel" },
+      { name: "description", content: "Consulter ou créer un profil de résident." },
+      { property: "og:title", content: "Profils des résidents" },
+      { property: "og:description", content: "Consulter ou créer un profil de résident." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -34,7 +34,7 @@ function PatientsHome() {
         </div>
       ) : (
         <>
-          <h1 className="bo-title">Profils des patients</h1>
+          <h1 className="bo-title">Profils des résidents</h1>
           <div className="title-underline" />
         </>
       )}

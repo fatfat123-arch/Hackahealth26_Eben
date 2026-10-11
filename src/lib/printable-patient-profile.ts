@@ -98,7 +98,7 @@ export function patientProfileFilename(name: string) {
     .trim()
     .replace(/\s+/g, "_")
     .replace(/^[._]+|[._]+$/g, "");
-  return `Profil_${Array.from(safeName || "Patient")
+  return `Profil_${Array.from(safeName || "Resident")
     .slice(0, 120)
     .join("")}.pdf`;
 }

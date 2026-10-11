@@ -66,7 +66,7 @@ function NewPatient() {
 
   return (
     <>
-      <BackLink to="/espace/patients">Retour aux profils des patients</BackLink>
+      <BackLink to="/espace/patients">Retour aux profils des résidents</BackLink>
       <h1 className="bo-title">Créer un nouveau profil</h1>
       <div className="title-underline" />
       <div className="bo-actions">

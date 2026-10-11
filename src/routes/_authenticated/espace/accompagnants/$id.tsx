@@ -231,7 +231,7 @@ function CaregiverPage() {
         </section>
       )}
       <section className="bo-card">
-        <h2>Profils créés</h2>
+        <h2>Profils de résidents créés</h2>
         {data.patients.length === 0 ? (
           <p>Aucun profil créé pour le moment.</p>
         ) : (

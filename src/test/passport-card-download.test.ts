@@ -86,7 +86,7 @@ describe("Authenticated badge download data", () => {
         : new Response(new Uint8Array([1])),
     );
     await expect(preparePassportCard("patient-1")).rejects.toThrow(
-      "La photo du patient n’a pas pu être chargée",
+      "La photo du résident n’a pas pu être chargée",
     );
     expect(signPaths).toHaveBeenCalledWith(["private/photo.jpg"]);
     expect(createPassportCardPdf).not.toHaveBeenCalled();

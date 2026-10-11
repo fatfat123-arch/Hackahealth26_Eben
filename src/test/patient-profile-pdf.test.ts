@@ -358,6 +358,6 @@ describe("Printable patient profile", () => {
   it("uses a safe printable filename with the patient's current name", () => {
     expect(patientProfileFilename(" Élodie Exemple ")).toBe("Profil_Élodie_Exemple.pdf");
     expect(patientProfileFilename("../../Nom:patient")).toBe("Profil_Nom_patient.pdf");
-    expect(patientProfileFilename("")).toBe("Profil_Patient.pdf");
+    expect(patientProfileFilename("")).toBe("Profil_Resident.pdf");
   });
 });

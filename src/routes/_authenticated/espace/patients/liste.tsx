@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/espace/patients/liste")({
   head: () => ({
     meta: [
       { title: "Profils existants — Espace professionnel" },
-      { name: "description", content: "Liste partagée des profils de patients." },
+      { name: "description", content: "Liste partagée des profils de résidents." },
       { property: "og:title", content: "Profils existants" },
-      { property: "og:description", content: "Liste partagée des profils de patients." },
+      { property: "og:description", content: "Liste partagée des profils de résidents." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -70,7 +70,7 @@ function PatientList() {
 
   return (
     <>
-      <BackLink to="/espace/patients">Retour aux profils des patients</BackLink>
+      <BackLink to="/espace/patients">Retour aux profils des résidents</BackLink>
       <h1 className="bo-title">Profils existants</h1>
       <div className="title-underline" />
       <label className="bo-field bo-search">

@@ -29,7 +29,7 @@ async function loadBytes(url: string, photo = false) {
   } catch {
     throw new Error(
       photo
-        ? "La photo du patient n’a pas pu être chargée. Réessayez."
+        ? "La photo du résident n’a pas pu être chargée. Réessayez."
         : "Le modèle des badges n’a pas pu être chargé. Réessayez.",
     );
   } finally {
@@ -39,13 +39,13 @@ async function loadBytes(url: string, photo = false) {
 
 async function loadPhoto(path: string) {
   const urls = await signPaths([path]);
-  if (!urls[path]) throw new Error("La photo du patient n’a pas pu être chargée. Réessayez.");
+  if (!urls[path]) throw new Error("La photo du résident n’a pas pu être chargée. Réessayez.");
   const bytes = await loadBytes(urls[path], true);
   let image: ImageBitmap;
   try {
     image = await createImageBitmap(new Blob([new Uint8Array(bytes)]));
   } catch {
-    throw new Error("La photo du patient n’a pas pu être chargée. Réessayez.");
+    throw new Error("La photo du résident n’a pas pu être chargée. Réessayez.");
   }
   try {
     const canvas = document.createElement("canvas");
@@ -54,7 +54,7 @@ async function loadPhoto(path: string) {
       (canvas.width * BADGE_TEMPLATE.photo.height) / BADGE_TEMPLATE.photo.width,
     );
     const context = canvas.getContext("2d");
-    if (!context) throw new Error("La photo du patient n’a pas pu être préparée.");
+    if (!context) throw new Error("La photo du résident n’a pas pu être préparée.");
     const scale = Math.max(canvas.width / image.width, canvas.height / image.height);
     const width = canvas.width / scale,
       height = canvas.height / scale;
@@ -72,7 +72,9 @@ async function loadPhoto(path: string) {
     const png = await new Promise<Blob>((resolve, reject) =>
       canvas.toBlob(
         (blob) =>
-          blob ? resolve(blob) : reject(new Error("La photo du patient n’a pas pu être préparée.")),
+          blob
+            ? resolve(blob)
+            : reject(new Error("La photo du résident n’a pas pu être préparée.")),
         "image/png",
       ),
     );
@@ -92,7 +94,7 @@ export async function preparePassportCard(patientId: string) {
     loadBytes(templateUrl),
     loadBytes(nameFontUrl),
   ]);
-  if (!patient) throw new Error("Le profil du patient est introuvable.");
+  if (!patient) throw new Error("Le profil du résident est introuvable.");
   const photo = patient.photo_path ? await loadPhoto(patient.photo_path) : undefined;
   return {
     bytes: await createPassportCardPdf(publicPassportUrl(patient.public_id), patient.name, {

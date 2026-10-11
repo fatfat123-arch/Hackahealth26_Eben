@@ -41,7 +41,7 @@ export const BADGE_TEMPLATE = {
 } as const;
 
 export function patientFirstName(name: string) {
-  return name.trim().split(/\s+/)[0] || "Patient";
+  return name.trim().split(/\s+/)[0] || "Résident";
 }
 
 export type PassportCardAssets = {

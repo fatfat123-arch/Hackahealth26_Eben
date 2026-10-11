@@ -48,7 +48,7 @@ résultat, et métadonnées disponibles. Les refus authentifiés parvenus à cet
 opération enregistrent aussi une tentative avec un code fixe et un ancien rôle
 inconnu (`NULL`) ; les requêtes rejetées avant l'opération (session absente,
 CSRF ou données malformées) ne créent pas de changement ni d'audit de rôle. Les mots de
-passe, cookies, empreintes de session et données patient ne sont jamais inscrits.
+passe, cookies, empreintes de session et données des résidents ne sont jamais inscrits.
 L'IP est la valeur validée par le mécanisme existant du proxy ; elle ne sert pas
 à autoriser l'action. Le proxy doit supprimer/remplacer les en-têtes transmis
 par le client. L'agent utilisateur est une métadonnée non fiable, limitée à 512
@@ -60,7 +60,7 @@ MariaDB refusent aussi leur modification et leur suppression. L'absence de clés
 efface son historique. Aucun service externe de journalisation n'existe dans
 l'architecture actuelle.
 
-## Sessions et données patient
+## Sessions et données des résidents
 
 Toutes les sessions de la cible sont révoquées lors d'une promotion comme d'une
 rétrogradation. La personne doit se reconnecter avec son mot de passe inchangé.
@@ -71,8 +71,8 @@ un onglet ne sont pas effacées à distance ; une requête commencée avant le c
 peut finir, mais les nouvelles requêtes ne récupèrent pas les anciens droits.
 
 Un changement de rôle conserve les informations du compte, son mot de passe,
-les profils patient et `patients.created_by`. Ce dernier est un lien de création, et non une
-table d'affectations : l'accès collectif des professionnels aux patients reste
+les profils des résidents et `patients.created_by`. Ce dernier est un lien de création, et non une
+table d'affectations : l'accès collectif des professionnels aux résidents reste
 celui de l'application existante.
 
 ## Déploiement : séparation des droits MariaDB
