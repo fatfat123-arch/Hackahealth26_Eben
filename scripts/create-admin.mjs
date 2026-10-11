@@ -28,16 +28,42 @@ rl.close();
 if (password !== confirmation) throw new Error("Passwords do not match.");
 if (!email || !name || password.length < 8)
   throw new Error("Email, name and an 8-character password are required.");
+if (process.env.DB_MIGRATION_USER && !process.env.DB_MIGRATION_PASSWORD)
+  throw new Error("DB_MIGRATION_PASSWORD is required with DB_MIGRATION_USER.");
 const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT || 3306),
   database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  user: process.env.DB_MIGRATION_USER || process.env.DB_USER,
+  password: process.env.DB_MIGRATION_USER
+    ? process.env.DB_MIGRATION_PASSWORD
+    : process.env.DB_PASSWORD,
 });
-await connection.execute(
-  "INSERT INTO users (id,email,full_name,password_hash,role) VALUES (?,?,?,?, 'admin') ON DUPLICATE KEY UPDATE full_name=VALUES(full_name), password_hash=VALUES(password_hash), role='admin', archived_at=NULL",
-  [randomUUID(), email, name, await hash(password, 12)],
-);
-await connection.end();
+try {
+  await connection.beginTransaction();
+  const [lock] = await connection.query(
+    "SELECT id FROM account_security_lock WHERE id=1 FOR UPDATE",
+  );
+  if (!lock.length)
+    throw new Error(
+      "Le verrou de sécurité est absent. Exécutez db:init avant de créer le premier administrateur.",
+    );
+  const [admins] = await connection.query(
+    "SELECT id FROM users WHERE role='admin' AND archived_at IS NULL LIMIT 1 FOR UPDATE",
+  );
+  if (admins.length)
+    throw new Error(
+      "Un administrateur existe déjà. Utilisez la gestion des rôles de l’application pour créer d’autres administrateurs.",
+    );
+  await connection.execute(
+    "INSERT INTO users (id,email,full_name,password_hash,role) VALUES (?,?,?,?, 'admin')",
+    [randomUUID(), email, name, await hash(password, 12)],
+  );
+  await connection.commit();
+} catch (error) {
+  await connection.rollback();
+  throw error;
+} finally {
+  await connection.end();
+}
 console.log("Admin account ready.");

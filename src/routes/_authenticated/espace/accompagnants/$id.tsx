@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/caregivers";
 import { formatDateFr } from "@/lib/patients";
 import { PasswordField } from "@/components/backoffice/password-field";
 import { BackLink } from "@/components/backoffice/back-link";
+import { UserRoleControl } from "@/components/backoffice/user-role-control";
 
 export const Route = createFileRoute("/_authenticated/espace/accompagnants/$id")({
   beforeLoad: ({ context }) => requireAdmin(context.me),
@@ -94,6 +95,13 @@ function CaregiverPage() {
       <BackLink to="/espace/accompagnants">Retour à la liste</BackLink>
       <h1 className="bo-title">{p.full_name || p.email}</h1>
       <div className="title-underline" />
+      <section className="bo-card">
+        <h2>Rôle du compte</h2>
+        {(id === me.id || p.archived_at) && (
+          <p>{p.role === "admin" ? "Administrateur" : "Accompagnant"}</p>
+        )}
+        <UserRoleControl user={p} actorId={me.id} isAdmin={me.isAdmin} />
+      </section>
       <div className="bo-actions">
         {edit ? (
           <>

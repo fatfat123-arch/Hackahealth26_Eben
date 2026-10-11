@@ -43,6 +43,12 @@ export async function currentUser() {
   return sessionUserFromToken(getCookie(COOKIE));
 }
 
+/** Derived from the HttpOnly cookie, never from a server-function input. */
+export function currentSessionHash() {
+  const token = getCookie(COOKIE);
+  return token ? digest(token) : null;
+}
+
 export async function destroySession() {
   const token = getCookie(COOKIE);
   if (token) await db().execute("DELETE FROM sessions WHERE token_hash=?", [digest(token)]);

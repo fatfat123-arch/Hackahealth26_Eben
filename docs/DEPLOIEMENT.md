@@ -61,6 +61,9 @@ Les variables `LOGIN_RATE_LIMIT_*` règlent la protection contre les tentatives 
 
 ## Vérifications après déploiement
 
+Pour la gestion sécurisée des rôles, appliquer aussi la [séparation des privilèges MariaDB](GESTION_ROLES.md#déploiement--séparation-des-droits-mariadb).
+Le compte d'exécution ne doit pas modifier directement `users.role` ni altérer les journaux.
+
 Effectuez les contrôles suivants après chaque mise en production importante :
 
 1. ouvrir `https://eh-passport.ch` ;

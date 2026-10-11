@@ -1,12 +1,17 @@
 import { readFile } from "node:fs/promises";
 import mysql from "mysql2/promise";
 
+if (process.env.DB_MIGRATION_USER && !process.env.DB_MIGRATION_PASSWORD)
+  throw new Error("DB_MIGRATION_PASSWORD is required with DB_MIGRATION_USER.");
+
 const connection = await mysql.createConnection({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT || 3306),
   database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  user: process.env.DB_MIGRATION_USER || process.env.DB_USER,
+  password: process.env.DB_MIGRATION_USER
+    ? process.env.DB_MIGRATION_PASSWORD
+    : process.env.DB_PASSWORD,
   multipleStatements: true,
 });
 await connection.query(await readFile(new URL("../database/schema.sql", import.meta.url), "utf8"));
@@ -43,5 +48,8 @@ if (photoPositionColumns.length === 0) {
     "ALTER TABLE patients ADD COLUMN photo_position_y TINYINT UNSIGNED NOT NULL DEFAULT 50 AFTER photo_alt",
   );
 }
+await connection.query(
+  await readFile(new URL("../database/role-management.sql", import.meta.url), "utf8"),
+);
 await connection.end();
 console.log("MariaDB schema ready.");

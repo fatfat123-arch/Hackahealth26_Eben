@@ -2,9 +2,22 @@ import { randomUUID } from "node:crypto";
 import { hash } from "bcryptjs";
 import type { RowDataPacket } from "mysql2";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireAuth } from "@/lib/auth.functions";
 import { db, iso } from "@/server/db.server";
+import { currentSessionHash } from "@/server/auth.server";
+import {
+  changeUserRole,
+  guardAccountRemoval,
+  withAccountTransaction,
+} from "@/server/user-roles.server";
+import { clientIp } from "@/server/swiss-ip";
+import {
+  createCaregiverSchema,
+  updateCaregiverSchema,
+  parseRoleChangeInput,
+} from "./user-role-input";
 
 type UserListRow = RowDataPacket & {
   id: string;
@@ -19,30 +32,15 @@ type ProfileRow = RowDataPacket & {
   full_name: string;
   email: string;
   created_at: Date | string;
+  role: "admin" | "caregiver";
+  archived_at: Date | string | null;
 };
 type CreatedPatientRow = RowDataPacket & { id: string; name: string; updated_at: Date | string };
 
 const admin = (user: { role: string }) => {
   if (user.role !== "admin") throw new Error("Accès réservé aux administrateurs.");
 };
-const idInput = (d: unknown) => z.object({ id: z.string().uuid() }).parse(d);
-async function safe(caller: string, target: string, removesAdmin: boolean) {
-  if (caller === target)
-    throw new Error("Vous ne pouvez pas faire cette action sur votre propre compte.");
-  const [rows] = await db().execute<(RowDataPacket & { role: string })[]>(
-    "SELECT role FROM users WHERE id=?",
-    [target],
-  );
-  if (!rows[0]) throw new Error("Compte introuvable.");
-  if (removesAdmin && rows[0].role === "admin") {
-    const [counts] = await db().execute<(RowDataPacket & { n: number })[]>(
-      "SELECT COUNT(*) AS n FROM users WHERE role='admin' AND archived_at IS NULL AND id<>?",
-      [target],
-    );
-    if (!Number(counts[0]?.n))
-      throw new Error("Il doit toujours rester au moins un administrateur actif.");
-  }
-}
+const idInput = (d: unknown) => z.object({ id: z.string().uuid() }).strict().parse(d);
 
 export const listCaregivers = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -64,39 +62,40 @@ export const getCaregiver = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     admin(context.user);
     const [[profiles], [patients]] = await Promise.all([
-      db().execute<ProfileRow[]>("SELECT id,full_name,email,created_at FROM users WHERE id=?", [
-        data,
-      ]),
+      db().execute<ProfileRow[]>(
+        "SELECT id,full_name,email,role,created_at,archived_at FROM users WHERE id=?",
+        [data],
+      ),
       db().execute<CreatedPatientRow[]>(
         "SELECT id,name,updated_at FROM patients WHERE created_by=? ORDER BY name",
         [data],
       ),
     ]);
     return {
-      profile: profiles[0] ? { ...profiles[0], created_at: iso(profiles[0].created_at) } : null,
+      profile: profiles[0]
+        ? {
+            ...profiles[0],
+            created_at: iso(profiles[0].created_at),
+            archived_at: iso(profiles[0].archived_at),
+          }
+        : null,
       patients: patients.map((p) => ({ ...p, updated_at: iso(p.updated_at) })),
     };
   });
 export const createCaregiver = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((d: unknown) =>
-    z
-      .object({
-        name: z.string().trim().min(1).max(120),
-        email: z.string().trim().email().max(255),
-        password: z.string().min(8).max(128),
-        role: z.enum(["caregiver", "admin"]).default("caregiver"),
-      })
-      .parse(d),
-  )
+  .inputValidator((d: unknown) => createCaregiverSchema.parse(d))
   .handler(async ({ data, context }) => {
     admin(context.user);
     try {
       const id = randomUUID();
-      await db().execute(
-        "INSERT INTO users (id,email,full_name,password_hash,role) VALUES (?,?,?,?,?)",
-        [id, data.email.toLowerCase(), data.name, await hash(data.password, 12), data.role],
-      );
+      const passwordHash = await hash(data.password, 12);
+      await withAccountTransaction(currentSessionHash(), async (connection) => {
+        await connection.execute(
+          "INSERT INTO users (id,email,full_name,password_hash) VALUES (?,?,?,?)",
+          [id, data.email.toLowerCase(), data.name, passwordHash],
+        );
+      });
       return { id };
     } catch (e) {
       if ((e as { code?: string }).code === "ER_DUP_ENTRY")
@@ -106,46 +105,50 @@ export const createCaregiver = createServerFn({ method: "POST" })
   });
 export const updateCaregiver = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((d: unknown) =>
-    z
-      .object({
-        id: z.string().uuid(),
-        name: z.string().trim().min(1).max(120),
-        email: z.string().trim().email().max(255),
-      })
-      .parse(d),
-  )
+  .inputValidator((d: unknown) => updateCaregiverSchema.parse(d))
   .handler(async ({ data, context }) => {
     admin(context.user);
-    await db().execute("UPDATE users SET full_name=?,email=? WHERE id=?", [
-      data.name,
-      data.email.toLowerCase(),
-      data.id,
-    ]);
+    await withAccountTransaction(currentSessionHash(), async (connection) => {
+      await connection.execute("UPDATE users SET full_name=?,email=? WHERE id=?", [
+        data.name,
+        data.email.toLowerCase(),
+        data.id,
+      ]);
+    });
     return { ok: true };
   });
-export const promoteToAdmin = createServerFn({ method: "POST" })
+export const changeCaregiverRole = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator(idInput)
+  .inputValidator(parseRoleChangeInput)
   .handler(async ({ data, context }) => {
-    admin(context.user);
-    await safe(context.user.id, data.id, false);
-    await db().execute("UPDATE users SET role='admin' WHERE id=?", [data.id]);
-    return { ok: true };
+    const request = getRequest();
+    const agent = request.headers.get("user-agent");
+    return changeUserRole(currentSessionHash(), context.user.id, data, {
+      ip: clientIp(request),
+      userAgent: agent
+        ? Array.from(agent)
+            .filter((character) => character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127)
+            .join("")
+            .slice(0, 512)
+        : null,
+    });
   });
 export const setAccountArchived = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), archived: z.boolean() }).parse(d),
+    z.object({ id: z.string().uuid(), archived: z.boolean() }).strict().parse(d),
   )
   .handler(async ({ data, context }) => {
     admin(context.user);
-    await safe(context.user.id, data.id, data.archived);
-    await db().execute("UPDATE users SET archived_at=? WHERE id=?", [
-      data.archived ? new Date() : null,
-      data.id,
-    ]);
-    if (data.archived) await db().execute("DELETE FROM sessions WHERE user_id=?", [data.id]);
+    await withAccountTransaction(currentSessionHash(), async (connection, actor) => {
+      await guardAccountRemoval(connection, actor, data.id, data.archived);
+      await connection.execute("UPDATE users SET archived_at=IF(?,NOW(3),NULL) WHERE id=?", [
+        data.archived,
+        data.id,
+      ]);
+      if (data.archived)
+        await connection.execute("DELETE FROM sessions WHERE user_id=?", [data.id]);
+    });
     return { ok: true };
   });
 export const deleteAccount = createServerFn({ method: "POST" })
@@ -153,22 +156,30 @@ export const deleteAccount = createServerFn({ method: "POST" })
   .inputValidator(idInput)
   .handler(async ({ data, context }) => {
     admin(context.user);
-    await safe(context.user.id, data.id, true);
-    await db().execute("DELETE FROM users WHERE id=?", [data.id]);
+    await withAccountTransaction(currentSessionHash(), async (connection, actor) => {
+      await guardAccountRemoval(connection, actor, data.id, true);
+      await connection.execute("DELETE FROM users WHERE id=?", [data.id]);
+    });
     return { ok: true };
   });
 export const resetPassword = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), password: z.string().min(8).max(128) }).parse(d),
+    z
+      .object({ id: z.string().uuid(), password: z.string().min(8).max(128) })
+      .strict()
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     admin(context.user);
-    await safe(context.user.id, data.id, false);
-    await db().execute("UPDATE users SET password_hash=? WHERE id=?", [
-      await hash(data.password, 12),
-      data.id,
-    ]);
-    await db().execute("DELETE FROM sessions WHERE user_id=?", [data.id]);
+    const passwordHash = await hash(data.password, 12);
+    await withAccountTransaction(currentSessionHash(), async (connection, actor) => {
+      await guardAccountRemoval(connection, actor, data.id, false);
+      await connection.execute("UPDATE users SET password_hash=? WHERE id=?", [
+        passwordHash,
+        data.id,
+      ]);
+      await connection.execute("DELETE FROM sessions WHERE user_id=?", [data.id]);
+    });
     return { ok: true };
   });

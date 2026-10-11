@@ -5,7 +5,6 @@ import { useState, type FormEvent } from "react";
 import { UserPlus } from "lucide-react";
 import {
   createCaregiver,
-  promoteToAdmin,
   setAccountArchived,
   deleteAccount,
   listCaregivers,
@@ -17,6 +16,7 @@ import { BackLink } from "@/components/backoffice/back-link";
 import { askConfirm } from "@/components/backoffice/confirm-dialog";
 import { PasswordField } from "@/components/backoffice/password-field";
 import { EmptyState } from "@/components/mascot";
+import { UserRoleControl } from "@/components/backoffice/user-role-control";
 
 export const Route = createFileRoute("/_authenticated/espace/accompagnants/")({
   beforeLoad: ({ context }) => requireAdmin(context.me),
@@ -40,7 +40,6 @@ async function loadCaregivers() {
 function Caregivers() {
   const qc = useQueryClient();
   const create = useServerFn(createCaregiver);
-  const promote = useServerFn(promoteToAdmin);
   const archive = useServerFn(setAccountArchived);
   const del = useServerFn(deleteAccount);
   const { me } = Route.useRouteContext();
@@ -62,8 +61,7 @@ function Caregivers() {
     name: string;
     email: string;
     password: string;
-    role: "caregiver" | "admin";
-  }>({ name: "", email: "", password: "", role: "caregiver" });
+  }>({ name: "", email: "", password: "" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
@@ -85,7 +83,7 @@ function Caregivers() {
       setMsg(
         `Le compte de ${form.name} a été créé. Transmettez-lui son adresse e-mail et son mot de passe.`,
       );
-      setForm({ name: "", email: "", password: "", role: "caregiver" });
+      setForm({ name: "", email: "", password: "" });
       setOpen(false);
       await qc.invalidateQueries({ queryKey: ["caregivers"] });
     } catch (e2) {
@@ -100,12 +98,6 @@ function Caregivers() {
     if (c.id === me.id) return [];
     const name = c.full_name || c.email;
     const a: RowAction[] = [];
-    if (!c.isAdmin && !c.archived_at)
-      a.push({
-        label: "Nommer administrateur",
-        onSelect: () =>
-          run(() => promote({ data: { id: c.id } }), `${name} est maintenant administrateur.`),
-      });
     a.push(
       c.archived_at
         ? {
@@ -185,27 +177,10 @@ function Caregivers() {
             value={form.password}
             onChange={(v) => setForm({ ...form, password: v })}
           />
-          <fieldset className="bo-radio-group">
-            <legend>Rôle</legend>
-            <label>
-              <input
-                type="radio"
-                name="role"
-                checked={form.role === "caregiver"}
-                onChange={() => setForm({ ...form, role: "caregiver" })}
-              />{" "}
-              Accompagnant
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="role"
-                checked={form.role === "admin"}
-                onChange={() => setForm({ ...form, role: "admin" })}
-              />{" "}
-              Administrateur
-            </label>
-          </fieldset>
+          <p className="bo-hint">
+            Le compte sera créé comme accompagnant. Vous pourrez ensuite lui attribuer les droits
+            administrateur avec confirmation.
+          </p>
           {err && (
             <p className="bo-error" role="alert">
               {err}
@@ -256,7 +231,7 @@ function Caregivers() {
       )}
       <ul className="bo-list">
         {shown.map((c) => (
-          <li key={c.id} className="bo-row-wrap">
+          <li key={c.id} className="bo-row-wrap bo-user-row">
             <Link to="/espace/accompagnants/$id" params={{ id: c.id }} className="bo-list-item">
               <span className="bo-avatar" aria-hidden="true">
                 {(c.full_name || c.email).slice(0, 1).toUpperCase()}
@@ -273,6 +248,7 @@ function Caregivers() {
               </span>
             </Link>
             <RowMenu label={c.full_name || c.email} actions={actionsFor(c)} />
+            <UserRoleControl user={c} actorId={me.id} isAdmin={me.isAdmin} />
           </li>
         ))}
       </ul>
