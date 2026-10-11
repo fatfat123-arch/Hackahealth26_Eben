@@ -1967,18 +1967,6 @@
 .bo-role-control {
   width: 100%;
 }
-.bo-row-wrap > .bo-role-control {
-  flex-basis: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-.bo-user-row {
-  flex-wrap: wrap;
-}
-.bo-user-row > .bo-list-item {
-  flex-basis: calc(100% - 64px);
-}
 .bo-role-toggle-row {
   display: flex;
   align-items: center;

@@ -6,14 +6,12 @@ n'est ajouté. Son propre rôle ne peut jamais être modifié depuis l'applicati
 
 ## Interface et authentification
 
-Le contrôle « Droits administrateur » figure dans la liste et la fiche des
-utilisateurs, sauf pour soi-même et les comptes archivés. Il ouvre un dialogue
-de confirmation, puis demande le mot de passe actuel de l'administrateur.
-L'état affiché reste celui enregistré jusqu'au succès de l'opération. Le serveur
-vérifie le mot de passe avec bcrypt pour **chaque changement**, sans enregistrer
-ce mot de passe ni une preuve réutilisable dans le navigateur. Cinq erreurs en
-quinze minutes bloquent temporairement les changements de rôles de ce compte.
-Ce compteur est conservé dans MariaDB et partagé entre les processus.
+Le contrôle « Droits administrateur » figure uniquement dans la fiche d’un
+utilisateur, sauf pour soi-même et les comptes archivés. La liste conserve les
+badges de rôle et ses autres actions. Le toggle ouvre un dialogue de confirmation
+« Annuler / Confirmer », sans demander de mot de passe. L’état affiché reste celui
+enregistré jusqu’au succès de l’opération. L’authentification par la session
+existante et les contrôles d’autorisation serveur restent obligatoires.
 
 Les nouveaux comptes sont toujours accompagnants. Leur promotion utilise le
 même contrôle, avec confirmation et audit. Les schémas stricts des opérations
@@ -33,7 +31,7 @@ une précondition permettant de rejeter un écran devenu périmé.
 `change_user_role` est une procédure MariaDB `SQL SECURITY DEFINER`. Elle ouvre
 une transaction InnoDB, prend le verrou `account_security_lock`, retrouve
 l'acteur grâce à l'empreinte de la session issue du cookie, puis vérifie à nouveau
-sa session, son rôle actuel et l'empreinte de mot de passe vérifiée par le serveur.
+sa session et son rôle actuel.
 Le compte cible doit être actif et son rôle doit correspondre à la précondition.
 
 Le changement, l'enregistrement `security_audit` et la suppression de toutes
@@ -89,7 +87,12 @@ de variables `VITE_*`. En leur absence, les scripts conservent le compte existan
 mais cela ne constitue pas une séparation sûre des privilèges en production.
 
 `db:init` applique `database/role-management.sql`, sans changer les rôles ou les
-comptes existants. L'hébergeur doit autoriser les procédures `SQL SECURITY DEFINER`
+comptes existants. Pour cette simplification, exécuter de nouveau la migration
+avant de démarrer le nouveau build : la signature de `change_user_role` passe de
+huit à sept paramètres, sans preuve de mot de passe. L’ancienne table
+`role_reauthentication`, si elle existe, reste inutilisée ; aucune suppression
+de table ou de données n’est effectuée.
+L'hébergeur doit autoriser les procédures `SQL SECURITY DEFINER`
 et les triggers. S'ils sont indisponibles, le changement de rôle échoue ; aucun
 repli sur un UPDATE non protégé n'est prévu.
 
@@ -109,7 +112,6 @@ GRANT INSERT (id,email,full_name,password_hash),
 GRANT SELECT,INSERT,DELETE ON eh_passport.sessions TO 'eh_passport_app'@'localhost';
 GRANT SELECT,INSERT,UPDATE,DELETE ON eh_passport.patients TO 'eh_passport_app'@'localhost';
 GRANT SELECT,UPDATE ON eh_passport.account_security_lock TO 'eh_passport_app'@'localhost';
-GRANT SELECT,INSERT,UPDATE ON eh_passport.role_reauthentication TO 'eh_passport_app'@'localhost';
 GRANT INSERT ON eh_passport.security_audit TO 'eh_passport_app'@'localhost';
 GRANT EXECUTE ON PROCEDURE eh_passport.change_user_role TO 'eh_passport_app'@'localhost';
 ```
@@ -150,7 +152,18 @@ npm test -- src/test/user-roles.database.test.ts
 Les tests utilisent un compte root local de test (mot de passe facultatif via
 `ROLE_TEST_DB_ROOT_PASSWORD`), créent des comptes fictifs et attribuent au compte
 d'exécution les seuls GRANT ci-dessus. Ils couvrent promotion, rétrogradation,
-réauthentification, refus, concurrence, rollback sur erreur d'audit, sessions
+refus, concurrence, rollback sur erreur d'audit, sessions
 révoquées, absence de pertes de données et refus des UPDATE/DELETE/TRUNCATE/DROP
 sur le journal. Le mot de passe de la fixture est fictif ; la production conserve
 le hachage bcrypt existant à 12 tours.
+
+La simplification a été vérifiée en navigateur sur le serveur de développement
+avec MariaDB et des comptes fictifs : liste sans toggle, badges et navigation,
+confirmation et annulation sans mot de passe, promotion et rétrogradation,
+actualisation du profil, affichage ordinateur/tablette/mobile, refus des appels
+anonymes et accompagnants (y compris avec un acteur falsifié), audit et sessions.
+Les tests, TypeScript, le lint ciblé et la compilation du build passent.
+Le parcours navigateur du build local n'a pas pu être validé : l'ouverture
+directe de `/espace/accompagnants` reste vide, alors que le même parcours fonctionne
+en développement. La cause de ce chargement n'est pas établie ; aucune correction
+du rendu général du backoffice n'est incluse dans cette modification.

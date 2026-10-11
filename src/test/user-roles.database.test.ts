@@ -33,13 +33,11 @@ const promote = (target: string) => ({
   id: target,
   role: "admin" as const,
   expectedRole: "caregiver" as const,
-  password,
 });
 const demote = (target: string) => ({
   id: target,
   role: "caregiver" as const,
   expectedRole: "admin" as const,
-  password,
 });
 let root: Connection;
 let passwordHash: string;
@@ -71,7 +69,6 @@ describe.skipIf(!enabled)("MariaDB role security with restricted runtime grants"
       GRANT SELECT,INSERT,DELETE ON ${database}.sessions TO 'eh_role_test_runtime'@'localhost';
       GRANT SELECT,INSERT,UPDATE,DELETE ON ${database}.patients TO 'eh_role_test_runtime'@'localhost';
       GRANT SELECT,UPDATE ON ${database}.account_security_lock TO 'eh_role_test_runtime'@'localhost';
-      GRANT SELECT,INSERT,UPDATE ON ${database}.role_reauthentication TO 'eh_role_test_runtime'@'localhost';
       GRANT INSERT ON ${database}.security_audit TO 'eh_role_test_runtime'@'localhost';
       GRANT EXECUTE ON PROCEDURE ${database}.change_user_role TO 'eh_role_test_runtime'@'localhost';
     `);
@@ -90,7 +87,7 @@ describe.skipIf(!enabled)("MariaDB role security with restricted runtime grants"
   beforeEach(async () => {
     await root.query("DROP TRIGGER IF EXISTS test_audit_failure");
     await root.query(
-      "SET FOREIGN_KEY_CHECKS=0; TRUNCATE patients; TRUNCATE sessions; TRUNCATE users; TRUNCATE role_reauthentication; TRUNCATE security_audit; SET FOREIGN_KEY_CHECKS=1",
+      "SET FOREIGN_KEY_CHECKS=0; TRUNCATE patients; TRUNCATE sessions; TRUNCATE users; TRUNCATE security_audit; SET FOREIGN_KEY_CHECKS=1",
     );
     for (const [id, role] of [
       [A, "admin"],
@@ -265,32 +262,6 @@ describe.skipIf(!enabled)("MariaDB role security with restricted runtime grants"
       await root.query("DROP TRIGGER test_audit_failure");
     }
   });
-  it("durably rate-limits wrong password attempts across requests, then allows a fresh window", async () => {
-    for (let index = 0; index < 5; index++)
-      await expect(
-        changeUserRole(
-          tokenHash(A),
-          A,
-          { ...promote(C), password: "incorrect-password" },
-          metadata,
-        ),
-      ).rejects.toThrow("incorrect");
-    await expect(changeUserRole(tokenHash(A), A, promote(C), metadata)).rejects.toThrow(
-      "quinze minutes",
-    );
-    expect(
-      (await rows("SELECT failures FROM role_reauthentication WHERE user_id=?", [A]))[0]![
-        "failures"
-      ],
-    ).toBe(5);
-    await root.execute(
-      "UPDATE role_reauthentication SET window_start=DATE_SUB(NOW(),INTERVAL 16 MINUTE) WHERE user_id=?",
-      [A],
-    );
-    await expect(changeUserRole(tokenHash(A), A, promote(C), metadata)).resolves.toMatchObject({
-      role: "admin",
-    });
-  });
   it("denies direct privileged updates and prevents runtime edits, deletions and truncation of the audit", async () => {
     await changeUserRole(tokenHash(A), A, promote(C), metadata);
     await expect(
@@ -319,11 +290,10 @@ describe.skipIf(!enabled)("MariaDB role security with restricted runtime grants"
     await root.execute("DELETE FROM users WHERE id=?", [C]);
     expect(await rows("SELECT * FROM security_audit")).toHaveLength(1);
   });
-  it("rechecks password proof and allowed roles inside the stored operation", async () => {
-    const call = (proof: string, role: string, previous = "caregiver") =>
-      db().query("CALL change_user_role(?,?,?,?,?,?,?,?)", [
-        tokenHash(A),
-        proof,
+  it("rechecks the current actor and allowed roles inside the stored operation", async () => {
+    const call = (session: string, role: string, previous = "caregiver") =>
+      db().query("CALL change_user_role(?,?,?,?,?,?,?)", [
+        session,
         C,
         role,
         previous,
@@ -331,14 +301,10 @@ describe.skipIf(!enabled)("MariaDB role security with restricted runtime grants"
         null,
         null,
       ]);
-    await expect(call("forged-password-hash", "admin")).rejects.toThrow("ROLE_REAUTH_REQUIRED");
-    await expect(call(passwordHash, "owner")).rejects.toThrow("ROLE_INVALID");
-    await expect(call(passwordHash, "caregiver")).rejects.toThrow("ROLE_INVALID");
-    await root.execute("UPDATE users SET password_hash=? WHERE id=?", [
-      await hash("new-password", 4),
-      A,
-    ]);
-    await expect(call(passwordHash, "admin")).rejects.toThrow("ROLE_REAUTH_REQUIRED");
+    await expect(call(tokenHash(A), "owner")).rejects.toThrow("ROLE_INVALID");
+    await expect(call(tokenHash(A), "caregiver")).rejects.toThrow("ROLE_INVALID");
+    await root.execute("UPDATE users SET role='caregiver' WHERE id=?", [A]);
+    await expect(call(tokenHash(A), "admin")).rejects.toThrow("ROLE_FORBIDDEN");
     expect((await rows("SELECT role FROM users WHERE id=?", [C]))[0]!["role"]).toBe("caregiver");
   });
 });

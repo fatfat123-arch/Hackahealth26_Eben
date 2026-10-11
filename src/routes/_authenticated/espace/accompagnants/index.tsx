@@ -16,7 +16,6 @@ import { BackLink } from "@/components/backoffice/back-link";
 import { askConfirm } from "@/components/backoffice/confirm-dialog";
 import { PasswordField } from "@/components/backoffice/password-field";
 import { EmptyState } from "@/components/mascot";
-import { UserRoleControl } from "@/components/backoffice/user-role-control";
 
 export const Route = createFileRoute("/_authenticated/espace/accompagnants/")({
   beforeLoad: ({ context }) => requireAdmin(context.me),
@@ -231,7 +230,7 @@ function Caregivers() {
       )}
       <ul className="bo-list">
         {shown.map((c) => (
-          <li key={c.id} className="bo-row-wrap bo-user-row">
+          <li key={c.id} className="bo-row-wrap">
             <Link to="/espace/accompagnants/$id" params={{ id: c.id }} className="bo-list-item">
               <span className="bo-avatar" aria-hidden="true">
                 {(c.full_name || c.email).slice(0, 1).toUpperCase()}
@@ -248,7 +247,6 @@ function Caregivers() {
               </span>
             </Link>
             <RowMenu label={c.full_name || c.email} actions={actionsFor(c)} />
-            <UserRoleControl user={c} actorId={me.id} isAdmin={me.isAdmin} />
           </li>
         ))}
       </ul>

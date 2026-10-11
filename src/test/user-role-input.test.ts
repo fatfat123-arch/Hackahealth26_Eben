@@ -8,26 +8,25 @@ import {
 
 const id = "00000000-0000-4000-8000-000000000001";
 describe("Role-management inputs", () => {
-  it("accepts only the two existing roles and requires reauthentication and a saved-role precondition", () => {
+  it("accepts only the two existing roles and requires a saved-role precondition without a password", () => {
     const input = {
       id,
       role: "admin",
       expectedRole: "caregiver",
-      password: "mot-de-passe-de-test",
     };
     expect(parseRoleChangeInput(input)).toEqual(input);
     for (const invalid of [
       { ...input, role: "owner" },
       { ...input, id: "bad" },
-      { ...input, password: "" },
       { ...input, expectedRole: undefined },
     ])
       expect(roleChangeSchema.safeParse(invalid).success).toBe(false);
   });
   it("rejects invented actor IDs, permissions, timestamps and other client authorization claims", () => {
-    const input = { id, role: "admin", expectedRole: "caregiver", password: "test-password" };
+    const input = { id, role: "admin", expectedRole: "caregiver" };
     for (const extra of [
       { actorId: id },
+      { password: "test-password" },
       { isAdmin: true },
       { can_manage_roles: true },
       { timestamp: "2026-01-01" },

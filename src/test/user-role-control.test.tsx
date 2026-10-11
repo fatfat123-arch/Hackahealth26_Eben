@@ -69,25 +69,30 @@ describe("Role toggle confirmation", () => {
     expect(screen.getByRole("switch", { hidden: true })).toHaveAttribute("aria-checked", "false");
   });
   it.each(["admin", "caregiver"] as const)(
-    "confirms the change to %s with a password and displays the server's saved role",
+    "confirms the change to %s without a password and displays the server's saved role",
     async (newRole) => {
       const qc = setup(newRole === "admin" ? "caregiver" : "admin");
       vi.mocked(changeCaregiverRole).mockResolvedValue({ ok: true, role: newRole });
       fireEvent.click(screen.getByRole("switch", { hidden: true }));
       const label = newRole === "admin" ? "Confirmer la promotion" : "Confirmer la rétrogradation";
       expect(await screen.findByRole("alertdialog", { name: label })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: label })).toBeDisabled();
-      fireEvent.change(screen.getByLabelText("Votre mot de passe actuel"), {
-        target: { value: "test-password" },
-      });
-      fireEvent.click(screen.getByRole("button", { name: label }));
+      expect(screen.queryByLabelText("Votre mot de passe actuel")).toBeNull();
+      expect(
+        screen.getByText(
+          "Voulez-vous " +
+            (newRole === "admin"
+              ? "attribuer les droits administrateur à"
+              : "retirer les droits administrateur de") +
+            " Marie ?",
+        ),
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Confirmer" }));
       await screen.findByRole("status");
       expect(changeCaregiverRole).toHaveBeenCalledExactlyOnceWith({
         data: {
           id: user.id,
           role: newRole,
           expectedRole: newRole === "admin" ? "caregiver" : "admin",
-          password: "test-password",
         },
       });
       expect(screen.getByRole("switch", { hidden: true })).toHaveAttribute(
@@ -99,19 +104,15 @@ describe("Role toggle confirmation", () => {
       ).toBe(newRole);
     },
   );
-  it("keeps the original state and clears the password after a server rejection", async () => {
+  it("keeps the original state after a server rejection", async () => {
     setup("admin");
     vi.mocked(changeCaregiverRole).mockRejectedValue(
       new Error("Il doit toujours rester au moins un administrateur actif."),
     );
     fireEvent.click(screen.getByRole("switch", { hidden: true }));
-    fireEvent.change(screen.getByLabelText("Votre mot de passe actuel"), {
-      target: { value: "test-password" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Confirmer la rétrogradation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirmer" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("au moins un administrateur");
     expect(screen.getByRole("switch", { hidden: true })).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByLabelText("Votre mot de passe actuel")).toHaveValue("");
   });
   it("blocks duplicate confirmation and cancellation during the request", async () => {
     setup();
@@ -122,10 +123,7 @@ describe("Role toggle confirmation", () => {
       }),
     );
     fireEvent.click(screen.getByRole("switch", { hidden: true }));
-    fireEvent.change(screen.getByLabelText("Votre mot de passe actuel"), {
-      target: { value: "test-password" },
-    });
-    const confirm = screen.getByRole("button", { name: "Confirmer la promotion" });
+    const confirm = screen.getByRole("button", { name: "Confirmer" });
     fireEvent.click(confirm);
     fireEvent.click(confirm);
     await waitFor(() => expect(screen.getByRole("button", { name: "Annuler" })).toBeDisabled());

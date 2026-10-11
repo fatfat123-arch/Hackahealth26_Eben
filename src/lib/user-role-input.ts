@@ -7,7 +7,6 @@ export const roleChangeSchema = z
     id: z.string().uuid(),
     role: userRole,
     expectedRole: userRole,
-    password: z.string().min(1).max(128),
   })
   .strict();
 export type RoleChangeInput = z.infer<typeof roleChangeSchema>;

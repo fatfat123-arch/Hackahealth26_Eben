@@ -3,13 +3,6 @@ CREATE TABLE IF NOT EXISTS account_security_lock (
 ) ENGINE=InnoDB;
 INSERT IGNORE INTO account_security_lock (id) VALUES (1);
 
-CREATE TABLE IF NOT EXISTS role_reauthentication (
-  user_id CHAR(36) PRIMARY KEY,
-  failures INT UNSIGNED NOT NULL DEFAULT 0,
-  window_start DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  CONSTRAINT role_reauth_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE IF NOT EXISTS security_audit (
   id CHAR(36) PRIMARY KEY,
   actor_user_id CHAR(36) NOT NULL,
@@ -36,7 +29,6 @@ FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='AUDIT_IMMUTABLE';
 -- it must not have direct INSERT/UPDATE permission on users.role (see docs).
 CREATE OR REPLACE PROCEDURE change_user_role(
   IN p_session_hash CHAR(64),
-  IN p_verified_password_hash VARCHAR(255),
   IN p_target CHAR(36),
   IN p_role VARCHAR(16),
   IN p_expected_role VARCHAR(16),
@@ -48,7 +40,6 @@ SQL SECURITY DEFINER
 BEGIN
   DECLARE v_actor CHAR(36) DEFAULT NULL;
   DECLARE v_actor_role VARCHAR(16) DEFAULT NULL;
-  DECLARE v_password VARCHAR(255) DEFAULT NULL;
   DECLARE v_previous VARCHAR(16) DEFAULT NULL;
   DECLARE v_archived DATETIME(3) DEFAULT NULL;
   DECLARE v_admins INT DEFAULT 0;
@@ -63,15 +54,12 @@ BEGIN
   IF v_lock IS NULL THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='ROLE_SECURITY_UNAVAILABLE';
   END IF;
-  SELECT u.id,u.role,u.password_hash INTO v_actor,v_actor_role,v_password
+  SELECT u.id,u.role INTO v_actor,v_actor_role
     FROM sessions s JOIN users u ON u.id=s.user_id
     WHERE s.token_hash=p_session_hash AND s.expires_at>NOW(3) AND u.archived_at IS NULL
     LIMIT 1 FOR UPDATE;
   IF v_actor IS NULL OR v_actor_role<>'admin' THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='ROLE_FORBIDDEN';
-  END IF;
-  IF p_verified_password_hash IS NULL OR BINARY v_password<>BINARY p_verified_password_hash THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='ROLE_REAUTH_REQUIRED';
   END IF;
   IF p_role IS NULL OR p_role NOT IN ('admin','caregiver')
     OR p_expected_role IS NULL OR p_expected_role NOT IN ('admin','caregiver')

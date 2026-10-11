@@ -27,28 +27,26 @@ export function UserRoleControl({
   const submitting = useRef(false);
   const switchRef = useRef<HTMLButtonElement>(null);
   const labelId = useId();
-  const passwordId = useId();
   const [requestedRole, setRequestedRole] = useState<UserRole | null>(null);
   const [expectedRole, setExpectedRole] = useState<UserRole>(user.role);
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const promoting = requestedRole === "admin";
+  const firstName = user.full_name.trim().split(/\s+/)[0];
   const busy = mutation.isPending;
   function close() {
     if (submitting.current) return;
     setRequestedRole(null);
-    setPassword("");
   }
   async function confirm(event: FormEvent) {
     event.preventDefault();
-    if (!requestedRole || !password || submitting.current || activeChanges) return;
+    if (!requestedRole || submitting.current || activeChanges) return;
     submitting.current = true;
     setError("");
     setMessage("");
     try {
       const result = await mutation.mutateAsync({
-        data: { id: user.id, role: requestedRole, expectedRole, password },
+        data: { id: user.id, role: requestedRole, expectedRole },
       });
       // Cache updates are applied only after the server has committed its transaction.
       qc.setQueryData<RoleUser[]>(["caregivers"], (users) =>
@@ -65,14 +63,12 @@ export function UserRoleControl({
         `${user.full_name} est maintenant ${result.role === "admin" ? "administrateur" : "accompagnant"}.`,
       );
       setRequestedRole(null);
-      setPassword("");
     } catch (e) {
       setError(
         e instanceof Error && /^(Accès|Votre|Trop|Le |Vous |Ce |Il |La |Les )/.test(e.message)
           ? e.message
           : "Le changement de rôle n’a pas pu être confirmé. Actualisez la page avant de réessayer.",
       );
-      setPassword("");
     } finally {
       submitting.current = false;
       // Restore the actual saved state, including when another administrator changed it.
@@ -103,7 +99,6 @@ export function UserRoleControl({
           onClick={() => {
             setExpectedRole(user.role);
             setRequestedRole(user.role === "admin" ? "caregiver" : "admin");
-            setPassword("");
             setError("");
             setMessage("");
           }}
@@ -148,33 +143,10 @@ export function UserRoleControl({
                 {promoting
                   ? "attribuer les droits administrateur à"
                   : "retirer les droits administrateur de"}{" "}
-                {user.full_name} ?
+                {firstName} ?
               </span>
-              <span>
-                {promoting
-                  ? "Cette personne pourra accéder aux fonctionnalités réservées aux administrateurs."
-                  : "Cette personne conservera uniquement les permissions d'un accompagnant."}
-              </span>
-              <span>Cette modification sera enregistrée dans le journal de sécurité.</span>
             </AlertDialog.Description>
             <form onSubmit={confirm} className="bo-role-confirm-form">
-              <label className="bo-field" htmlFor={passwordId}>
-                <span>Votre mot de passe actuel</span>
-                <input
-                  id={passwordId}
-                  className="bo-input"
-                  type="password"
-                  autoComplete="current-password"
-                  maxLength={128}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  disabled={busy}
-                />
-              </label>
-              <p className="bo-hint">
-                Pour votre sécurité, confirmez votre identité pour cette modification.
-              </p>
               {error && (
                 <p className="bo-error" role="alert">
                   {error}
@@ -187,13 +159,9 @@ export function UserRoleControl({
                 <button
                   type="submit"
                   className="bo-btn bo-btn-primary"
-                  disabled={!password || busy || activeChanges > 0}
+                  disabled={busy || activeChanges > 0}
                 >
-                  {busy
-                    ? "Modification…"
-                    : promoting
-                      ? "Confirmer la promotion"
-                      : "Confirmer la rétrogradation"}
+                  {busy ? "Modification…" : "Confirmer"}
                 </button>
               </div>
             </form>

@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { compare } from "bcryptjs";
 import type { PoolConnection } from "mysql2/promise";
 import type { RowDataPacket } from "mysql2";
 import { db, type DbUser } from "./db.server";
@@ -8,9 +7,6 @@ import type { RoleChangeInput } from "@/lib/user-role-input";
 const messages: Record<string, string> = {
   ROLE_FORBIDDEN:
     "Accès réservé aux administrateurs. Veuillez vous reconnecter si vos droits ont changé.",
-  ROLE_REAUTH_REQUIRED: "Votre session ou votre mot de passe a changé. Veuillez vous reconnecter.",
-  ROLE_REAUTH_FAILED: "Votre mot de passe est incorrect. Le rôle n’a pas été modifié.",
-  ROLE_RATE_LIMITED: "Trop de tentatives. Réessayez dans quinze minutes.",
   ROLE_INVALID: "Le changement de rôle demandé est invalide.",
   ROLE_SELF_CHANGE: "Vous ne pouvez pas modifier votre propre rôle.",
   ROLE_TARGET_UNAVAILABLE: "Ce compte est introuvable ou archivé.",
@@ -84,34 +80,6 @@ export async function guardAccountRemoval(
 
 export type RoleRequestMetadata = { ip: string | null; userAgent: string | null };
 
-/** Password proof is fresh for this action, checked on the server, never persisted. */
-async function reauthenticate(sessionHash: string | null, password: string) {
-  const proof = await withAccountTransaction(sessionHash, async (connection, actor) => {
-    await connection.execute(
-      "INSERT INTO role_reauthentication (user_id,failures,window_start) VALUES (?,0,NOW(3)) ON DUPLICATE KEY UPDATE failures=IF(window_start<DATE_SUB(NOW(3),INTERVAL 15 MINUTE),0,failures), window_start=IF(window_start<DATE_SUB(NOW(3),INTERVAL 15 MINUTE),NOW(3),window_start)",
-      [actor.id],
-    );
-    const [attempts] = await connection.execute<(RowDataPacket & { failures: number })[]>(
-      "SELECT failures FROM role_reauthentication WHERE user_id=? FOR UPDATE",
-      [actor.id],
-    );
-    if (Number(attempts[0]?.failures) >= 5) return { reason: "ROLE_RATE_LIMITED" } as const;
-    if (!(await compare(password, actor.password_hash))) {
-      await connection.execute(
-        "UPDATE role_reauthentication SET failures=failures+1 WHERE user_id=?",
-        [actor.id],
-      );
-      return { reason: "ROLE_REAUTH_FAILED" } as const;
-    }
-    await connection.execute("UPDATE role_reauthentication SET failures=0 WHERE user_id=?", [
-      actor.id,
-    ]);
-    return { passwordHash: actor.password_hash } as const;
-  });
-  if (proof.reason) throw new RoleSecurityError(proof.reason);
-  return proof.passwordHash;
-}
-
 export async function changeUserRole(
   sessionHash: string | null,
   actorId: string,
@@ -120,13 +88,11 @@ export async function changeUserRole(
 ) {
   const requestId = randomUUID();
   try {
-    const passwordHash = await reauthenticate(sessionHash, input.password);
-    // The routine starts its own transaction and rechecks the session, actor's
-    // current role and verified password hash after obtaining the shared lock.
+    // The routine starts its own transaction and rechecks the session and actor's
+    // current role after obtaining the shared lock.
     // The runtime DB account need not be able to UPDATE users.role directly.
-    await db().query("CALL change_user_role(?,?,?,?,?,?,?,?)", [
+    await db().query("CALL change_user_role(?,?,?,?,?,?,?)", [
       sessionHash,
-      passwordHash,
       input.id,
       input.role,
       input.expectedRole,
