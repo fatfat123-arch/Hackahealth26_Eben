@@ -3,7 +3,7 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import { db, iso, type DbUser } from "@/server/db.server";
 
-const COOKIE = "eh_session";
+const COOKIE = process.env["NODE_ENV"] === "production" ? "__Host-eh_session" : "eh_session";
 const DAYS = 14;
 const digest = (token: string) => createHash("sha256").update(token).digest("hex");
 
@@ -19,6 +19,7 @@ export function setSessionCookie(token: string) {
 
 export function clearSessionCookie() {
   deleteCookie(COOKIE, { path: "/" });
+  if (COOKIE !== "eh_session") deleteCookie("eh_session", { path: "/" });
 }
 
 export async function createSession(userId: string) {

@@ -3,6 +3,7 @@ import { clientIp, isSwissIp, requireSwissIp } from "@/server/swiss-ip";
 
 afterEach(() => {
   delete process.env["SWISS_IP_ONLY"];
+  delete process.env["TRUSTED_PROXY_HOPS"];
 });
 
 describe("Swiss IP restriction", () => {
@@ -11,6 +12,14 @@ describe("Swiss IP restriction", () => {
       headers: { "x-forwarded-for": "198.51.100.2, 83.166.133.15, 2a02:1210::1" },
     });
     expect(clientIp(request)).toBe("2a02:1210::1");
+  });
+
+  it("ignores the configured number of trusted proxy hops", () => {
+    process.env["TRUSTED_PROXY_HOPS"] = "1";
+    const request = new Request("https://eh-passport.ch", {
+      headers: { "x-forwarded-for": "198.51.100.2, 83.166.133.15" },
+    });
+    expect(clientIp(request)).toBe("198.51.100.2");
   });
 
   it("recognizes Swiss and non-Swiss addresses", () => {

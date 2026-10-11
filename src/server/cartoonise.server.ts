@@ -2,9 +2,16 @@ import { spawn } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
+import {
+  limitedFormData,
+  rejectCrossOrigin,
+  RequestBodyTooLargeError,
+} from "@/server/request-security.server";
+import { mediaContentMatches, mediaKind } from "@/lib/media-limits";
 
 const DEFAULT_MAX_BYTES = 100 * 1024 * 1024;
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000;
+let activeCartoonisers = 0;
 
 function positiveInteger(value: string | undefined, fallback: number) {
   const parsed = Number(value);
@@ -12,7 +19,9 @@ function positiveInteger(value: string | undefined, fallback: number) {
 }
 
 async function requireStaff(request: Request) {
-  const cookie = request.headers.get("cookie")?.match(/(?:^|;\s*)eh_session=([^;]+)/)?.[1];
+  const cookie = request.headers
+    .get("cookie")
+    ?.match(/(?:^|;\s*)(?:__Host-)?eh_session=([^;]+)/)?.[1];
   const { sessionUserFromToken } = await import("@/server/auth.server");
   const user = await sessionUserFromToken(cookie ? decodeURIComponent(cookie) : null);
   if (!user || user.archived_at) throw new Response("Non autorisé", { status: 401 });
@@ -53,22 +62,43 @@ function runCartooniser(input: string, runsDir: string) {
 }
 
 export async function cartooniseRequest(request: Request) {
+  const originError = rejectCrossOrigin(request);
+  if (originError) return originError;
   await requireStaff(request);
   const contentLength = Number(request.headers.get("content-length") || 0);
   const maxBytes = positiveInteger(process.env["CARTOONISER_MAX_BYTES"], DEFAULT_MAX_BYTES);
   if (contentLength > maxBytes) return new Response("Vidéo trop volumineuse", { status: 413 });
 
-  const form = await request.formData();
+  let form: FormData;
+  try {
+    form = await limitedFormData(request, maxBytes);
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError)
+      return new Response("Vidéo trop volumineuse", { status: 413 });
+    throw error;
+  }
   const value = form.get("video");
-  if (!(value instanceof File) || !value.type.startsWith("video/")) {
+  if (!(value instanceof File) || mediaKind(value.type) !== "video") {
     return new Response("Une vidéo est requise", { status: 400 });
   }
   if (value.size === 0 || value.size > maxBytes) {
     return new Response("Vidéo vide ou trop volumineuse", { status: 413 });
   }
+  if (!(await mediaContentMatches(value)))
+    return new Response("Le contenu de la vidéo ne correspond pas à son format.", { status: 415 });
 
-  const workDir = await mkdtemp(join(tmpdir(), "eh-cartoonise-"));
+  const maxConcurrent = positiveInteger(process.env["CARTOONISER_MAX_CONCURRENT"], 1);
+  if (activeCartoonisers >= maxConcurrent) {
+    return new Response("Le traitement vidéo est occupé. Réessayez dans quelques instants.", {
+      status: 429,
+      headers: { "retry-after": "30" },
+    });
+  }
+
+  activeCartoonisers += 1;
+  let workDir: string | null = null;
   try {
+    workDir = await mkdtemp(join(tmpdir(), "eh-cartoonise-"));
     const suffix =
       extname(value.name)
         .toLowerCase()
@@ -89,6 +119,7 @@ export async function cartooniseRequest(request: Request) {
     console.error("Cartooniser failed", error);
     return new Response("La transformation en dessin animé a échoué.", { status: 500 });
   } finally {
-    await rm(workDir, { recursive: true, force: true });
+    if (workDir) await rm(workDir, { recursive: true, force: true });
+    activeCartoonisers -= 1;
   }
 }

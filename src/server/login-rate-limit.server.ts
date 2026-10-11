@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import type { RowDataPacket } from "mysql2";
+import { db } from "@/server/db.server";
+
 const DEFAULT_LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 5;
 const DEFAULT_LOGIN_RATE_LIMIT_WINDOW_SECONDS = 15 * 60;
 
@@ -74,4 +78,46 @@ export function resetLoginRateLimit(identifier: string) {
 
 export function clearLoginRateLimits() {
   attempts.clear();
+}
+
+const identifierHash = (identifier: string) =>
+  createHash("sha256").update(key(identifier)).digest("hex");
+
+export async function assertPersistentLoginRateLimit(identifiers: string[]) {
+  const { maxAttempts, windowMs } = config();
+  if (maxAttempts === 0 || windowMs === 0) return;
+  identifiers.forEach((identifier) => assertLoginRateLimit(identifier));
+  const hashes = identifiers.map(identifierHash);
+  const placeholders = hashes.map(() => "?").join(",");
+  const [rows] = await db().execute<(RowDataPacket & { attempt_count: number })[]>(
+    `SELECT attempt_count FROM login_rate_limits WHERE identifier_hash IN (${placeholders}) AND reset_at>NOW()`,
+    hashes,
+  );
+  if (rows.some((row) => Number(row.attempt_count) >= maxAttempts))
+    throw new Error(LOGIN_RATE_LIMIT_MESSAGE);
+}
+
+export async function recordPersistentFailedLogin(identifiers: string[]) {
+  const { maxAttempts, windowMs } = config();
+  if (maxAttempts === 0 || windowMs === 0) return;
+  identifiers.forEach((identifier) => recordFailedLogin(identifier));
+  const resetAt = new Date(Date.now() + windowMs);
+  await Promise.all(
+    identifiers.map((identifier) =>
+      db().execute(
+        `INSERT INTO login_rate_limits (identifier_hash,attempt_count,reset_at) VALUES (?,1,?)
+         ON DUPLICATE KEY UPDATE
+           attempt_count=IF(reset_at<=NOW(),1,attempt_count+1),
+           reset_at=IF(reset_at<=NOW(),VALUES(reset_at),reset_at)`,
+        [identifierHash(identifier), resetAt],
+      ),
+    ),
+  );
+}
+
+export async function resetPersistentLoginRateLimit(identifier: string) {
+  resetLoginRateLimit(identifier);
+  await db().execute("DELETE FROM login_rate_limits WHERE identifier_hash=?", [
+    identifierHash(identifier),
+  ]);
 }
