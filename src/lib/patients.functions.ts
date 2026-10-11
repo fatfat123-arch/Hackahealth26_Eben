@@ -1,5 +1,6 @@
+import { randomBytes } from "node:crypto";
 import { rm } from "node:fs/promises";
-import type { RowDataPacket } from "mysql2";
+import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireAuth } from "@/lib/auth.functions";
@@ -8,7 +9,7 @@ import { mediaFile, signedMediaUrl } from "@/server/media.server";
 import { formatSwissPhone, swissPhoneError } from "@/lib/swiss-phone";
 
 type PatientRecord = RowDataPacket & {
-  id: string; name: string; age: number | null; birth_date: string | Date | null; phone: string; phone_note: string; address: string;
+  id: string; public_id: string; name: string; age: number | null; birth_date: string | Date | null; phone: string; phone_note: string; address: string;
   about: string; how_to: string; reminder: string; photo_path: string | null; photo_position_y: number; dictionary: unknown;
   communicates: unknown; understanding_needs: unknown; tools: unknown; facilitators: unknown; interests: unknown;
   dislikes: unknown; additional: unknown; section_order: unknown; created_by: string | null;
@@ -16,7 +17,7 @@ type PatientRecord = RowDataPacket & {
 };
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 export type PatientResult = {
-  id: string; name: string; age: number | null; birth_date: string | null; phone: string; phone_note: string; address: string;
+  id: string; public_id: string; name: string; age: number | null; birth_date: string | null; phone: string; phone_note: string; address: string;
   about: string; how_to: string; reminder: string; photo_path: string | null; photo_position_y: number; created_by: string | null;
   created_at: string | null; updated_at: string | null; archived_at: string | null;
   dictionary: JsonValue[]; communicates: string[]; understanding_needs: string[]; tools: string[]; facilitators: string[];
@@ -26,6 +27,9 @@ export type PatientResult = {
 const idSchema = z.string().uuid();
 const JSON_COLUMNS = new Set(["dictionary", "communicates", "understanding_needs", "tools", "facilitators", "interests", "dislikes", "additional", "section_order"]);
 const EDITABLE = new Set(["name", "birth_date", "phone", "phone_note", "address", "about", "how_to", "reminder", "photo_path", "photo_position_y", ...JSON_COLUMNS]);
+function publicId() {
+  return randomBytes(24).toString("base64url");
+}
 
 function editableValues(values: Record<string, unknown>) {
   const clean = Object.fromEntries(Object.entries(values).filter(([key]) => EDITABLE.has(key)));
@@ -69,7 +73,7 @@ export const getPatient = createServerFn({ method: "GET" }).middleware([requireA
 export const createPatient = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => z.object({ id: idSchema, row: z.record(z.unknown()) }).parse(v)).handler(async ({ data, context }) => {
   const clean = editableValues(data.row);
   const keys = Object.keys(clean); const values = keys.map((k) => JSON_COLUMNS.has(k) ? JSON.stringify(clean[k] ?? []) : clean[k]) as (string | number | boolean | Date | null)[];
-  await db().execute(`INSERT INTO patients (id,created_by,${keys.map((k) => `\`${k}\``).join(",")}) VALUES (?,?,${keys.map(() => "?").join(",")})`, [data.id, context.user.id, ...values]);
+  await db().execute(`INSERT INTO patients (id,public_id,created_by,${keys.map((k) => `\`${k}\``).join(",")}) VALUES (?,?,?,${keys.map(() => "?").join(",")})`, [data.id, publicId(), context.user.id, ...values]);
   return { ok: true };
 });
 export const updatePatient = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => z.object({ id: idSchema, changes: z.record(z.unknown()) }).parse(v)).handler(async ({ data }) => {
@@ -81,6 +85,12 @@ export const updatePatient = createServerFn({ method: "POST" }).middleware([requ
 });
 export const archivePatient = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => z.object({ id: idSchema, archived: z.boolean() }).parse(v)).handler(async ({ data }) => {
   await db().execute("UPDATE patients SET archived_at=? WHERE id=?", [data.archived ? new Date() : null, data.id]); return { ok: true };
+});
+export const resetPatientPublicUrl = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => idSchema.parse(v)).handler(async ({ data }) => {
+  const nextPublicId = publicId();
+  const [result] = await db().execute<ResultSetHeader>("UPDATE patients SET public_id=? WHERE id=?", [nextPublicId, data]);
+  if (result.affectedRows !== 1) throw new Error("Profil introuvable.");
+  return { public_id: nextPublicId };
 });
 export const deletePatient = createServerFn({ method: "POST" }).middleware([requireAuth]).inputValidator((v: unknown) => idSchema.parse(v)).handler(async ({ data }) => {
   const [rows] = await db().execute<PatientRecord[]>("SELECT * FROM patients WHERE id=?", [data]);

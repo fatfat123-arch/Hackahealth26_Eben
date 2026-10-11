@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BookOpen, ListOrdered, Eye } from "lucide-react";
-import { getPatient, updatePatient } from "@/lib/patients.functions";
+import { getPatient, resetPatientPublicUrl, updatePatient } from "@/lib/patients.functions";
 import { signPaths } from "@/lib/session";
 import { draftPaths, draftToRow, patientValidationError, rowToDraft, type PatientDraft, type PatientRow } from "@/lib/patients";
 import { PatientForm, FIELD_DRAFT_KEYS, FIELD_LABELS, type FieldKey } from "@/components/backoffice/patient-form";
@@ -35,12 +35,13 @@ function PatientPage() {
   const [preview, setPreview] = useState(false);
   const [draft, setDraft] = useState<PatientDraft | null>(null);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [publicId, setPublicId] = useState("");
   const [editing, setEditing] = useState<FieldKey | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(() => consumeJustSaved(id) ? "Profil enregistré" : "");
   const [err, setErr] = useState("");
 
-  useEffect(() => { if (data && !editing) { setDraft(data.draft); setUrls(u => ({ ...u, ...data.urls })); } }, [data]);
+  useEffect(() => { if (data && !editing) { setDraft(data.draft); setUrls(u => ({ ...u, ...data.urls })); setPublicId(data.row.public_id); } }, [data]);
 
   if (isLoading || (data && !draft)) return <p>Chargement…</p>;
   if (error) return <p className="bo-error" role="alert">Le profil n’a pas pu être chargé.</p>;
@@ -82,10 +83,15 @@ function PatientPage() {
     try { await qc.refetchQueries({ queryKey: ["patient", id], exact: true }); setPreview(true); }
     catch { setErr("L’aperçu n’a pas pu être chargé. Merci de réessayer."); }
   }
+  async function resetPublicUrl() {
+    const res = await resetPatientPublicUrl({ data: id });
+    setPublicId(res.public_id);
+    await qc.invalidateQueries({ queryKey: ["patient", id] });
+  }
+
 
   // The preview always shows the latest saved record, never unsaved edits or a cached copy.
   if (preview) return <PreviewPanel patientId={id} draft={data.draft} urls={{ ...urls, ...data.urls }} updatedAt={data.row.updated_at} onClose={() => setPreview(false)} />;
-
   return <>
     <BackLink to="/espace/patients/liste">Retour à la liste</BackLink>
     <h1 className="bo-title">{data.row.name}</h1>
@@ -93,13 +99,13 @@ function PatientPage() {
     <div className="bo-actions">
       <button type="button" className="bo-btn bo-btn-outline" onClick={openPreview}><Eye aria-hidden="true" /> Aperçu</button>
       <PatientProfileDownload key={id} patientId={id} />
-      <Link to="/espace/tutoriel" search={{ id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
+      <Link to="/espace/tutoriel" search={{ id, publicId: publicId || data.row.public_id }} className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
       <button type="button" className="bo-btn bo-btn-outline" onClick={async () => { await startEdit("sectionOrder"); requestAnimationFrame(() => document.getElementById("section-order")?.scrollIntoView({ block: "start" })); }}><ListOrdered aria-hidden="true" /> Réorganiser les sections</button>
     </div>
     <p className="bo-hint">Pour modifier une information, cliquez sur le crayon à côté de celle-ci.</p>
     {msg && <div className="bo-saved" role="status"><Mascot pose="joie" size={88} /><div><strong>{msg}</strong><p>Merci ! Le changement est visible tout de suite sur la page publique.</p></div></div>}
     {err && <p className="bo-error" role="alert">{err}</p>}
-    <PublicPassportLink key={id} id={id} name={data.row.name} />
+    <PublicPassportLink key={id} publicId={publicId || data.row.public_id} name={data.row.name} onReset={resetPublicUrl} />
     <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly folder={id} updatedAt={data.row.updated_at} canCartoonise={me.isAdmin}
       inline={{ editing, busy, onEdit: startEdit, onSave: k => { void saveField(k); }, onCancel: cancel }} />
   </>;

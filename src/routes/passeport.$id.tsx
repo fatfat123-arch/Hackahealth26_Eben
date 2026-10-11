@@ -6,7 +6,7 @@ import { rowToDraft, toViewData, type PatientRow } from "@/lib/patients";
 
 export const Route = createFileRoute("/passeport/$id")({
   loader: async ({ params }) => {
-    if (!/^[0-9a-f-]{36}$/i.test(params.id)) throw notFound();
+    if (!/^[A-Za-z0-9_-]{22,64}$/.test(params.id)) throw notFound();
     const res = await getPublicPassport({ data: { id: params.id } });
     if (!res) throw notFound();
     return res;

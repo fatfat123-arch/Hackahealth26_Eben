@@ -16,15 +16,15 @@ import nfc07 from "@/assets/nfc-07-ecrire-tag.jpg";
 import nfc08 from "@/assets/nfc-08-ecriture-terminee.jpg";
 
 export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
-  validateSearch: (s) => z.object({ id: z.string().optional() }).parse(s),
+  validateSearch: (s) => z.object({ id: z.string().optional(), publicId: z.string().optional() }).parse(s),
   head: () => ({ meta: [{ title: "Tutoriel QR code et NFC — Espace professionnel" }, { name: "description", content: "Créer un code QR ou programmer une puce NFC vers un passeport." }, { property: "og:title", content: "Tutoriel QR code et NFC" }, { property: "og:description", content: "Créer un code QR ou programmer une puce NFC vers un passeport." }, { property: "og:type", content: "article" }, { name: "twitter:card", content: "summary" }] }),
   component: Tutorial,
 });
 
 function Tutorial() {
-  const { id } = Route.useSearch();
+  const { id, publicId } = Route.useSearch();
   const [url, setUrl] = useState("");
-  useEffect(() => { setUrl(id ? publicPassportUrl(id) : ""); }, [id]);
+  useEffect(() => { setUrl(publicId ? publicPassportUrl(publicId) : ""); }, [publicId]);
   const link = url || "le lien public copié depuis le profil du résident";
 
   return <article className="bo-tutorial">
@@ -82,7 +82,7 @@ function Tutorial() {
     </section>
     <section className="bo-card">
       <h2>4. Mettre à jour le passeport</h2>
-      <p>Après une modification, il n’est pas nécessaire de réimprimer le code QR ni de reprogrammer le badge NFC : le lien reste identique et affiche automatiquement les informations les plus récentes.</p>
+      <p>Après une modification, il n’est pas nécessaire de réimprimer le code QR ni de reprogrammer le badge NFC : le lien reste identique et affiche automatiquement les informations les plus récentes. Si vous réinitialisez le lien public depuis le profil, les anciens codes QR et badges NFC ne fonctionneront plus et doivent être remplacés.</p>
     </section>
   </article>;
 }

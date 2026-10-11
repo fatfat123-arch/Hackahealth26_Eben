@@ -47,7 +47,7 @@ function NewPatient() {
     <div className="bo-actions">
       <button type="button" className="bo-btn bo-btn-primary" onClick={save} disabled={busy}><Save aria-hidden="true" /> {busy ? "Enregistrement…" : "Enregistrer"}</button>
       <button type="button" className="bo-btn bo-btn-outline" onClick={() => setPreview(true)}><Eye aria-hidden="true" /> Aperçu</button>
-      <Link to="/espace/tutoriel" search={{ id }} target="_blank" className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
+      <Link to="/espace/tutoriel" target="_blank" className="bo-btn bo-btn-outline"><BookOpen aria-hidden="true" /> Tutoriel</Link>
     </div>
     {error && <p className="bo-error" role="alert">{error}</p>}
     <PatientForm draft={draft} onChange={setDraft} urls={urls} onUrls={setUrls} readOnly={false} folder={id} updatedAt={null} canCartoonise={me.isAdmin} />

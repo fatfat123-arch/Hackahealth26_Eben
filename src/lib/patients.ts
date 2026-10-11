@@ -41,6 +41,7 @@ export type PatientDraft = {
 
 export type PatientRow = {
   id: string;
+  public_id: string;
   name: string;
   age?: number | string | null;
   birth_date?: string | null;
