@@ -1,32 +1,32 @@
 # EH Passport
 
-EH Passport creates communication passports for people with communication disabilities. A resident’s public passport can be opened from a QR code or NFC badge; authorised staff manage profiles, media and caregiver accounts from the private back office.
+EH Passport permet de créer des passeports de communication pour des personnes ayant des difficultés à communiquer. Le passeport public d’un résident s’ouvre avec un QR code ou un badge NFC. Les professionnels autorisés gèrent les profils, les médias et les comptes accompagnants depuis un espace privé.
 
-The interface is in French and is designed for phones, accessibility and use in care settings.
+L’interface est en français. Elle est conçue pour les téléphones, l’accessibilité et une utilisation dans les établissements médico-sociaux.
 
-## Main features
+## Fonctionnalités principales
 
-- public passports with resettable, non-indexed links;
-- QR code and NFC badge workflow;
-- administrator and caregiver accounts;
-- image, GIF, audio and looping video dictionary entries;
-- optional video cartoonisation for administrators;
-- downloadable profile and badge PDFs;
-- archived profiles and accounts;
-- private media served through expiring signed URLs;
-- optional restriction to Swiss IP addresses.
+- passeports publics accessibles par des liens non indexés et renouvelables ;
+- accès par QR code et badge NFC ;
+- comptes administrateurs et accompagnants ;
+- dictionnaire avec images, GIF, fichiers audio et vidéos en boucle ;
+- filtre de cartoonisation vidéo facultatif pour les administrateurs ;
+- téléchargement des profils et badges au format PDF ;
+- archivage des profils et des comptes ;
+- médias privés accessibles par des URL signées temporaires ;
+- restriction facultative aux adresses IP suisses.
 
-## Technology
+## Technologies
 
 - Node.js 22.12+
 - TanStack Start, React, TypeScript and Vite
 - MariaDB
-- local private media storage in the current deployment
-- optional Python, TensorFlow Lite, OpenCV and PyAV cartoonisation pipeline
+- stockage local et privé des médias pour le déploiement actuel
+- traitement facultatif des vidéos avec Python, TensorFlow Lite, OpenCV et PyAV
 
-## Start locally
+## Lancer le projet en local
 
-You need Node.js 22.12 or newer and access to a MariaDB database.
+Node.js 22.12 ou une version plus récente ainsi qu’une base MariaDB sont nécessaires.
 
 ```sh
 git clone git@github.com:fatfat123-arch/Hackahealth26_Eben.git
@@ -35,7 +35,7 @@ npm ci
 cp .env.example .env
 ```
 
-Edit `.env` with your local database credentials, then initialise the database and first administrator:
+Renseignez les accès à votre base locale dans `.env`, puis initialisez la base et le premier compte administrateur :
 
 ```sh
 npm run db:init
@@ -43,68 +43,72 @@ npm run db:create-admin
 npm run dev
 ```
 
-`db:create-admin` asks interactively for the administrator’s email, name and temporary password; the password is hidden while typing.
+`db:create-admin` demande l’adresse e-mail, le nom et le mot de passe temporaire de l’administrateur. Le mot de passe reste masqué pendant la saisie.
 
-Open [http://localhost:8080](http://localhost:8080). The fictional demonstration profile is available at `/demo`.
+Ouvrez [http://localhost:8080](http://localhost:8080), puis utilisez un compte et un profil de test créés dans votre base locale.
 
-Never commit `.env`, database credentials, uploaded resident media or generated builds.
+Ne publiez jamais `.env`, les accès à la base de données, les médias des résidents ou les fichiers générés.
 
-## Where to make changes
+## Où effectuer les modifications
 
-| Area                                        | Location                     |
+| Partie                                      | Emplacement                  |
 | ------------------------------------------- | ---------------------------- |
-| Pages and URLs                              | `src/routes/`                |
-| Back-office components                      | `src/components/backoffice/` |
-| Public passport and media players           | `src/components/passport/`   |
-| Shared business rules                       | `src/lib/`                   |
-| Authentication, database and media services | `src/server/`                |
-| Database schema                             | `database/schema.sql`        |
-| Safe schema upgrades                        | `scripts/init-db.mjs`        |
-| Global styles                               | `src/styles.css`             |
-| Images, mascots, fonts and tutorial media   | `src/assets/`                |
-| Automated tests                             | `src/test/`                  |
-| Python cartoonisation                       | `Cartooniser/`               |
-| Production configuration template           | `.env.example`               |
+| Pages et URL                                | `src/routes/`                |
+| Composants de l’espace privé                | `src/components/backoffice/` |
+| Passeport public et lecteurs multimédias    | `src/components/passport/`   |
+| Règles métier partagées                     | `src/lib/`                   |
+| Authentification, base et services médias   | `src/server/`                |
+| Schéma de la base de données                | `database/schema.sql`        |
+| Mises à jour sûres du schéma                | `scripts/init-db.mjs`        |
+| Styles globaux                              | `src/styles.css`             |
+| Images, mascottes, polices et tutoriels     | `src/assets/`                |
+| Tests automatisés                           | `src/test/`                  |
+| Cartoonisation Python                       | `Cartooniser/`               |
+| Modèle de configuration de production       | `.env.example`               |
 
-TanStack Start uses file-based routing. `src/routeTree.gen.ts` is generated automatically and must not be edited manually. See `src/routes/README.md` for route naming conventions.
+TanStack Start utilise un routage basé sur les fichiers. `src/routeTree.gen.ts` est généré automatiquement et ne doit pas être modifié manuellement. Consultez `src/routes/README.md` pour les conventions de nommage.
 
-## Commands
+## Commandes
 
 ```sh
-npm run dev              # development server on port 8080
-npm run typecheck        # TypeScript verification
-npm test                 # complete test suite
+npm run dev              # serveur de développement sur le port 8080
+npm run typecheck        # vérification TypeScript
+npm test                 # tous les tests
 npm run lint             # ESLint
-npm run build            # production build
-npm run check            # lint, types, tests and production build
-npm run db:init          # create or safely update the schema
-npm run db:create-admin  # create/reset the administrator from ADMIN_* variables
-npm run ip-ranges:update # refresh Swiss IP ranges from RIPE NCC
-npm start                # run the compiled production application
+npm run build            # compilation de production
+npm run check            # lint, types, tests et compilation
+npm run db:init          # création ou mise à jour sûre du schéma
+npm run db:create-admin  # création/réinitialisation d’un administrateur
+npm run ip-ranges:update # actualisation des plages IP suisses depuis RIPE NCC
+npm start                # lancement de l’application compilée
 ```
 
-Run `npm run check` before pushing or deploying.
+Exécutez `npm run check` avant chaque envoi ou déploiement.
 
 ## Configuration
 
-Copy `.env.example` to `.env`. The important settings are:
+Copiez `.env.example` vers `.env`. Les réglages principaux sont :
 
-| Variable                                                  | Purpose                                                      |
+| Variable                                                  | Rôle                                                         |
 | --------------------------------------------------------- | ------------------------------------------------------------ |
-| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | MariaDB connection                                           |
-| `MEDIA_ROOT`                                              | Private directory containing uploaded files                  |
-| `MEDIA_SIGNING_SECRET`                                    | Secret used for expiring media URLs; minimum 24 characters   |
-| `PUBLISHED_ORIGIN`                                        | Public origin used in QR and NFC links                       |
-| `SWISS_IP_ONLY`                                           | Set to `true` to restrict requests to Swiss IP ranges        |
-| `LOGIN_RATE_LIMIT_*`                                      | Login protection settings                                    |
-| `CARTOONISER_*`                                           | Optional Python executable, upload size and timeout settings |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | connexion MariaDB                                            |
+| `MEDIA_ROOT`                                              | dossier privé contenant les fichiers envoyés                 |
+| `MEDIA_SIGNING_SECRET`                                    | secret des URL temporaires, 24 caractères minimum            |
+| `PUBLISHED_ORIGIN`                                        | domaine public utilisé dans les liens QR et NFC               |
+| `SWISS_IP_ONLY`                                           | `true` pour limiter l’accès aux plages IP suisses             |
+| `LOGIN_RATE_LIMIT_*`                                      | protection contre les tentatives répétées de connexion       |
+| `CARTOONISER_*`                                           | exécutable Python, taille maximale et délai de traitement     |
 
-More details are available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+Plus de détails sont disponibles dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) et [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Data and privacy
+## Données et confidentialité
 
-Real resident data belongs in MariaDB and the private media directory, never in Git. `src/data/passport.ts` contains only the fictional demonstration profile. Public passport responses expose the calculated age rather than the complete birth date.
+Les données réelles des résidents doivent rester dans MariaDB et dans le dossier privé des médias, jamais dans Git. Le passeport public affiche l’âge calculé, et non la date de naissance complète.
 
-## Cartooniser
+## Cartoonisation
 
-The website works without the optional filter. To enable it, install the Python dependencies and configure `CARTOONISER_PYTHON`. Full instructions are in [Cartooniser/USAGE.txt](Cartooniser/USAGE.txt).
+Le site fonctionne sans ce filtre facultatif. Pour l’activer, installez les dépendances Python et configurez `CARTOONISER_PYTHON`. Les instructions complètes se trouvent dans [Cartooniser/USAGE.txt](Cartooniser/USAGE.txt).
+
+## Vidéo de démonstration
+
+La démonstration sera fournie sous forme de vidéo dans ce dépôt. Avant de la publier, vérifiez qu’elle ne contient aucune donnée réelle de résident ni aucun identifiant confidentiel.

@@ -1,40 +1,40 @@
-# Contributing
+# Contribuer au projet
 
-## Development workflow
+## Méthode de travail
 
-1. Pull the latest `main` branch.
-2. Create a short-lived branch for the change.
-3. Keep secrets and real resident data outside Git.
-4. Add or update tests for behavioural changes.
-5. Run `npm run check`.
-6. Open a pull request describing the user-visible change and deployment impact.
+1. Récupérez la dernière version de la branche `main`.
+2. Créez une branche courte dédiée à la modification.
+3. Ne placez aucun secret ni aucune donnée réelle de résident dans Git.
+4. Ajoutez ou adaptez les tests lorsque le comportement change.
+5. Exécutez `npm run check`.
+6. Ouvrez une pull request en décrivant le changement visible et son impact sur le déploiement.
 
-## Code conventions
+## Conventions de code
 
-- Use TypeScript and the `@/` alias for imports from `src/`.
-- Keep server-only code in `src/server/` or files ending in `.server.ts`.
-- Validate untrusted input both in the browser and on the server.
-- Keep French interface wording clear and respectful.
-- Preserve keyboard navigation, visible focus, contrast and large touch targets.
-- Use `PassportView`, `DictionaryGrid` and `DictionaryMedia` for public and preview rendering.
-- Put database changes in both `database/schema.sql` and the idempotent migration logic in `scripts/init-db.mjs`.
-- Do not edit `src/routeTree.gen.ts`; Vite regenerates it from `src/routes/`.
+- Utilisez TypeScript et l’alias `@/` pour les imports depuis `src/`.
+- Placez le code réservé au serveur dans `src/server/` ou dans des fichiers `.server.ts`.
+- Validez les données non fiables dans le navigateur et sur le serveur.
+- Gardez des textes français clairs et respectueux dans l’interface.
+- Préservez la navigation au clavier, le focus visible, les contrastes et de grandes zones tactiles.
+- Utilisez `PassportView`, `DictionaryGrid` et `DictionaryMedia` pour le passeport public et l’aperçu.
+- Reportez toute modification de base dans `database/schema.sql` et dans la migration idempotente de `scripts/init-db.mjs`.
+- Ne modifiez pas `src/routeTree.gen.ts` : Vite le régénère depuis `src/routes/`.
 
-## Before requesting review
+## Avant de demander une relecture
 
 ```sh
 npm run check
 ```
 
-Also verify the changed journey on a desktop browser and an iPhone-sized viewport. Media changes should be tested with a real uploaded file, not only the demonstration assets.
+Vérifiez aussi le parcours modifié sur ordinateur et avec une taille d’écran d’iPhone. Testez les changements multimédias avec un vrai fichier de test envoyé dans l’application.
 
-## Production-sensitive changes
+## Modifications sensibles pour la production
 
-Call out changes involving:
+Signalez clairement les changements qui concernent :
 
-- database schema or migrations;
-- environment variables;
-- authentication or public passport privacy;
-- media paths or file formats;
-- Python cartoonisation dependencies;
-- the Infomaniak build or start command.
+- le schéma ou les migrations de la base de données ;
+- les variables d’environnement ;
+- l’authentification ou la confidentialité du passeport public ;
+- les chemins ou formats des médias ;
+- les dépendances Python de cartoonisation ;
+- les commandes de compilation ou de démarrage Infomaniak.
