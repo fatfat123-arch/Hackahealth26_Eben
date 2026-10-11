@@ -110,6 +110,7 @@ GRANT INSERT (id,email,full_name,password_hash),
       UPDATE (full_name,email,password_hash,archived_at), DELETE
       ON eh_passport.users TO 'eh_passport_app'@'localhost';
 GRANT SELECT,INSERT,DELETE ON eh_passport.sessions TO 'eh_passport_app'@'localhost';
+GRANT SELECT,INSERT,UPDATE,DELETE ON eh_passport.login_rate_limits TO 'eh_passport_app'@'localhost';
 GRANT SELECT,INSERT,UPDATE,DELETE ON eh_passport.patients TO 'eh_passport_app'@'localhost';
 GRANT SELECT,UPDATE ON eh_passport.account_security_lock TO 'eh_passport_app'@'localhost';
 GRANT INSERT ON eh_passport.security_audit TO 'eh_passport_app'@'localhost';

@@ -42,7 +42,17 @@ describe("sécurité des requêtes", () => {
       new Response("ok"),
     );
     expect(secured.headers.get("x-frame-options")).toBe("DENY");
+    expect(secured.headers.get("content-security-policy")).toContain("default-src 'self'");
     expect(secured.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
     expect(secured.headers.get("strict-transport-security")).toContain("max-age=31536000");
+    expect(secured.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("interdit aussi la mise en cache des fonctions serveur", () => {
+    const secured = applySecurityHeaders(
+      new Request("https://eh-passport.ch/_serverFn/sensitive-data"),
+      new Response("ok"),
+    );
+    expect(secured.headers.get("cache-control")).toBe("no-store");
   });
 });

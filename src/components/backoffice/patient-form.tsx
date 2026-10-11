@@ -608,6 +608,7 @@ export function PatientForm({
                     className="sr-only"
                     onChange={(ev) => {
                       const f = ev.target.files?.[0];
+                      ev.target.value = "";
                       const t = f ? mediaTypeFromFile(f) : null;
                       handleUpload(
                         f,

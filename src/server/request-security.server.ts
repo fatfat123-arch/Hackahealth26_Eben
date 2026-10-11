@@ -61,18 +61,22 @@ export function applySecurityHeaders(request: Request, response: Response) {
   const headers = new Headers(response.headers);
   headers.set(
     "content-security-policy",
-    "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+    "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:",
   );
   headers.set("cross-origin-opener-policy", "same-origin");
   headers.set("cross-origin-resource-policy", "same-origin");
+  headers.set("origin-agent-cluster", "?1");
   headers.set("permissions-policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
   headers.set("referrer-policy", "no-referrer");
   headers.set("x-content-type-options", "nosniff");
+  headers.set("x-dns-prefetch-control", "off");
+  headers.set("x-permitted-cross-domain-policies", "none");
   headers.set("x-frame-options", "DENY");
   const path = new URL(request.url).pathname;
   if (
     path === "/connexion" ||
     path.startsWith("/espace") ||
+    path.startsWith("/_serverFn/") ||
     path === "/api/upload" ||
     path === "/api/cartoonise" ||
     response.headers.has("set-cookie")

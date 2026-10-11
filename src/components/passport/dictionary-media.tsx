@@ -3,15 +3,22 @@ import { AudioLines, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DictionaryEntry } from "@/lib/dictionary-entry";
 
-export function DictionaryMedia({
-  entry,
-  enlarged = false,
-  suspended = false,
-}: {
+type DictionaryMediaProps = {
   entry: DictionaryEntry;
   enlarged?: boolean;
   suspended?: boolean;
-}) {
+};
+
+export function DictionaryMedia(props: DictionaryMediaProps) {
+  // Replacing a file must also reset the native player and its playback/error state.
+  return <DictionaryMediaPlayer key={`${props.entry.type}:${props.entry.source}`} {...props} />;
+}
+
+function DictionaryMediaPlayer({
+  entry,
+  enlarged = false,
+  suspended = false,
+}: DictionaryMediaProps) {
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState(false);
   const audio = useRef<HTMLAudioElement>(null);
@@ -90,6 +97,7 @@ export function DictionaryMedia({
       {entry.type === "video" && (
         <video
           ref={video}
+          src={entry.source}
           autoPlay
           loop
           muted
@@ -103,7 +111,6 @@ export function DictionaryMedia({
             if (attempt) void attempt.catch(() => setError(true));
           }}
         >
-          <source src={entry.source} />
           Votre navigateur ne permet pas de lire cette vidéo.
         </video>
       )}
