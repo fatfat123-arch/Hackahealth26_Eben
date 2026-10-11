@@ -1,46 +1,62 @@
 # Architecture
 
-## Request flow
+## Parcours d’une requête
 
-TanStack Start renders both public and authenticated routes. `src/server.ts` is the production entry point: it applies bot protection and the optional Swiss-IP restriction before forwarding requests to TanStack Start.
+TanStack Start assure le rendu des pages publiques et des pages authentifiées. Le fichier `src/server.ts` constitue le point d’entrée de production : il applique la protection contre les robots et, lorsqu’elle est activée, la restriction aux adresses IP suisses avant de transmettre la requête à l’application.
 
-Public passport links use a random `public_id`, not the internal resident ID. The public loader fetches only the selected profile and converts private media paths into expiring signed URLs.
+Les liens publics des passeports utilisent un identifiant aléatoire `public_id`, jamais l’identifiant interne du résident. Le chargeur public récupère uniquement le profil demandé et transforme les chemins des médias privés en URL signées à durée limitée.
 
-Authenticated server functions use the `eh_session` HTTP-only cookie. Sessions are stored in MariaDB as SHA-256 token hashes. Administrators can manage accounts and use the optional cartooniser; caregivers can manage resident content.
+Les fonctions serveur authentifiées utilisent le cookie HTTP-only `eh_session`. Les sessions sont enregistrées dans MariaDB sous forme d’empreintes SHA-256. Les administrateurs peuvent gérer les comptes et utiliser le cartooniser facultatif ; les accompagnants peuvent gérer le contenu des profils qui leur sont accessibles.
 
-## Main areas
+## Organisation principale
 
 ```text
-src/routes/                 URL pages and API route adapters
-src/components/backoffice/ profile/account administration UI
-src/components/passport/   shared public passport and media UI
-src/lib/                    domain models, validation and server functions
-src/server/                 database, sessions, media and processing services
-database/                   canonical MariaDB schema
-scripts/                    repeatable operational scripts
-Cartooniser/                isolated Python video-processing pipeline
+src/routes/                 pages, URL et adaptateurs des routes API
+src/components/backoffice/ gestion des profils et des comptes
+src/components/passport/   passeport public et lecteurs multimédias
+src/lib/                    modèles, validation et fonctions serveur
+src/server/                 base, sessions, médias et traitements
+database/                   schéma MariaDB de référence
+scripts/                    scripts d’exploitation réutilisables
+Cartooniser/                traitement vidéo Python isolé
 ```
 
-## Data storage
+## Stockage des données
 
-MariaDB stores users, sessions and passports. Uploaded media is stored below `MEDIA_ROOT`, outside the public web root. Database records contain relative media paths only. `/api/media` verifies the URL signature and supports HTTP byte ranges for phone video playback.
+MariaDB conserve les utilisateurs, les sessions et les passeports. Les médias importés sont enregistrés sous `MEDIA_ROOT`, en dehors du dossier web public. La base de données ne contient que leurs chemins relatifs. La route `/api/media` vérifie la signature de l’URL et prend en charge les requêtes HTTP par plages, indispensables à la lecture des vidéos sur téléphone.
 
-The `dictionary` and the profile’s list sections are currently JSON columns. `section_order` also stores the visible order and custom sections configured from the back office. When editing their structure, update the types and mappings in `src/lib/patients.ts` and `src/lib/patients.functions.ts` together.
+Le dictionnaire et les listes du profil sont actuellement stockés dans des colonnes JSON. La colonne `section_order` contient aussi l’ordre des rubriques, les rubriques personnalisées et leurs icônes configurées depuis l’espace de gestion. Toute évolution de cette structure doit être reportée ensemble dans les types et les conversions de `src/lib/patients.ts` et `src/lib/patients.functions.ts`.
 
-## Media flow
+## Parcours d’un média
 
-1. The browser validates type and size.
-2. `/api/upload` repeats validation and writes the file below `MEDIA_ROOT`.
-3. Only the relative path is saved with the resident.
-4. The server creates short-lived signed URLs when a profile is loaded.
-5. `/api/media` streams the file and supports range requests.
+1. Le navigateur contrôle le type et la taille du fichier.
+2. `/api/upload` répète ces contrôles et enregistre le fichier sous `MEDIA_ROOT`.
+3. Seul le chemin relatif est enregistré avec le profil du résident.
+4. Le serveur crée une URL signée temporaire lorsque le profil est chargé.
+5. `/api/media` transmet le fichier et gère les requêtes par plages.
 
-Cartoonisation is optional. The administrator selects an existing video, the Node server invokes `Cartooniser/cartoonise.py`, and the transformed MP4 is uploaded as a new media file. The original path is retained so the filter can be undone before saving.
+La cartoonisation est facultative. L’administrateur sélectionne une vidéo existante, le serveur Node.js lance `Cartooniser/cartoonise.py`, puis la vidéo MP4 transformée est enregistrée comme un nouveau média. Le chemin de la vidéo originale est conservé afin de pouvoir retirer le filtre avant l’enregistrement.
 
-## Database changes
+## Authentification et autorisations
 
-`database/schema.sql` describes a fresh installation. `scripts/init-db.mjs` must remain safe to execute repeatedly against an existing database. Never deploy a schema change that exists in only one of these files.
+Les mots de passe sont hachés avec bcrypt. Une connexion valide crée une session privée dans MariaDB et un cookie inaccessible au JavaScript du navigateur. Les fonctions serveur vérifient systématiquement la session et le rôle avant d’accéder aux données.
 
-## Tests
+Un accompagnant ne peut consulter et modifier que les profils qui lui sont attribués. Les opérations d’administration des comptes et la cartoonisation restent réservées aux administrateurs.
 
-Vitest and Testing Library tests live in `src/test/`. Python timing tests live in `Cartooniser/tests/`. The JavaScript production gate is `npm run check`.
+## Modification de la base de données
+
+`database/schema.sql` décrit une nouvelle installation complète. `scripts/init-db.mjs` applique les évolutions nécessaires à une base existante et doit pouvoir être exécuté plusieurs fois sans supprimer les données.
+
+Une modification du schéma doit toujours être ajoutée dans ces deux fichiers. Les changements déployés doivent rester compatibles avec les données déjà présentes en production.
+
+## Vérifications
+
+Les tests Vitest et Testing Library se trouvent dans `src/test/`. Les tests du traitement Python sont placés dans `Cartooniser/tests/`.
+
+La commande de validation complète du projet est :
+
+```sh
+npm run check
+```
+
+Elle exécute successivement ESLint, la vérification TypeScript, les tests automatisés et la compilation de production.

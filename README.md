@@ -7,7 +7,7 @@
 
 Accessible instantanément par **QR code** ou **badge NFC**, sur téléphone comme sur ordinateur.
 
-[Découvrir le site](https://eh-passport.ch) · [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOYMENT.md)
+[Découvrir le site](https://eh-passport.ch) · [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOIEMENT.md)
 </div>
 
 ---
@@ -156,7 +156,7 @@ Le fichier `src/routeTree.gen.ts` est généré automatiquement par TanStack Sta
 
 Le fichier `.env.example` documente les paramètres requis : accès MariaDB, répertoire privé des médias, secret de signature, domaine public et configuration facultative du cartooniser.
 
-La procédure complète pour Infomaniak — commande de build, démarrage, initialisation et retour arrière — se trouve dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+La procédure complète pour Infomaniak — commande de build, démarrage, initialisation et retour arrière — se trouve dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 
 ## Protection des données
 
