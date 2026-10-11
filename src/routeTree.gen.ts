@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ConnexionRouteImport } from './routes/connexion'
-import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ApiCartooniseRouteImport } from './routes/api/cartoonise'
 import { Route as ApiMediaRouteImport } from './routes/api/media'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
@@ -38,11 +37,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoRoute = DemoRouteImport.update({
-  id: '/demo',
-  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCartooniseRoute = ApiCartooniseRouteImport.update({
@@ -117,7 +111,6 @@ const AuthenticatedEspacePatientsNouveauRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/demo': typeof DemoRoute
   '/api/cartoonise': typeof ApiCartooniseRoute
   '/api/media': typeof ApiMediaRoute
   '/api/upload': typeof ApiUploadRoute
@@ -134,7 +127,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/demo': typeof DemoRoute
   '/api/cartoonise': typeof ApiCartooniseRoute
   '/api/media': typeof ApiMediaRoute
   '/api/upload': typeof ApiUploadRoute
@@ -153,7 +145,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/connexion': typeof ConnexionRoute
-  '/demo': typeof DemoRoute
   '/api/cartoonise': typeof ApiCartooniseRoute
   '/api/media': typeof ApiMediaRoute
   '/api/upload': typeof ApiUploadRoute
@@ -172,7 +163,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/connexion'
-    | '/demo'
     | '/api/cartoonise'
     | '/api/media'
     | '/api/upload'
@@ -189,7 +179,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/connexion'
-    | '/demo'
     | '/api/cartoonise'
     | '/api/media'
     | '/api/upload'
@@ -207,7 +196,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/connexion'
-    | '/demo'
     | '/api/cartoonise'
     | '/api/media'
     | '/api/upload'
@@ -226,7 +214,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ConnexionRoute: typeof ConnexionRoute
-  DemoRoute: typeof DemoRoute
   ApiCartooniseRoute: typeof ApiCartooniseRoute
   ApiMediaRoute: typeof ApiMediaRoute
   ApiUploadRoute: typeof ApiUploadRoute
@@ -254,13 +241,6 @@ declare module '@tanstack/react-router' {
       path: '/connexion'
       fullPath: '/connexion'
       preLoaderRoute: typeof ConnexionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/cartoonise': {
@@ -382,7 +362,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ConnexionRoute: ConnexionRoute,
-  DemoRoute: DemoRoute,
   ApiCartooniseRoute: ApiCartooniseRoute,
   ApiMediaRoute: ApiMediaRoute,
   ApiUploadRoute: ApiUploadRoute,

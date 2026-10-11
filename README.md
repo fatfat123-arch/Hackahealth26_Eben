@@ -31,8 +31,7 @@ npm run db:create-admin
 npm run dev
 ```
 
-The application is available at `http://localhost:8080`. The fictional public
-profile used for demonstrations is at `/demo`.
+The application is available at `http://localhost:8080`.
 
 ## Commands
 

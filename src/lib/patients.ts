@@ -1,9 +1,7 @@
-import type { DictionaryEntry } from "@/data/passport";
+import type { DictionaryEntry } from "@/lib/dictionary-entry";
 import { defaultSectionOrder, normalizeSectionOrder, type SectionKey } from "@/lib/section-order";
 import type { PassportViewData } from "@/components/passport/passport-view";
 import { formatSwissPhone, swissPhoneError } from "@/lib/swiss-phone";
-
-export const MEDIA_BUCKET = "passport-media";
 
 export type DictItem = {
   id: string;
@@ -66,32 +64,76 @@ export type PatientRow = {
   created_by?: string | null;
 };
 
-export const DEFAULT_HOW_TO = "Cette page vous aide à comprendre ce que je souhaite vous dire. Découvrez mes gestes dans mon dictionnaire et ce qui est important pour moi dans les rubriques ci-dessous. Adressez-vous directement à moi, avec des phrases simples, et laissez-moi le temps de répondre.";
+export const DEFAULT_HOW_TO =
+  "Cette page vous aide à comprendre ce que je souhaite vous dire. Découvrez mes gestes dans mon dictionnaire et ce qui est important pour moi dans les rubriques ci-dessous. Adressez-vous directement à moi, avec des phrases simples, et laissez-moi le temps de répondre.";
 
 export const emptyDraft = (): PatientDraft => ({
-  name: "", birthDate: "", phone: "", phoneNote: "", address: "", about: "", howTo: DEFAULT_HOW_TO, reminder: "",
-  photoPath: null, photoPositionY: 50, dictionary: [], communicates: [], understandingNeeds: [], tools: [], facilitators: [], interests: [], dislikes: [], additional: [], sectionOrder: defaultSectionOrder(),
+  name: "",
+  birthDate: "",
+  phone: "",
+  phoneNote: "",
+  address: "",
+  about: "",
+  howTo: DEFAULT_HOW_TO,
+  reminder: "",
+  photoPath: null,
+  photoPositionY: 50,
+  dictionary: [],
+  communicates: [],
+  understandingNeeds: [],
+  tools: [],
+  facilitators: [],
+  interests: [],
+  dislikes: [],
+  additional: [],
+  sectionOrder: defaultSectionOrder(),
 });
 
 export function rowToDraft(r: PatientRow): PatientDraft {
   return {
-    name: r.name, birthDate: r.birth_date ?? "", phone: r.phone, phoneNote: r.phone_note, address: r.address ?? "",
-    about: r.about, howTo: r.how_to, reminder: r.reminder, photoPath: r.photo_path, photoPositionY: r.photo_position_y ?? 50,
-    communicates: r.communicates ?? [], understandingNeeds: r.understanding_needs ?? [], tools: r.tools ?? [], facilitators: r.facilitators ?? [],
+    name: r.name,
+    birthDate: r.birth_date ?? "",
+    phone: r.phone,
+    phoneNote: r.phone_note,
+    address: r.address ?? "",
+    about: r.about,
+    howTo: r.how_to,
+    reminder: r.reminder,
+    photoPath: r.photo_path,
+    photoPositionY: r.photo_position_y ?? 50,
+    communicates: r.communicates ?? [],
+    understandingNeeds: r.understanding_needs ?? [],
+    tools: r.tools ?? [],
+    facilitators: r.facilitators ?? [],
     dictionary: Array.isArray(r.dictionary) ? (r.dictionary as DictItem[]) : [],
-    interests: r.interests ?? [], dislikes: r.dislikes ?? [], additional: r.additional ?? [],
+    interests: r.interests ?? [],
+    dislikes: r.dislikes ?? [],
+    additional: r.additional ?? [],
     sectionOrder: normalizeSectionOrder(r.section_order),
   };
 }
 
 export function draftToRow(d: PatientDraft) {
-  const clean = (l: string[]) => l.map(s => s.trim()).filter(Boolean);
+  const clean = (l: string[]) => l.map((s) => s.trim()).filter(Boolean);
   return {
-    name: d.name.trim(), birth_date: d.birthDate || null, phone: formatSwissPhone(d.phone), phone_note: d.phoneNote.trim(),
-    address: d.address.trim(), about: d.about.trim(), how_to: d.howTo.trim(), reminder: d.reminder.trim(),
-    photo_path: d.photoPath, photo_position_y: Math.min(100, Math.max(0, Math.round(d.photoPositionY))),
-    communicates: clean(d.communicates), understanding_needs: clean(d.understandingNeeds), tools: clean(d.tools), facilitators: clean(d.facilitators), dictionary: d.dictionary.filter(e => e.path),
-    interests: clean(d.interests), dislikes: clean(d.dislikes), additional: clean(d.additional),
+    name: d.name.trim(),
+    birth_date: d.birthDate || null,
+    phone: formatSwissPhone(d.phone),
+    phone_note: d.phoneNote.trim(),
+    address: d.address.trim(),
+    about: d.about.trim(),
+    how_to: d.howTo.trim(),
+    reminder: d.reminder.trim(),
+    photo_path: d.photoPath,
+    photo_position_y: Math.min(100, Math.max(0, Math.round(d.photoPositionY))),
+    communicates: clean(d.communicates),
+    understanding_needs: clean(d.understandingNeeds),
+    tools: clean(d.tools),
+    facilitators: clean(d.facilitators),
+    dictionary: d.dictionary.filter((e) => e.path),
+    interests: clean(d.interests),
+    dislikes: clean(d.dislikes),
+    additional: clean(d.additional),
     section_order: normalizeSectionOrder(d.sectionOrder),
   };
 }
@@ -99,14 +141,23 @@ export function draftToRow(d: PatientDraft) {
 export function draftPaths(d: PatientDraft): string[] {
   const p: string[] = [];
   if (d.photoPath) p.push(d.photoPath);
-  for (const e of d.dictionary) { if (e.path) p.push(e.path); if (e.originalPath) p.push(e.originalPath); if (e.posterPath) p.push(e.posterPath); }
+  for (const e of d.dictionary) {
+    if (e.path) p.push(e.path);
+    if (e.originalPath) p.push(e.originalPath);
+    if (e.posterPath) p.push(e.posterPath);
+  }
   return p;
 }
 
 export function formatDateFr(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso.length === 10 ? `${iso}T12:00:00` : iso);
-  return new Intl.DateTimeFormat("fr-CH", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Zurich" }).format(d);
+  return new Intl.DateTimeFormat("fr-CH", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Zurich",
+  }).format(d);
 }
 
 export function ageFromBirthDate(iso: string | null | undefined, now = new Date()): string {
@@ -118,7 +169,10 @@ export function ageFromBirthDate(iso: string | null | undefined, now = new Date(
   return age >= 0 && age <= 130 ? `${age} ans` : "—";
 }
 
-export function patientValidationError(d: Pick<PatientDraft, "name" | "birthDate" | "phone">, today = new Date()): string | null {
+export function patientValidationError(
+  d: Pick<PatientDraft, "name" | "birthDate" | "phone">,
+  today = new Date(),
+): string | null {
   if (!d.name.trim()) return "Le nom est obligatoire.";
   if (d.birthDate) {
     const selected = new Date(`${d.birthDate}T12:00:00`);
@@ -131,7 +185,12 @@ export function patientValidationError(d: Pick<PatientDraft, "name" | "birthDate
   return null;
 }
 
-export function toViewData(d: PatientDraft, urls: Record<string, string>, updatedAt: string | null, publicAge?: string): PassportViewData {
+export function toViewData(
+  d: PatientDraft,
+  urls: Record<string, string>,
+  updatedAt: string | null,
+  publicAge?: string,
+): PassportViewData {
   return {
     name: d.name || "Nom à compléter",
     age: publicAge ?? ageFromBirthDate(d.birthDate),
@@ -145,14 +204,29 @@ export function toViewData(d: PatientDraft, urls: Record<string, string>, update
     updatedAtISO: updatedAt ?? "",
     portrait: d.photoPath ? urls[d.photoPath] : null,
     portraitPosition: `${d.photoPositionY}%`,
-    portraitAlt: `Photo de ${(d.name.trim().split(/\s+/)[0]) || "la personne"}`,
-    about: d.about, howTo: d.howTo, reminder: d.reminder,
-    dictionary: d.dictionary.filter(e => e.path).map(e => ({
-      id: e.id, type: e.type, title: e.title, description: e.description, alt: e.alt || e.title,
-      source: urls[e.path] ?? "", poster: e.posterPath ? urls[e.posterPath] : undefined, transcript: e.transcript,
-    })),
-    communicates: d.communicates.filter(Boolean), understandingNeeds: d.understandingNeeds.filter(Boolean), tools: d.tools.filter(Boolean), facilitators: d.facilitators.filter(Boolean),
-    interests: d.interests.filter(Boolean), dislikes: d.dislikes.filter(Boolean), additional: d.additional.filter(Boolean),
+    portraitAlt: `Photo de ${d.name.trim().split(/\s+/)[0] || "la personne"}`,
+    about: d.about,
+    howTo: d.howTo,
+    reminder: d.reminder,
+    dictionary: d.dictionary
+      .filter((e) => e.path)
+      .map((e) => ({
+        id: e.id,
+        type: e.type,
+        title: e.title,
+        description: e.description,
+        alt: e.alt || e.title,
+        source: urls[e.path] ?? "",
+        poster: e.posterPath ? urls[e.posterPath] : undefined,
+        transcript: e.transcript,
+      })),
+    communicates: d.communicates.filter(Boolean),
+    understandingNeeds: d.understandingNeeds.filter(Boolean),
+    tools: d.tools.filter(Boolean),
+    facilitators: d.facilitators.filter(Boolean),
+    interests: d.interests.filter(Boolean),
+    dislikes: d.dislikes.filter(Boolean),
+    additional: d.additional.filter(Boolean),
     sectionOrder: d.sectionOrder,
   };
 }
