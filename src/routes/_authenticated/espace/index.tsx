@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { UserRound, UsersRound } from "lucide-react";
 import { Mascot } from "@/components/mascot";
+import { NavigationIcon } from "@/components/backoffice/navigation-icon";
 
 export const Route = createFileRoute("/_authenticated/espace/")({
   beforeLoad: ({ context }) => {
@@ -34,11 +34,11 @@ function AdminHome() {
       </div>
       <div className="bo-choices">
         <Link to="/espace/patients" className="bo-choice">
-          <UserRound aria-hidden="true" />
+          <NavigationIcon name="patient" />
           <span>Profils des patients</span>
         </Link>
         <Link to="/espace/accompagnants" className="bo-choice">
-          <UsersRound aria-hidden="true" />
+          <NavigationIcon name="accompagnants" />
           <span>Profils des accompagnants</span>
         </Link>
       </div>

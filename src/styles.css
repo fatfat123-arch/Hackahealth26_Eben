@@ -795,6 +795,28 @@
   color: var(--accent);
   stroke-width: 1.6;
 }
+.navigation-icon {
+  position: relative;
+  display: block;
+  width: 86px;
+  height: 82px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  transition: transform 160ms ease;
+}
+.navigation-icon img {
+  position: absolute;
+  top: calc(var(--icon-row) * -100%);
+  left: calc(var(--icon-column) * -100%);
+  width: 700%;
+  height: 500%;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+.bo-choice:hover .navigation-icon {
+  transform: scale(1.04);
+}
 .bo-btn {
   display: inline-flex;
   align-items: center;

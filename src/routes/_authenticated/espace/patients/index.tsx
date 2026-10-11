@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { List, UserPlus } from "lucide-react";
 import { BackLink } from "@/components/backoffice/back-link";
+import { NavigationIcon } from "@/components/backoffice/navigation-icon";
 import { Mascot } from "@/components/mascot";
 
 export const Route = createFileRoute("/_authenticated/espace/patients/")({
@@ -40,11 +40,11 @@ function PatientsHome() {
       )}
       <div className="bo-choices">
         <Link to="/espace/patients/liste" className="bo-choice">
-          <List aria-hidden="true" />
+          <NavigationIcon name="liste" />
           <span>Voir les profils existants</span>
         </Link>
         <Link to="/espace/patients/nouveau" className="bo-choice">
-          <UserPlus aria-hidden="true" />
+          <NavigationIcon name="ajouter" />
           <span>Créer un nouveau profil</span>
         </Link>
       </div>

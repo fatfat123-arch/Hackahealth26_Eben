@@ -16,30 +16,94 @@ import nfc07 from "@/assets/nfc-07-ecrire-tag.jpg";
 import nfc08 from "@/assets/nfc-08-ecriture-terminee.jpg";
 
 export const Route = createFileRoute("/_authenticated/espace/tutoriel")({
-  validateSearch: (s) => z.object({ id: z.string().optional(), publicId: z.string().optional() }).parse(s),
-  head: () => ({ meta: [{ title: "Tutoriel QR code et NFC — Espace professionnel" }, { name: "description", content: "Créer un code QR ou programmer une puce NFC vers un passeport." }, { property: "og:title", content: "Tutoriel QR code et NFC" }, { property: "og:description", content: "Créer un code QR ou programmer une puce NFC vers un passeport." }, { property: "og:type", content: "article" }, { name: "twitter:card", content: "summary" }] }),
+  validateSearch: (s) =>
+    z.object({ id: z.string().optional(), publicId: z.string().optional() }).parse(s),
+  head: () => ({
+    meta: [
+      { title: "Tutoriel QR code et NFC — Espace professionnel" },
+      {
+        name: "description",
+        content: "Créer un code QR ou programmer une puce NFC vers un passeport.",
+      },
+      { property: "og:title", content: "Tutoriel QR code et NFC" },
+      {
+        property: "og:description",
+        content: "Créer un code QR ou programmer une puce NFC vers un passeport.",
+      },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Tutorial,
 });
 
 const nfcPhotos = [
-  { src: nfc01, title: "Image 1 — Ouvrir « Écrire »", explanation: "Sélectionnez l’onglet Écrire en haut de l’écran.", alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré", highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 } },
-  { src: nfc02, title: "Image 2 — Ajouter un enregistrement", explanation: "Choisissez le contenu à placer dans le badge.", alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré", highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 } },
-  { src: nfc03, title: "Image 3 — Choisir URL / URI", explanation: "Cette option permet d’ouvrir directement le passeport.", alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée", highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 } },
-  { src: nfc04, title: "Image 4 — Coller le lien", explanation: "Collez le lien public copié depuis le profil du résident.", alt: "Champ URL vide de NFC Tools", highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 } },
-  { src: nfc05, title: "Image 5 — Valider le lien", explanation: "Vérifiez qu’il commence par https://eh-passport.ch/passeport/, puis validez.", alt: "Champ URL rempli avec le lien du passeport, bouton Valider entouré", highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 } },
-  { src: nfc06, title: "Image 6 — Lancer l’écriture", explanation: "Lorsque l’URL apparaît dans la liste, touchez Écrire.", alt: "Enregistrement URL ajouté, bouton Écrire entouré", highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 } },
-  { src: nfc07, title: "Image 7 — Approcher le badge", explanation: "Gardez le badge immobile contre le téléphone.", alt: "Demande d’approcher un badge NFC" },
-  { src: nfc08, title: "Image 8 — Vérifier la confirmation", explanation: "Écriture terminée confirme que le lien est enregistré.", alt: "Confirmation « Écriture terminée »" },
+  {
+    src: nfc01,
+    title: "Image 1 — Ouvrir « Écrire »",
+    explanation: "Sélectionnez l’onglet Écrire en haut de l’écran.",
+    alt: "Écran d’accueil de NFC Tools, bouton Écrire entouré",
+    highlight: { cx: 37.5, cy: 14, rx: 11, ry: 2.5 },
+  },
+  {
+    src: nfc02,
+    title: "Image 2 — Ajouter un enregistrement",
+    explanation: "Choisissez le contenu à placer dans le badge.",
+    alt: "Onglet Écrire de NFC Tools, bouton Ajouter un enregistrement entouré",
+    highlight: { cx: 50, cy: 21, rx: 46, ry: 3.5 },
+  },
+  {
+    src: nfc03,
+    title: "Image 3 — Choisir URL / URI",
+    explanation: "Cette option permet d’ouvrir directement le passeport.",
+    alt: "Liste des types d’enregistrement de NFC Tools, option URL / URI entourée",
+    highlight: { cx: 42, cy: 22.9, rx: 25, ry: 3.2 },
+  },
+  {
+    src: nfc04,
+    title: "Image 4 — Coller le lien",
+    explanation: "Collez le lien public copié depuis le profil du résident.",
+    alt: "Champ URL vide de NFC Tools",
+    highlight: { cx: 45, cy: 15.2, rx: 32, ry: 3 },
+  },
+  {
+    src: nfc05,
+    title: "Image 5 — Valider le lien",
+    explanation: "Vérifiez qu’il commence par https://eh-passport.ch/passeport/, puis validez.",
+    alt: "Champ URL rempli avec le lien du passeport, bouton Valider entouré",
+    highlight: { cx: 74, cy: 89.4, rx: 24, ry: 3.8 },
+  },
+  {
+    src: nfc06,
+    title: "Image 6 — Lancer l’écriture",
+    explanation: "Lorsque l’URL apparaît dans la liste, touchez Écrire.",
+    alt: "Enregistrement URL ajouté, bouton Écrire entouré",
+    highlight: { cx: 50, cy: 35.9, rx: 46, ry: 3.6 },
+  },
+  {
+    src: nfc07,
+    title: "Image 7 — Approcher le badge",
+    explanation: "Gardez le badge immobile contre le téléphone.",
+    alt: "Demande d’approcher un badge NFC",
+  },
+  {
+    src: nfc08,
+    title: "Image 8 — Vérifier la confirmation",
+    explanation: "Écriture terminée confirme que le lien est enregistré.",
+    alt: "Confirmation « Écriture terminée »",
+  },
 ];
 
 function StepPhoto({ n }: { n: number }) {
-  return <TutorialPhotos photos={[nfcPhotos[n - 1]]} />;
+  return <TutorialPhotos photos={[nfcPhotos[n - 1]!]} />;
 }
 
 function Tutorial() {
   const { id, publicId } = Route.useSearch();
   const [url, setUrl] = useState("");
-  useEffect(() => { setUrl(publicId ? publicPassportUrl(publicId) : ""); }, [publicId]);
+  useEffect(() => {
+    setUrl(publicId ? publicPassportUrl(publicId) : "");
+  }, [publicId]);
   const link = url || "le lien public copié depuis le profil du résident";
 
   return <article className="bo-tutorial">
@@ -55,7 +119,7 @@ function Tutorial() {
     <section className="bo-card">
       <h2>2. Préparer et tester le code QR</h2>
       <ol className="bo-steps">
-        <li>Sur le profil, touchez <strong>Télécharger le code QR</strong> pour obtenir l’image seule, ou <strong>Télécharger la carte (PDF)</strong> pour une planche de cinq badges avec la mascotte.</li><li>Pour les badges, imprimez le PDF sur une page A4 à <strong>100 % (taille réelle)</strong>, puis découpez le long du bord jaune. Pour le code QR seul, imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.</li><li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li><li>Visez-le avec l’appareil photo d’un autre téléphone.</li><li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
+        <li>Sur le profil, touchez <strong>Télécharger le code QR</strong> pour obtenir l’image seule, ou <strong>Télécharger la carte (PDF)</strong> pour une carte avec la mascotte.</li><li>Pour la carte de 9 × 7 cm, imprimez le PDF sur une page A4 à <strong>100 % (taille réelle)</strong>, puis découpez aux repères. Pour le code QR seul, imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.</li><li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li><li>Visez-le avec l’appareil photo d’un autre téléphone.</li><li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
       </ol>
     </section>
     <section className="bo-card">
