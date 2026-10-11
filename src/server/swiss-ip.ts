@@ -40,7 +40,11 @@ function inRange(address: string, range: Range) {
 export function clientIp(request: Request) {
   const forwarded = request.headers.get("x-forwarded-for");
   if (!forwarded) return null;
-  const address = normalize(forwarded.split(",").at(-1) || "");
+  const chain = forwarded.split(",").map(normalize);
+  const configuredHops = Number(process.env["TRUSTED_PROXY_HOPS"] || 0);
+  const trustedHops =
+    Number.isSafeInteger(configuredHops) && configuredHops >= 0 ? configuredHops : 0;
+  const address = chain[Math.max(0, chain.length - 1 - trustedHops)] || "";
   return isIP(address) ? address : null;
 }
 

@@ -56,8 +56,9 @@ Après une modification du code ou des variables d’environnement, lancez **Bui
 | `MEDIA_SIGNING_SECRET` | signature des URL temporaires                              |
 | `PUBLISHED_ORIGIN`     | origine HTTPS utilisée dans les QR codes et badges NFC     |
 | `SWISS_IP_ONLY`        | `true` pour limiter les connexions aux adresses IP suisses |
+| `TRUSTED_PROXY_HOPS`   | nombre de proxys de confiance à ignorer dans l’en-tête IP  |
 
-Les variables `LOGIN_RATE_LIMIT_*` règlent la protection contre les tentatives répétées de connexion. Les variables `CARTOONISER_*` configurent le traitement vidéo facultatif.
+Les variables `LOGIN_RATE_LIMIT_*` règlent la protection contre les tentatives répétées de connexion. Les variables `CARTOONISER_*` configurent le traitement vidéo facultatif, notamment `CARTOONISER_MAX_CONCURRENT=1` pour éviter de saturer l’hébergement.
 
 ## Vérifications après déploiement
 

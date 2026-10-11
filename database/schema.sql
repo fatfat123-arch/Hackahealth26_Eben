@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS sessions (
   CONSTRAINT sessions_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS login_rate_limits (
+  identifier_hash CHAR(64) PRIMARY KEY,
+  attempt_count SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  reset_at DATETIME(3) NOT NULL,
+  INDEX login_rate_limits_reset_at (reset_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS patients (
   id CHAR(36) PRIMARY KEY,
   public_id VARCHAR(64) NOT NULL UNIQUE,

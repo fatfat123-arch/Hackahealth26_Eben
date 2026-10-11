@@ -4,6 +4,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { blockBotRequest, withNoIndex } from "./server/bots.server";
 import { requireSwissIp } from "./server/swiss-ip";
+import { applySecurityHeaders } from "./server/request-security.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -50,21 +51,27 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const botResponse = blockBotRequest(request);
-      if (botResponse) return botResponse;
+      if (botResponse) return applySecurityHeaders(request, botResponse);
       const geographyResponse = requireSwissIp(request);
-      if (geographyResponse) return withNoIndex(geographyResponse);
+      if (geographyResponse) return applySecurityHeaders(request, withNoIndex(geographyResponse));
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return withNoIndex(await normalizeCatastrophicSsrResponse(response));
+      return applySecurityHeaders(
+        request,
+        withNoIndex(await normalizeCatastrophicSsrResponse(response)),
+      );
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
-        },
-      });
+      return applySecurityHeaders(
+        request,
+        new Response(renderErrorPage(), {
+          status: 500,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
+          },
+        }),
+      );
     }
   },
 };

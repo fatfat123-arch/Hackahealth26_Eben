@@ -4,9 +4,9 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { createSession, currentUser, destroySession, publicUser } from "@/server/auth.server";
 import {
-  assertLoginRateLimit,
-  recordFailedLogin,
-  resetLoginRateLimit,
+  assertPersistentLoginRateLimit,
+  recordPersistentFailedLogin,
+  resetPersistentLoginRateLimit,
 } from "@/server/login-rate-limit.server";
 import { clientIp } from "@/server/swiss-ip";
 import { db } from "@/server/db.server";
@@ -27,18 +27,18 @@ export const login = createServerFn({ method: "POST" })
     const email = data.email.trim().toLowerCase();
     const address = clientIp(getRequest());
     const limitKeys = address ? [`email:${email}`, `ip:${address}`] : [`email:${email}`];
-    limitKeys.forEach((limitKey) => assertLoginRateLimit(limitKey));
+    await assertPersistentLoginRateLimit(limitKeys);
     const [rows] = await db().execute<(DbUser & RowDataPacket)[]>(
       "SELECT * FROM users WHERE email=? LIMIT 1",
       [email],
     );
     const user = rows[0];
     if (!user || user.archived_at || !(await compare(data.password, user.password_hash))) {
-      limitKeys.forEach((limitKey) => recordFailedLogin(limitKey));
+      await recordPersistentFailedLogin(limitKeys);
       console.warn("Failed login attempt", { email, address });
       throw new Error("Adresse e-mail ou mot de passe incorrect.");
     }
-    resetLoginRateLimit(`email:${email}`);
+    await resetPersistentLoginRateLimit(`email:${email}`);
     await createSession(user.id);
     return publicUser(user);
   });
