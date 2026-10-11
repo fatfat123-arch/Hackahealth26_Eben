@@ -106,52 +106,165 @@ function Tutorial() {
   }, [publicId]);
   const link = url || "le lien public copié depuis le profil du résident";
 
-  return <article className="bo-tutorial">
-    {id ? <BackLink to="/espace/patients/$id" params={{ id }}>Retour au profil</BackLink> : <BackLink to="/espace/patients">Retour aux profils des résidents</BackLink>}
-    <h1 className="bo-title">Tutoriel : utiliser un code QR et un badge NFC</h1>
-    <div className="title-underline" />
-    <div className="bo-intro"><Mascot pose="qr" size={120} /><p>Le code QR et le badge NFC ouvrent exactement le même passeport. Suivez les étapes dans l’ordre et testez toujours le support avant de le remettre au résident.</p></div>
-    <section className="bo-card">
-      <h2>1. Récupérer le lien du passeport</h2>
-      <ol className="bo-steps"><li>Ouvrez le profil du résident.</li><li>Enregistrez le profil pour créer sa page publique.</li><li>Dans « Lien vers la page publique », touchez <strong>Copier le lien</strong>.</li><li>Vérifiez que le nom correspond au bon résident.</li></ol>
-      {url ? <p className="bo-url">Lien à utiliser pour ce résident : <strong>{url}</strong></p> : <p>Ouvrez d’abord un profil pour afficher ici son lien exact.</p>}
-    </section>
-    <section className="bo-card">
-      <h2>2. Préparer et tester le code QR</h2>
-      <ol className="bo-steps">
-        <li>Sur le profil, touchez <strong>Télécharger le code QR</strong> pour obtenir l’image seule, ou <strong>Télécharger la carte (PDF)</strong> pour une carte avec la mascotte.</li><li>Pour la carte de 9 × 7 cm, imprimez le PDF sur une page A4 à <strong>100 % (taille réelle)</strong>, puis découpez aux repères. Pour le code QR seul, imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.</li><li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li><li>Visez-le avec l’appareil photo d’un autre téléphone.</li><li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
-      </ol>
-    </section>
-    <section className="bo-card">
-      <h2>3. Programmer le badge NFC</h2>
-      <p>Le badge NFC contient uniquement le lien du passeport. En approchant un téléphone compatible, une notification permet d’ouvrir la page du résident.</p>
-      <h3>Avant de commencer</h3>
-      <ul className="bo-steps">
-        <li>Préparez un badge NFC vierge <strong>NTAG213 ou NTAG215</strong>.</li>
-        <li>Installez l’application gratuite <strong>NFC Tools</strong> <img src={nfcToolsIcon} alt="Icône de l’application NFC Tools : un téléphone blanc avec un N sur fond orange" className="app-icon" width={28} height={28} />.</li>
-        <li>Sur Android, activez le NFC dans les réglages. Sur les iPhone récents, la lecture est disponible automatiquement.</li>
-        <li>Copiez le lien du bon résident depuis son profil.</li>
-      </ul>
-      <h3>Écrire le lien sur le badge</h3>
-      <ol className="bo-steps">
-        <li>Ouvrez <strong>NFC Tools</strong> <img src={nfcToolsIcon} alt="Icône de NFC Tools" className="app-icon" width={28} height={28} />, puis touchez <strong>Écrire</strong>. <span className="step-ref">(image 1)</span><StepPhoto n={1} /></li>
-        <li>Touchez <strong>Ajouter un enregistrement</strong>. <span className="step-ref">(image 2)</span><StepPhoto n={2} /></li>
-        <li>Choisissez <strong>URL / URI</strong>. <span className="step-ref">(image 3)</span><StepPhoto n={3} /></li>
-        <li>Collez le lien : <strong>{link}</strong>. Depuis votre téléphone, c’est le lien de la page du résident que vous obtenez quand vous scannez le code QR, et qui apparaît en haut de la page. <span className="step-ref">(image 4)</span><StepPhoto n={4} /></li>
-        <li>Vérifiez le lien, puis touchez <strong>Valider</strong>. <span className="step-ref">(image 5)</span><StepPhoto n={5} /></li>
-        <li>Touchez <strong>Écrire</strong>. <span className="step-ref">(image 6)</span><StepPhoto n={6} /></li>
-        <li>Maintenez le badge sans bouger contre le haut d’un iPhone ou le centre du dos d’un Android. <span className="step-ref">(image 7)</span><StepPhoto n={7} /></li>
-        <li>Attendez le message <strong>Écriture terminée</strong>. <span className="step-ref">(image 8)</span><StepPhoto n={8} /></li>
-      </ol>
-      <p><strong>Important :</strong> ne verrouillez pas encore le badge. Testez-le d’abord : le verrouillage est définitif.</p>
-      <h3>Tester le badge avant de le distribuer</h3>
-      <ol className="bo-steps"><li>Fermez NFC Tools ou prenez un deuxième téléphone.</li><li>Déverrouillez le téléphone et approchez-le du badge.</li><li>Touchez la notification.</li><li>Vérifiez le nom du résident et la lecture des vidéos.</li><li>Inscrivez le nom du résident sur le badge ou son emballage.</li></ol>
-      <h3>Si le badge ne réagit pas</h3>
-      <ul className="bo-steps"><li>Retirez une coque épaisse ou métallique.</li><li>Déplacez lentement le badge sur le dos du téléphone.</li><li>Sur Android, vérifiez que le NFC est activé.</li><li>Relisez le badge dans NFC Tools pour vérifier l’URL.</li></ul>
-    </section>
-    <section className="bo-card">
-      <h2>4. Mettre à jour le passeport</h2>
-      <p>Après une modification, il n’est pas nécessaire de réimprimer le code QR ni de reprogrammer le badge NFC : le lien reste identique et affiche automatiquement les informations les plus récentes. Si vous réinitialisez le lien public depuis le profil, les anciens codes QR et badges NFC ne fonctionneront plus et doivent être remplacés.</p>
-    </section>
-  </article>;
+  return (
+    <article className="bo-tutorial">
+      {id ? (
+        <BackLink to="/espace/patients/$id" params={{ id }}>
+          Retour au profil
+        </BackLink>
+      ) : (
+        <BackLink to="/espace/patients">Retour aux profils des résidents</BackLink>
+      )}
+      <h1 className="bo-title">Tutoriel : utiliser un code QR et un badge NFC</h1>
+      <div className="title-underline" />
+      <div className="bo-intro">
+        <Mascot pose="qr" size={120} />
+        <p>
+          Le code QR et le badge NFC ouvrent exactement le même passeport. Suivez les étapes dans
+          l’ordre et testez toujours le support avant de le remettre au résident.
+        </p>
+      </div>
+      <section className="bo-card">
+        <h2>1. Récupérer le lien du passeport</h2>
+        <ol className="bo-steps">
+          <li>Ouvrez le profil du résident.</li>
+          <li>Enregistrez le profil pour créer sa page publique.</li>
+          <li>
+            Dans « Lien vers la page publique », touchez <strong>Copier le lien</strong>.
+          </li>
+          <li>Vérifiez que le nom correspond au bon résident.</li>
+        </ol>
+        {url ? (
+          <p className="bo-url">
+            Lien à utiliser pour ce résident : <strong>{url}</strong>
+          </p>
+        ) : (
+          <p>Ouvrez d’abord un profil pour afficher ici son lien exact.</p>
+        )}
+      </section>
+      <section className="bo-card">
+        <h2>2. Préparer et tester le code QR</h2>
+        <ol className="bo-steps">
+          <li>
+            Sur le profil, touchez <strong>Télécharger le code QR</strong> pour obtenir l’image
+            seule, ou <strong>Télécharger la carte (PDF)</strong> pour une carte avec la mascotte.
+          </li>
+          <li>
+            Pour la carte de 9 × 7 cm, imprimez le PDF sur une page A4 à{" "}
+            <strong>100 % (taille réelle)</strong>, puis découpez aux repères. Pour le code QR seul,
+            imprimez-le au minimum en 3 cm sur 3 cm, sur fond clair.
+          </li>
+          <li>Placez-le sur le badge sans le plier ni le recouvrir d’un élément brillant.</li>
+          <li>Visez-le avec l’appareil photo d’un autre téléphone.</li>
+          <li>Touchez la notification et vérifiez que le passeport du bon résident s’ouvre.</li>
+        </ol>
+      </section>
+      <section className="bo-card">
+        <h2>3. Programmer le badge NFC</h2>
+        <p>
+          Le badge NFC contient uniquement le lien du passeport. En approchant un téléphone
+          compatible, une notification permet d’ouvrir la page du résident.
+        </p>
+        <h3>Avant de commencer</h3>
+        <ul className="bo-steps">
+          <li>
+            Préparez un badge NFC vierge <strong>NTAG213 ou NTAG215</strong>.
+          </li>
+          <li>
+            Installez l’application gratuite <strong>NFC Tools</strong>{" "}
+            <img
+              src={nfcToolsIcon}
+              alt="Icône de l’application NFC Tools : un téléphone blanc avec un N sur fond orange"
+              className="app-icon"
+              width={28}
+              height={28}
+            />
+            .
+          </li>
+          <li>
+            Sur Android, activez le NFC dans les réglages. Sur les iPhone récents, la lecture est
+            disponible automatiquement.
+          </li>
+          <li>Copiez le lien du bon résident depuis son profil.</li>
+        </ul>
+        <h3>Écrire le lien sur le badge</h3>
+        <ol className="bo-steps">
+          <li>
+            Ouvrez <strong>NFC Tools</strong>{" "}
+            <img
+              src={nfcToolsIcon}
+              alt="Icône de NFC Tools"
+              className="app-icon"
+              width={28}
+              height={28}
+            />
+            , puis touchez <strong>Écrire</strong>. <span className="step-ref">(image 1)</span>
+            <StepPhoto n={1} />
+          </li>
+          <li>
+            Touchez <strong>Ajouter un enregistrement</strong>.{" "}
+            <span className="step-ref">(image 2)</span>
+            <StepPhoto n={2} />
+          </li>
+          <li>
+            Choisissez <strong>URL / URI</strong>. <span className="step-ref">(image 3)</span>
+            <StepPhoto n={3} />
+          </li>
+          <li>
+            Collez le lien : <strong>{link}</strong>. Depuis votre téléphone, c’est le lien de la
+            page du résident que vous obtenez quand vous scannez le code QR, et qui apparaît en haut
+            de la page. <span className="step-ref">(image 4)</span>
+            <StepPhoto n={4} />
+          </li>
+          <li>
+            Vérifiez le lien, puis touchez <strong>Valider</strong>.{" "}
+            <span className="step-ref">(image 5)</span>
+            <StepPhoto n={5} />
+          </li>
+          <li>
+            Touchez <strong>Écrire</strong>. <span className="step-ref">(image 6)</span>
+            <StepPhoto n={6} />
+          </li>
+          <li>
+            Maintenez le badge sans bouger contre le haut d’un iPhone ou le centre du dos d’un
+            Android. <span className="step-ref">(image 7)</span>
+            <StepPhoto n={7} />
+          </li>
+          <li>
+            Attendez le message <strong>Écriture terminée</strong>.{" "}
+            <span className="step-ref">(image 8)</span>
+            <StepPhoto n={8} />
+          </li>
+        </ol>
+        <p>
+          <strong>Important :</strong> ne verrouillez pas encore le badge. Testez-le d’abord : le
+          verrouillage est définitif.
+        </p>
+        <h3>Tester le badge avant de le distribuer</h3>
+        <ol className="bo-steps">
+          <li>Fermez NFC Tools ou prenez un deuxième téléphone.</li>
+          <li>Déverrouillez le téléphone et approchez-le du badge.</li>
+          <li>Touchez la notification.</li>
+          <li>Vérifiez le nom du résident et la lecture des vidéos.</li>
+          <li>Inscrivez le nom du résident sur le badge ou son emballage.</li>
+        </ol>
+        <h3>Si le badge ne réagit pas</h3>
+        <ul className="bo-steps">
+          <li>Retirez une coque épaisse ou métallique.</li>
+          <li>Déplacez lentement le badge sur le dos du téléphone.</li>
+          <li>Sur Android, vérifiez que le NFC est activé.</li>
+          <li>Relisez le badge dans NFC Tools pour vérifier l’URL.</li>
+        </ul>
+      </section>
+      <section className="bo-card">
+        <h2>4. Mettre à jour le passeport</h2>
+        <p>
+          Après une modification, il n’est pas nécessaire de réimprimer le code QR ni de
+          reprogrammer le badge NFC : le lien reste identique et affiche automatiquement les
+          informations les plus récentes. Si vous réinitialisez le lien public depuis le profil, les
+          anciens codes QR et badges NFC ne fonctionneront plus et doivent être remplacés.
+        </p>
+      </section>
+    </article>
+  );
 }
