@@ -13,6 +13,9 @@ import { db } from "@/server/db.server";
 import type { DbUser } from "@/server/db.server";
 import type { RowDataPacket } from "mysql2";
 
+// Keep unknown-account and known-account password checks computationally equivalent.
+const DUMMY_PASSWORD_HASH = "$2b$12$KEGWWxFwFMP7k/B03JAgquT00jbgrQkFfJ1jWUPeHiXr6g3y2Qy/6";
+
 export const requireAuth = createMiddleware({ type: "function" }).server(async ({ next }) => {
   const user = await currentUser();
   if (!user || user.archived_at) throw new Error("Session expirée. Veuillez vous reconnecter.");
@@ -33,12 +36,16 @@ export const login = createServerFn({ method: "POST" })
       [email],
     );
     const user = rows[0];
-    if (!user || user.archived_at || !(await compare(data.password, user.password_hash))) {
+    const passwordMatches = await compare(
+      data.password,
+      user?.password_hash ?? DUMMY_PASSWORD_HASH,
+    );
+    if (!user || user.archived_at || !passwordMatches) {
       await recordPersistentFailedLogin(limitKeys);
-      console.warn("Failed login attempt", { email, address });
+      console.warn("Failed login attempt");
       throw new Error("Adresse e-mail ou mot de passe incorrect.");
     }
-    await resetPersistentLoginRateLimit(`email:${email}`);
+    await Promise.all(limitKeys.map((limitKey) => resetPersistentLoginRateLimit(limitKey)));
     await createSession(user.id);
     return publicUser(user);
   });

@@ -7,7 +7,7 @@
 
 Accessible instantanément par **QR code** ou **badge NFC**, sur téléphone comme sur ordinateur.
 
-[Découvrir le site](https://eh-passport.ch) · [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOIEMENT.md)
+[Découvrir le site](https://eh-passport.ch) · [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOIEMENT.md) · [Sécurité](docs/AUDIT_SECURITE.md)
 </div>
 
 ---
